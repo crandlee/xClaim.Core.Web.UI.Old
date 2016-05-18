@@ -1,0 +1,112 @@
+{
+  "_args": [
+    [
+      "ng2-toasty",
+      "c:\\Dev\\aClaim\\xClaim.WebUI"
+    ]
+  ],
+  "_from": "ng2-toasty@latest",
+  "_id": "ng2-toasty@1.6.0",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/ng2-toasty",
+  "_nodeVersion": "5.11.0",
+  "_npmOperationalInternal": {
+    "host": "packages-16-east.internal.npmjs.com",
+    "tmp": "tmp/ng2-toasty-1.6.0.tgz_1462289771250_0.64673314220272"
+  },
+  "_npmUser": {
+    "email": "akserg@gmail.com",
+    "name": "akserg"
+  },
+  "_npmVersion": "3.8.8",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "ng2-toasty",
+    "raw": "ng2-toasty",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/ng2-toasty/-/ng2-toasty-1.6.0.tgz",
+  "_shasum": "ce7c432dc96216d7f005c8684800f8acc338a243",
+  "_shrinkwrap": null,
+  "_spec": "ng2-toasty",
+  "_where": "c:\\Dev\\aClaim\\xClaim.WebUI",
+  "author": {
+    "name": "Sergey Akopkokhyants"
+  },
+  "bugs": {
+    "url": "https://github.com/akserg/ng2-toasty/issues"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "dependencies": {},
+  "description": "Angular2 Toasty component shows growl-style alerts and messages for your app.",
+  "devDependencies": {
+    "angular2": "~2.0.0-beta.17",
+    "cz-conventional-changelog": "^1.1.5",
+    "es6-promise": "~3.1.2",
+    "es6-shim": "~0.35.0",
+    "jasmine-core": "~2.3.4",
+    "karma": "~0.13.15",
+    "karma-chrome-launcher": "~0.2.2",
+    "karma-firefox-launcher": "~0.1.7",
+    "karma-jasmine": "~0.3.6",
+    "karma-typescript-preprocessor": "0.0.21",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-beta.6",
+    "semantic-release": "^4.3.5",
+    "systemjs": "~0.19.6",
+    "systemjs-builder": "^0.15.6",
+    "tsd": "^0.6.5",
+    "typescript": "~1.7.3",
+    "typings": "^0.6.8",
+    "uglify-js": "^2.6.2",
+    "zone.js": "~0.6.12"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "ce7c432dc96216d7f005c8684800f8acc338a243",
+    "tarball": "https://registry.npmjs.org/ng2-toasty/-/ng2-toasty-1.6.0.tgz"
+  },
+  "gitHead": "2a9568c2fec47498dcbf8377ce33860af0aa1c42",
+  "homepage": "https://github.com/akserg/ng2-toasty",
+  "keywords": [
+    "angular",
+    "angular2",
+    "toasty",
+    "growl"
+  ],
+  "license": "MIT",
+  "main": "ng2-toasty.js",
+  "maintainers": [
+    {
+      "email": "akserg@gmail.com",
+      "name": "akserg"
+    }
+  ],
+  "name": "ng2-toasty",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akserg/ng2-toasty.git"
+  },
+  "scripts": {
+    "minify": "node node_modules/uglify-js/bin/uglifyjs bundles/ng2-toasty.js -o bundles/ng2-toasty.min.js --source-map bundles/ng2-toasty.min.js.map -c -m",
+    "prepublish": "typings install && tsc && node make.js && npm run minify",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "test": "tsc && karma start",
+    "test-watch": "tsc && karma start --no-single-run --auto-watch"
+  },
+  "typings": "./ng2-toasty.d.ts",
+  "version": "1.6.0"
+}

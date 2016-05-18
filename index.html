@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>xClaim Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="app/app.component.css" rel="stylesheet" />
+    <link href="node_modules/ng2-toasty/ng2-toasty.css" rel="stylesheet" />
+    
+    <!-- 1. Load libraries -->
+    <!-- IE required polyfills, in this exact order -->
+    <script src="node_modules/es6-shim/es6-shim.min.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>    
+    <script src="node_modules/systemjs/dist/system-polyfills.js"></script>    
+    <script src="node_modules/systemjs/dist/system.src.js"></script>
+    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+
+
+    <!-- 2. Configure SystemJS -->
+    <script src="app/systemjs.config.js"></script>
+    <script>
+        System.import('app').catch(function(err){ console.error(err); });
+    </script>
+    <style>
+        pre:empty {
+            display:none;
+        }
+    </style>
+</head>
+<base href="/">
+<body>
+  <xcore-app>Loading xClaim Web</xcore-app>
+</body>
+</html>
+
+<!--<script src="app/security/oidc-client.js"></script>
+<script src="app/security/auth.js"></script>-->

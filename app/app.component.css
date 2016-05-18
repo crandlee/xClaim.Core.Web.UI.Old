@@ -1,0 +1,11 @@
+li {
+    font-size: large;
+}
+
+div.panel-heading {
+   font-size: x-large; 
+}
+
+.bottom-space {
+    margin-bottom: 10px;
+}
