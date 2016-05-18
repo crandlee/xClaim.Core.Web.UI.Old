@@ -1,23 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter } from '@angular/core';
 import { XCoreServices } from '../shared/service/core-services.service';
 import { UserProfileService } from '../usermanagement/userprofile.service';
+import { XCoreBaseComponent } from '../shared/component/base.component';
 
 @Component({
-    selector: 'xcore-userprofile',
     templateUrl: 'app/usermanagement/userprofile.component.html',
     providers: [UserProfileService]
 })
-export class UserProfileComponent implements OnInit  {
+export class UserProfileComponent extends XCoreBaseComponent implements OnInit  {
 
     public userName: string;
     
-    constructor(private userProfileService: UserProfileService)     
-    { }
+    constructor(protected xCoreServices: XCoreServices, private userProfileService: UserProfileService)     
+    {  
+        super(xCoreServices);
+    }
     
     ngOnInit() {
+        super.ngOnInit();
         this.userProfileService.getUserProfile().subscribe(up => {
             this.userName = up.UserName;      
-            console.log(up);  
+            console.log(up);
         });
     }
               

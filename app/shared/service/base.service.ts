@@ -1,9 +1,8 @@
 import {Response, RequestOptions, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/toPromise';
-import { fromPromise } from 'rxJs/Observable/fromPromise';
 import { Injectable } from '@angular/core';
 import { XCoreServices } from './core-services.service';
+import { BusyService } from './busy.service';
 
  @Injectable()
 export class BaseService {
@@ -11,9 +10,10 @@ export class BaseService {
     protected token: string;
     protected actionUrl: string;
 
+        
     constructor(
-        public xCoreServices: XCoreServices) {
-    }
+        public xCoreServices: XCoreServices
+        ) {}
     
     private setHeaders(options: RequestOptions): RequestOptions {
         
@@ -66,28 +66,43 @@ export class BaseService {
     private getCleanRoutePath(routePath: string): string {
         return routePath ? `/${routePath}` : '';
     }
-    protected getData(routePath?: string, options?: RequestOptions): Observable<Response> {
-        if (this.passedAuthentication())
-            return this.xCoreServices.Http.get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options));    
+    
+    private executeObservable<TData>(obs: Observable<TData>): Observable<TData> {
+        if (this.passedAuthentication()) {
+            this.xCoreServices.BusyService.notifyBusy(true);            
+            //obs.subscribe(() => {}, () => {}, () => { this.xCoreServices.BusyService.notifyBusy(false); });
+            return obs;                
+        }
+        
+    }
+    protected getData<TData>(routePath?: string, options?: RequestOptions): Observable<TData> {
+        return this.executeObservable(
+            this.xCoreServices.Http.get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options)).map(res => { this.xCoreServices.BusyService.notifyBusy(false); return res.json()})
+        );
     }
     
     protected postData(data: any, routePath?: string, options?: RequestOptions): Observable<Response> {
-        if (this.passedAuthentication())
-            return this.xCoreServices.Http.post(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(options));
+        return this.executeObservable(
+            this.xCoreServices.Http.post(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(options))
+        );
     }
 
     protected putData(data: any, routePath?: string, options?: RequestOptions): Observable<Response> {
-        if (this.passedAuthentication())
-            return this.xCoreServices.Http.put(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(options));
+        return this.executeObservable(
+            this.xCoreServices.Http.put(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(options))
+        );
     }
 
     protected deleteData(routePath: string, options: RequestOptions): Observable<Response> {
-        if (this.passedAuthentication())
-            return this.xCoreServices.Http.delete(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(options));
+        return this.executeObservable(
+            this.xCoreServices.Http.delete(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(options))
+        )
     }
         
     protected setApiController(relativeUrl: string) {
         this.actionUrl = `${this.xCoreServices.AppSettings.ApiEndpoint}/${relativeUrl}`; 
     }
-                       
+           
+           
+     
 }

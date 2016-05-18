@@ -40,7 +40,7 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                 }
                 UserProfileService.prototype.getUserProfile = function () {
                     return _super.prototype.getData.call(this)
-                        .map(function (res) { return res.json(); })
+                        .map(function (res) { console.log('What?'); return res; })
                         .catch(function (err, caught) {
                         return Observable_1.Observable.throw('There was a problem');
                     });

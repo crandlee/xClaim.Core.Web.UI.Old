@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Response, Headers } from '@angular/http';
-import { IAuthorizedCallbackReturn } from '../service/interfaces';
 import { XCoreServices } from '../service/core-services.service';
 import { AppSettings } from '../../appsettings';
 import { CookieService } from 'angular2-cookie/core';

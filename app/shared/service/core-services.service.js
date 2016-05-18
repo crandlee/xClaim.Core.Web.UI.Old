@@ -1,4 +1,4 @@
-System.register(['../../appsettings', '../security/security.service', '../logging/logging.service', './base-service.service', '@angular/core', '@angular/http', '@angular/router', 'angular2-cookie/core'], function(exports_1, context_1) {
+System.register(['../../appsettings', '../security/security.service', '../logging/logging.service', './base.service', '@angular/core', '@angular/http', '@angular/router', 'angular2-cookie/core', './busy.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['../../appsettings', '../security/security.service', '../loggin
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var appsettings_1, security_service_1, logging_service_1, base_service_service_1, core_1, http_1, router_1, core_2;
+    var appsettings_1, security_service_1, logging_service_1, base_service_1, core_1, http_1, router_1, core_2, busy_service_1;
     var XCoreServices, XCoreServiceBase;
     return {
         setters:[
@@ -28,8 +28,8 @@ System.register(['../../appsettings', '../security/security.service', '../loggin
             function (logging_service_1_1) {
                 logging_service_1 = logging_service_1_1;
             },
-            function (base_service_service_1_1) {
-                base_service_service_1 = base_service_service_1_1;
+            function (base_service_1_1) {
+                base_service_1 = base_service_1_1;
             },
             function (core_1_1) {
                 core_1 = core_1_1;
@@ -42,20 +42,24 @@ System.register(['../../appsettings', '../security/security.service', '../loggin
             },
             function (core_2_1) {
                 core_2 = core_2_1;
+            },
+            function (busy_service_1_1) {
+                busy_service_1 = busy_service_1_1;
             }],
         execute: function() {
             XCoreServices = (function () {
-                function XCoreServices(LoggingService, AppSettings, SecurityService, Http, Router, CookieService) {
+                function XCoreServices(LoggingService, AppSettings, SecurityService, Http, Router, CookieService, BusyService) {
                     this.LoggingService = LoggingService;
                     this.AppSettings = AppSettings;
                     this.SecurityService = SecurityService;
                     this.Http = Http;
                     this.Router = Router;
                     this.CookieService = CookieService;
+                    this.BusyService = BusyService;
                 }
                 XCoreServices = __decorate([
                     core_1.Injectable(), 
-                    __metadata('design:paramtypes', [logging_service_1.LoggingService, appsettings_1.AppSettings, security_service_1.SecurityService, http_1.Http, router_1.Router, core_2.CookieService])
+                    __metadata('design:paramtypes', [logging_service_1.LoggingService, appsettings_1.AppSettings, security_service_1.SecurityService, http_1.Http, router_1.Router, core_2.CookieService, busy_service_1.BusyService])
                 ], XCoreServices);
                 return XCoreServices;
             }());
@@ -70,7 +74,7 @@ System.register(['../../appsettings', '../security/security.service', '../loggin
                     __metadata('design:paramtypes', [XCoreServices])
                 ], XCoreServiceBase);
                 return XCoreServiceBase;
-            }(base_service_service_1.BaseService));
+            }(base_service_1.BaseService));
             exports_1("XCoreServiceBase", XCoreServiceBase);
         }
     }

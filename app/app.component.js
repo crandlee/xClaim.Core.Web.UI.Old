@@ -34,17 +34,29 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
             }],
         execute: function() {
             AppComponent = (function () {
-                function AppComponent() {
+                function AppComponent(xCoreServices) {
+                    this.xCoreServices = xCoreServices;
+                    this.isBusy = true;
                 }
+                AppComponent.prototype.ngOnInit = function () {
+                    AppComponent.subscribeToIsApplicationBusy(this.xCoreServices.BusyService, this);
+                };
+                AppComponent.subscribeToIsApplicationBusy = function (busyService, appComponent) {
+                    busyService.notifyBusy$.subscribe(function (busyCount) {
+                        console.log(busyCount);
+                        appComponent.isBusy = (busyCount > 0);
+                    });
+                };
                 AppComponent = __decorate([
                     core_1.Component({
                         selector: 'xcore-app',
                         templateUrl: 'app/app.component.html',
+                        styles: ['app/app.component.css'],
                         directives: [security_component_1.SecurityComponent, ng2_toasty_1.Toasty, router_1.ROUTER_DIRECTIVES],
                         providers: [core_services_service_1.XCoreServices]
                     }),
                     router_1.Routes([].concat(domain_service_1.DomainService.getRoutes())), 
-                    __metadata('design:paramtypes', [])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices])
                 ], AppComponent);
                 return AppComponent;
             }());

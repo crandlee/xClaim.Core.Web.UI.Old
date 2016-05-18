@@ -1,4 +1,4 @@
-System.register(['@angular/http', 'rxjs/add/operator/toPromise', '@angular/core', './core-services.service'], function(exports_1, context_1) {
+System.register(['@angular/http', '@angular/core', './core-services.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -17,7 +17,6 @@ System.register(['@angular/http', 'rxjs/add/operator/toPromise', '@angular/core'
             function (http_1_1) {
                 http_1 = http_1_1;
             },
-            function (_1) {},
             function (core_1_1) {
                 core_1 = core_1_1;
             },
@@ -74,21 +73,25 @@ System.register(['@angular/http', 'rxjs/add/operator/toPromise', '@angular/core'
                 BaseService.prototype.getCleanRoutePath = function (routePath) {
                     return routePath ? "/" + routePath : '';
                 };
+                BaseService.prototype.executeObservable = function (obs) {
+                    if (this.passedAuthentication()) {
+                        this.xCoreServices.BusyService.notifyBusy(true);
+                        //obs.subscribe(() => {}, () => {}, () => { this.xCoreServices.BusyService.notifyBusy(false); });
+                        return obs;
+                    }
+                };
                 BaseService.prototype.getData = function (routePath, options) {
-                    if (this.passedAuthentication())
-                        return this.xCoreServices.Http.get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options));
+                    var _this = this;
+                    return this.executeObservable(this.xCoreServices.Http.get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options)).map(function (res) { _this.xCoreServices.BusyService.notifyBusy(false); return res.json(); }));
                 };
                 BaseService.prototype.postData = function (data, routePath, options) {
-                    if (this.passedAuthentication())
-                        return this.xCoreServices.Http.post("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options));
+                    return this.executeObservable(this.xCoreServices.Http.post("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options)));
                 };
                 BaseService.prototype.putData = function (data, routePath, options) {
-                    if (this.passedAuthentication())
-                        return this.xCoreServices.Http.put("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options));
+                    return this.executeObservable(this.xCoreServices.Http.put("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options)));
                 };
                 BaseService.prototype.deleteData = function (routePath, options) {
-                    if (this.passedAuthentication())
-                        return this.xCoreServices.Http.delete("" + this.actionUrl + this.getCleanRoutePath(routePath), this.setHeaders(options));
+                    return this.executeObservable(this.xCoreServices.Http.delete("" + this.actionUrl + this.getCleanRoutePath(routePath), this.setHeaders(options)));
                 };
                 BaseService.prototype.setApiController = function (relativeUrl) {
                     this.actionUrl = this.xCoreServices.AppSettings.ApiEndpoint + "/" + relativeUrl;
@@ -103,4 +106,4 @@ System.register(['@angular/http', 'rxjs/add/operator/toPromise', '@angular/core'
         }
     }
 });
-//# sourceMappingURL=base-service.service.js.map
+//# sourceMappingURL=base.service.js.map

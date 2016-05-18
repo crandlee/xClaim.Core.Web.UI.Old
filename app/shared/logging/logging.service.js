@@ -22,39 +22,42 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core'], funct
             }],
         execute: function() {
             LoggingService = (function () {
-                function LoggingService(_xCoreToast) {
-                    this._xCoreToast = _xCoreToast;
+                function LoggingService(xCoreToast) {
+                    this.xCoreToast = xCoreToast;
                 }
+                LoggingService.prototype.performLogging = function (consolePrefix, toastFunc, style, message, options) {
+                    if (!options || !options.noToast) {
+                        var toastOptions = this.setToastOptions(message, options);
+                        toastFunc(toastOptions);
+                    }
+                    if (!options || !options.noConsole) {
+                        console.log("%c" + consolePrefix + ": " + message, "" + style);
+                    }
+                };
                 LoggingService.prototype.error = function (message, options) {
-                    var toastOptions = this.setToastOptions(message, options);
-                    this._xCoreToast.error(toastOptions);
+                    this.performLogging("Error", this.xCoreToast.error.bind(this.xCoreToast), 'background: red; color: white', message, options);
                 };
                 LoggingService.prototype.success = function (message, options) {
-                    var toastOptions = this.setToastOptions(message, options);
-                    this._xCoreToast.success(toastOptions);
+                    this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, options);
                 };
                 LoggingService.prototype.default = function (message, options) {
-                    var toastOptions = this.setToastOptions(message, options);
-                    this._xCoreToast.default(toastOptions);
+                    this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, options);
                 };
                 LoggingService.prototype.info = function (message, options) {
-                    var toastOptions = this.setToastOptions(message, options);
-                    this._xCoreToast.info(toastOptions);
+                    this.performLogging("Info", this.xCoreToast.info.bind(this.xCoreToast), 'background: blue; color: white', message, options);
                 };
                 LoggingService.prototype.warn = function (message, options) {
-                    var toastOptions = this.setToastOptions(message, options);
-                    this._xCoreToast.warn(toastOptions);
+                    this.performLogging("Warning", this.xCoreToast.warn.bind(this.xCoreToast), 'background: yellow; color: black', message, options);
                 };
                 LoggingService.prototype.wait = function (message, options) {
-                    var toastOptions = this.setToastOptions(message, options);
-                    this._xCoreToast.wait(toastOptions);
+                    this.performLogging("Wait", this.xCoreToast.wait.bind(this.xCoreToast), 'background: orange; color: black', message, options);
                 };
                 LoggingService.prototype.setToastOptions = function (message, options) {
                     var toastOptions = { message: message };
                     if (options) {
-                        toastOptions.showClose = options.showClose || '';
-                        toastOptions.timeout = options.timeout || '';
-                        toastOptions.title = options.title || '';
+                        toastOptions.showClose = options.showClose || true;
+                        toastOptions.timeout = options.timeout || 5;
+                        toastOptions.title = options.title || "";
                     }
                     return toastOptions;
                 };

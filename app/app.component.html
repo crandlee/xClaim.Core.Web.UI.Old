@@ -1,9 +1,11 @@
-
-<div class="container-fluid bottom-space">
-    <div class="nav navbar-default">
+<img src="images/core/loadingSpinner.gif" *ngIf="isBusy" class="spinner" alt="Loading..." />
+<div class="container-fluid">
+    <div class="nav navbar-default navbar-fixed-top">
         <xcore-security></xcore-security> 
     </div>
 </div>
-<router-outlet></router-outlet>
+<div class="container">
+    <router-outlet></router-outlet>
+</div>
 <ng2-toasty></ng2-toasty>
 
