@@ -1,3 +1,7 @@
 <div class="container">
-    <label>{{userName}}</label>
+    <ul>
+        <li *ngFor="let userName of userNames">
+            {{userName}}
+        </li>
+    </ul>
 </div>

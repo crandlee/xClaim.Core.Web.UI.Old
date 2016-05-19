@@ -24,6 +24,8 @@ System.register(['@angular/core', '../service/core-services.service'], function(
             SecurityComponent = (function () {
                 function SecurityComponent(xCoreServices) {
                     this.xCoreServices = xCoreServices;
+                    this.isBusy = false;
+                    this.isBusy = true;
                 }
                 SecurityComponent.prototype.performPostLoginRouting = function () {
                     //Check for needed routing from post-login (where are previous route was requested and stored)
@@ -58,12 +60,19 @@ System.register(['@angular/core', '../service/core-services.service'], function(
                         this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();
                         this.userName = this.xCoreServices.SecurityService.getUserName();
                         this.performPostLoginRouting();
+                        this.subscribeToIsApplicationBusy();
                     }
                     catch (err) {
                         this.xCoreServices.LoggingService.error(JSON.stringify(err));
                     }
                 };
                 ;
+                SecurityComponent.prototype.subscribeToIsApplicationBusy = function () {
+                    var _this = this;
+                    this.xCoreServices.BusyService.notifyBusy$.subscribe(function (busyCount) {
+                        _this.isBusy = (busyCount > 0);
+                    });
+                };
                 SecurityComponent = __decorate([
                     core_1.Component({
                         selector: 'xcore-security',

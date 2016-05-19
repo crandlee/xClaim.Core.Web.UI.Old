@@ -3,14 +3,14 @@ import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 import { XCoreServices } from './core-services.service';
 import { BusyService } from './busy.service';
+import 'rxjs/add/operator/finally';
 
  @Injectable()
 export class BaseService {
     
     protected token: string;
     protected actionUrl: string;
-
-        
+       
     constructor(
         public xCoreServices: XCoreServices
         ) {}
@@ -69,16 +69,23 @@ export class BaseService {
     
     private executeObservable<TData>(obs: Observable<TData>): Observable<TData> {
         if (this.passedAuthentication()) {
-            this.xCoreServices.BusyService.notifyBusy(true);            
-            //obs.subscribe(() => {}, () => {}, () => { this.xCoreServices.BusyService.notifyBusy(false); });
+            this.xCoreServices.BusyService.notifyBusy(true);                        
             return obs;                
         }
         
     }
     protected getData<TData>(routePath?: string, options?: RequestOptions): Observable<TData> {
-        return this.executeObservable(
-            this.xCoreServices.Http.get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options)).map(res => { this.xCoreServices.BusyService.notifyBusy(false); return res.json()})
-        );
+        var obs = this.executeObservable(
+            this.xCoreServices.Http.get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options))
+                .map<TData>(res => { return res.json()}))
+                .catch((err,caught) => {
+                    this.xCoreServices.LoggingService.error(err);
+                    return obs; 
+                })
+                .finally(() => {
+                    this.xCoreServices.BusyService.notifyBusy(false);
+                });
+        return obs;
     }
     
     protected postData(data: any, routePath?: string, options?: RequestOptions): Observable<Response> {

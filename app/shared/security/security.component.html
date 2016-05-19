@@ -1,4 +1,5 @@
 <div>
+    <img src="images/core/loadingSpinner.gif" *ngIf="isBusy" class="spinner pull-left" alt="Loading..." />
     <a class="btn btn-link pull-right" *ngIf="loggedIn" (click)='logout()'>Logout</a>
     <a class="btn btn-link pull-right" *ngIf="!loggedIn" (click)='login()'>Login</a>
     <a class="btn btn-link pull-right" *ngIf="loggedIn" (click)='logout()'>{{userName}}</a>

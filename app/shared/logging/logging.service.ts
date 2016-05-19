@@ -1,47 +1,53 @@
 import { XCoreToastService, IXCoreToastOptions } from '../xcore-toasty/xcore-toasty.service';
 import { Injectable } from '@angular/core';
+import _ from 'lodash';
 
 
 @Injectable()
 export class LoggingService {
-    constructor(private xCoreToast: XCoreToastService) {}
+
+    constructor(private xCoreToast: XCoreToastService) 
+    {}
     
-    private performLogging(consolePrefix: string, toastFunc: Function, style: string, message: string, options?: IxLoggingOptions) {
+    private performLogging(consolePrefix: string, toastFunc: Function, style: string, message: string, toastMessage: string, options?: IxLoggingOptions) {
         if (!options || !options.noToast) {
-            var toastOptions = this.setToastOptions(message, options);
+            if (!toastMessage) toastMessage = message;
+            var toastOptions = this.setToastOptions(toastMessage, options);
             toastFunc(toastOptions);            
         }
         if (!options || !options.noConsole) {
-            console.log(`%c${consolePrefix}: ${message}`, `${style}`);
+            var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+            console.log(`%c${consolePrefix}: ${msg}`, `${style}`);
         }        
     }
     
-    public error(message: string, options?: IxLoggingOptions) {
-        this.performLogging("Error", this.xCoreToast.error.bind(this.xCoreToast),  'background: red; color: white', message, options);
+    public error(errorMessage: any, userMessage?: string, options?: IxLoggingOptions) {
+        this.performLogging("Error", this.xCoreToast.error.bind(this.xCoreToast),  'background: red; color: white', errorMessage, userMessage, options);
     }
 
-    public success(message: string, options?: IxLoggingOptions) {
-        this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, options);
+    public success(message: any, options?: IxLoggingOptions) {
+        this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, null, options);
     }
 
-    public default(message: string, options?: IxLoggingOptions) {
-        this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, options);        
+    public default(message: any, options?: IxLoggingOptions) {
+        this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, null, options);        
     }
 
-    public info(message: string, options?: IxLoggingOptions) {
-        this.performLogging("Info", this.xCoreToast.info.bind(this.xCoreToast), 'background: blue; color: white', message, options);
+    public info(message: any, options?: IxLoggingOptions) {
+        this.performLogging("Info", this.xCoreToast.info.bind(this.xCoreToast), 'background: blue; color: white', message, null, options);
     }
 
-    public warn(message: string, options?: IxLoggingOptions) {
-        this.performLogging("Warning", this.xCoreToast.warn.bind(this.xCoreToast), 'background: yellow; color: black', message, options);
+    public warn(errorMessage: any, userMessage?: string, options?: IxLoggingOptions) {
+        this.performLogging("Warning", this.xCoreToast.warn.bind(this.xCoreToast), 'background: yellow; color: black', errorMessage, userMessage, options);
     }
 
-    public wait(message: string, options?: IxLoggingOptions) {
-        this.performLogging("Wait", this.xCoreToast.wait.bind(this.xCoreToast), 'background: orange; color: black', message, options);
+    public wait(message: any, options?: IxLoggingOptions) {
+        this.performLogging("Wait", this.xCoreToast.wait.bind(this.xCoreToast), 'background: orange; color: black', message, null, options);
     }
     
-    private setToastOptions(message: string, options?: IxLoggingOptions): IXCoreToastOptions {
-        var toastOptions: IXCoreToastOptions = { message: message};        
+    private setToastOptions(message: any, options?: IxLoggingOptions): IXCoreToastOptions {
+        var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+        var toastOptions: IXCoreToastOptions = { message: msg };        
         if (options) {
             toastOptions.showClose = options.showClose || true;
             toastOptions.timeout = options.timeout || 5;
@@ -49,6 +55,7 @@ export class LoggingService {
         }
         return toastOptions;
     }
+    
 }
 
 export interface IxLoggingOptions {

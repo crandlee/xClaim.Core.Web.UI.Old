@@ -1,4 +1,4 @@
-System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core'], function(exports_1, context_1) {
+System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core'], funct
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var xcore_toasty_service_1, core_1;
+    var xcore_toasty_service_1, core_1, lodash_1;
     var LoggingService;
     return {
         setters:[
@@ -19,41 +19,48 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core'], funct
             },
             function (core_1_1) {
                 core_1 = core_1_1;
+            },
+            function (lodash_1_1) {
+                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             LoggingService = (function () {
                 function LoggingService(xCoreToast) {
                     this.xCoreToast = xCoreToast;
                 }
-                LoggingService.prototype.performLogging = function (consolePrefix, toastFunc, style, message, options) {
+                LoggingService.prototype.performLogging = function (consolePrefix, toastFunc, style, message, toastMessage, options) {
                     if (!options || !options.noToast) {
-                        var toastOptions = this.setToastOptions(message, options);
+                        if (!toastMessage)
+                            toastMessage = message;
+                        var toastOptions = this.setToastOptions(toastMessage, options);
                         toastFunc(toastOptions);
                     }
                     if (!options || !options.noConsole) {
-                        console.log("%c" + consolePrefix + ": " + message, "" + style);
+                        var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+                        console.log("%c" + consolePrefix + ": " + msg, "" + style);
                     }
                 };
-                LoggingService.prototype.error = function (message, options) {
-                    this.performLogging("Error", this.xCoreToast.error.bind(this.xCoreToast), 'background: red; color: white', message, options);
+                LoggingService.prototype.error = function (errorMessage, userMessage, options) {
+                    this.performLogging("Error", this.xCoreToast.error.bind(this.xCoreToast), 'background: red; color: white', errorMessage, userMessage, options);
                 };
                 LoggingService.prototype.success = function (message, options) {
-                    this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, options);
+                    this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, null, options);
                 };
                 LoggingService.prototype.default = function (message, options) {
-                    this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, options);
+                    this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, null, options);
                 };
                 LoggingService.prototype.info = function (message, options) {
-                    this.performLogging("Info", this.xCoreToast.info.bind(this.xCoreToast), 'background: blue; color: white', message, options);
+                    this.performLogging("Info", this.xCoreToast.info.bind(this.xCoreToast), 'background: blue; color: white', message, null, options);
                 };
-                LoggingService.prototype.warn = function (message, options) {
-                    this.performLogging("Warning", this.xCoreToast.warn.bind(this.xCoreToast), 'background: yellow; color: black', message, options);
+                LoggingService.prototype.warn = function (errorMessage, userMessage, options) {
+                    this.performLogging("Warning", this.xCoreToast.warn.bind(this.xCoreToast), 'background: yellow; color: black', errorMessage, userMessage, options);
                 };
                 LoggingService.prototype.wait = function (message, options) {
-                    this.performLogging("Wait", this.xCoreToast.wait.bind(this.xCoreToast), 'background: orange; color: black', message, options);
+                    this.performLogging("Wait", this.xCoreToast.wait.bind(this.xCoreToast), 'background: orange; color: black', message, null, options);
                 };
                 LoggingService.prototype.setToastOptions = function (message, options) {
-                    var toastOptions = { message: message };
+                    var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+                    var toastOptions = { message: msg };
                     if (options) {
                         toastOptions.showClose = options.showClose || true;
                         toastOptions.timeout = options.timeout || 5;

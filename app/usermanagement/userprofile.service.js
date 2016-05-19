@@ -1,4 +1,4 @@
-System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service'], function(exports_1, context_1) {
+System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,13 +15,10 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var Observable_1, core_1, core_services_service_1;
+    var core_1, core_services_service_1;
     var UserProfileService;
     return {
         setters:[
-            function (Observable_1_1) {
-                Observable_1 = Observable_1_1;
-            },
             function (core_1_1) {
                 core_1 = core_1_1;
             },
@@ -39,11 +36,7 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                     _super.prototype.setApiController.call(this, 'UserProfile');
                 }
                 UserProfileService.prototype.getUserProfile = function () {
-                    return _super.prototype.getData.call(this)
-                        .map(function (res) { console.log('What?'); return res; })
-                        .catch(function (err, caught) {
-                        return Observable_1.Observable.throw('There was a problem');
-                    });
+                    return _super.prototype.getData.call(this);
                 };
                 UserProfileService = __decorate([
                     core_1.Injectable(), 

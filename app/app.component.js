@@ -36,17 +36,7 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
             AppComponent = (function () {
                 function AppComponent(xCoreServices) {
                     this.xCoreServices = xCoreServices;
-                    this.isBusy = true;
                 }
-                AppComponent.prototype.ngOnInit = function () {
-                    AppComponent.subscribeToIsApplicationBusy(this.xCoreServices.BusyService, this);
-                };
-                AppComponent.subscribeToIsApplicationBusy = function (busyService, appComponent) {
-                    busyService.notifyBusy$.subscribe(function (busyCount) {
-                        console.log(busyCount);
-                        appComponent.isBusy = (busyCount > 0);
-                    });
-                };
                 AppComponent = __decorate([
                     core_1.Component({
                         selector: 'xcore-app',

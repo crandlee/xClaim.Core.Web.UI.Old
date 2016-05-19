@@ -5,7 +5,9 @@
         'app': 'app', // 'dist'
         'rxjs': 'node_modules/rxjs',
         '@angular': 'node_modules/@angular',
-        'angular2-cookie': 'node_modules/angular2-cookie'
+        'angular2-cookie': 'node_modules/angular2-cookie',
+        'lodash': 'node_modules/lodash/lodash.js',
+        'circularjson': 'node_modules/circular-json/build'
     };
 
     // packages tells the System loader how to load when no filename and/or no extension
@@ -13,6 +15,7 @@
         'app': { main: 'main.js', defaultExtension: 'js' },
         'rxjs': { defaultExtension: 'js' },
         'angular2-cookie': { main: 'core.js',  defaultExtension: 'js' },
+        'circularjson': { main: 'circular-json.js',  defaultExtension: 'js' },        
     };
 
     var packageNames = [

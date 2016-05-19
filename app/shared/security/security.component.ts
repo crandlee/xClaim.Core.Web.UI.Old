@@ -11,10 +11,11 @@ export class SecurityComponent implements OnInit {
 
     public loggedIn: boolean;
     public userName: string;
-    
+    public isBusy: boolean = false;
+
     constructor( 
         private xCoreServices: XCoreServices) {
-           
+        this.isBusy = true;           
     }
             
     
@@ -50,11 +51,18 @@ export class SecurityComponent implements OnInit {
             this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();
             this.userName = this.xCoreServices.SecurityService.getUserName();
             this.performPostLoginRouting();
-                                                                        
+            this.subscribeToIsApplicationBusy();                                                            
         } catch (err) {            
             this.xCoreServices.LoggingService.error(JSON.stringify(err));
         }
 
     };
+    
+    private subscribeToIsApplicationBusy() {
+        this.xCoreServices.BusyService.notifyBusy$.subscribe(busyCount => { 
+            this.isBusy = (busyCount > 0);
+        });
+    }
+
               
 }

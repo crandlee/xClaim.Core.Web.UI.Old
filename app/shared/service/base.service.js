@@ -1,4 +1,4 @@
-System.register(['@angular/http', '@angular/core', './core-services.service'], function(exports_1, context_1) {
+System.register(['@angular/http', '@angular/core', './core-services.service', 'rxjs/add/operator/finally'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -22,7 +22,8 @@ System.register(['@angular/http', '@angular/core', './core-services.service'], f
             },
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
-            }],
+            },
+            function (_1) {}],
         execute: function() {
             BaseService = (function () {
                 function BaseService(xCoreServices) {
@@ -76,13 +77,21 @@ System.register(['@angular/http', '@angular/core', './core-services.service'], f
                 BaseService.prototype.executeObservable = function (obs) {
                     if (this.passedAuthentication()) {
                         this.xCoreServices.BusyService.notifyBusy(true);
-                        //obs.subscribe(() => {}, () => {}, () => { this.xCoreServices.BusyService.notifyBusy(false); });
                         return obs;
                     }
                 };
                 BaseService.prototype.getData = function (routePath, options) {
                     var _this = this;
-                    return this.executeObservable(this.xCoreServices.Http.get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options)).map(function (res) { _this.xCoreServices.BusyService.notifyBusy(false); return res.json(); }));
+                    var obs = this.executeObservable(this.xCoreServices.Http.get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options))
+                        .map(function (res) { return res.json(); }))
+                        .catch(function (err, caught) {
+                        _this.xCoreServices.LoggingService.error(err);
+                        return obs;
+                    })
+                        .finally(function () {
+                        _this.xCoreServices.BusyService.notifyBusy(false);
+                    });
+                    return obs;
                 };
                 BaseService.prototype.postData = function (data, routePath, options) {
                     return this.executeObservable(this.xCoreServices.Http.post("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options)));

@@ -16,12 +16,8 @@ export class UserProfileService extends XCoreServiceBase {
     }
     
     
-    public getUserProfile(): Observable<IUserProfile> {
-        return super.getData<IUserProfile>()
-            .map(res => { console.log('What?'); return res;})
-            .catch((err,caught) => {
-                return Observable.throw('There was a problem'); 
-            })
+    public getUserProfile(): Observable<IUserProfile[]> {
+        return super.getData<IUserProfile[]>();
     }
     
 }
