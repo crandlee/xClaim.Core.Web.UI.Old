@@ -18,12 +18,9 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
 
     ngOnInit() {
         this.userProfileService.getUserProfile().subscribe(up => {
-            try {
-                this.userNames = up.map(u => u.UserName);                                      
-            } catch (serr) {
-                this.xCoreServices.LoggingService.error(serr, "There was an error retrieving the users");        
-            }
-        });                    
+                //this.userNames = up.map(u => u.UserName);
+                console.log(up);
+            }); 
     }
                   
 }

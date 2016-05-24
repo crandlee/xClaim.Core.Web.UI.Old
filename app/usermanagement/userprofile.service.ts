@@ -12,16 +12,16 @@ export class UserProfileService extends XCoreServiceBase {
     
     constructor(xCoreServices: XCoreServices) {
         super(xCoreServices);
-        super.setApiController('UserProfile');   
+        super.setApiController('Values');   
     }
     
     
-    public getUserProfile(): Observable<IUserProfile[]> {
-        return super.getData<IUserProfile[]>();
+    public getUserProfile(): Observable<string> {
+        return super.getTextData(null, { ServiceDataDescription: "test data", PropogateException: true });
     }
     
 }
 
-export interface IUserProfile {
-    UserName: string;
-}
+// export interface IUserProfile {
+//     UserName: string;
+// }

@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { XCoreServices } from './core-services.service';
 import { BusyService } from './busy.service';
 import 'rxjs/add/operator/finally';
+import 'rxjs/add/observable/empty';
 
  @Injectable()
 export class BaseService {
@@ -71,45 +72,100 @@ export class BaseService {
         if (this.passedAuthentication()) {
             this.xCoreServices.BusyService.notifyBusy(true);                        
             return obs;                
-        }
-        
+        } else {
+            //This case shouldn't occur as the user must be authenticated to get here
+            return null;
+        }   
     }
-    protected getData<TData>(routePath?: string, options?: RequestOptions): Observable<TData> {
-        var obs = this.executeObservable(
-            this.xCoreServices.Http.get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options))
-                .map<TData>(res => { return res.json()}))
-                .catch((err,caught) => {
-                    this.xCoreServices.LoggingService.error(err);
-                    return obs; 
-                })
-                .finally(() => {
-                    this.xCoreServices.BusyService.notifyBusy(false);
-                });
-        return obs;
+
+    protected getTextData(routePath?: string, serviceOptions?: IServiceOptions, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
+        var baseObs = this.xCoreServices.Http
+                .get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(requestOptions))                                        
+                .map(res => { return res.text(); })
+            var tailObs = this.getTailGetObservable<string>(baseObs, serviceOptions, onError);   
+        return this.executeObservable(tailObs);
+    }
+
+    private getBaseGetObservable(routePath?: string, options?: RequestOptions): Observable<Response> {
+        return this.xCoreServices.Http
+            .get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options));                                                
+    }   
+     
+    private getTailGetObservable<TData>(currentObservable: Observable<TData>, serviceOptions?: IServiceOptions,
+            onError?:(error: any, caught: Observable<TData>) => void): Observable<TData> {        
+        if (!onError) onError = (error: any, caught: any) => { this.xCoreServices.LoggingService.error(error); }
+        var swallowException = (!serviceOptions || !serviceOptions.PropogateException);
+        var suppressDefaultException = (serviceOptions && serviceOptions.SuppressDefaultException); 
+        currentObservable = currentObservable
+            .catch<TData>((err,caught) => {
+                if (suppressDefaultException) throw err;
+                var newError = this.getGeneralErrorMessage("retrieving", serviceOptions);
+                onError(newError, caught);
+                if (swallowException) return Observable.empty<TData>();
+                throw newError;
+            });
+        return currentObservable.finally(() => {
+            this.xCoreServices.BusyService.notifyBusy(false);
+        });
+                       
+    }
+
+    private getGeneralErrorMessage(action:string, serviceOptions?: IServiceOptions): string {
+        var dataDescription: string = serviceOptions && serviceOptions.ServiceDataDescription;
+        if (!dataDescription) dataDescription = "requested data"; 
+        var errorDescription: string = serviceOptions && serviceOptions.ServiceError; 
+        if (!errorDescription) errorDescription = `There was an error ${action} the ${dataDescription}`;
+        return errorDescription; 
+    }   
+     
+    protected getObjectData<TData>(routePath?: string, serviceOptions?: IServiceOptions, 
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TData>) => void): Observable<TData> {            
+            var baseObs = this.getBaseGetObservable(routePath, requestOptions)
+                .map<TData>(res => { return res.json(); });                
+            var tailObs = this.getTailGetObservable<TData>(baseObs, serviceOptions, onError);   
+        return this.executeObservable(tailObs);
     }
     
-    protected postData(data: any, routePath?: string, options?: RequestOptions): Observable<Response> {
-        return this.executeObservable(
-            this.xCoreServices.Http.post(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(options))
-        );
+    protected postData(data: any, routePath?: string, serviceOptions?: IServiceOptions, 
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
+
+        var baseObs = this.xCoreServices.Http
+                .post(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(requestOptions))
+        var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+        return this.executeObservable(tailObs);
     }
 
-    protected putData(data: any, routePath?: string, options?: RequestOptions): Observable<Response> {
-        return this.executeObservable(
-            this.xCoreServices.Http.put(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(options))
-        );
+    protected putData(data: any, routePath?: string, serviceOptions?: IServiceOptions, 
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
+
+        var baseObs = this.xCoreServices.Http
+                .put(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(requestOptions))
+        var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+        return this.executeObservable(tailObs);
     }
 
-    protected deleteData(routePath: string, options: RequestOptions): Observable<Response> {
-        return this.executeObservable(
-            this.xCoreServices.Http.delete(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(options))
-        )
+    protected deleteData(data: any, routePath?: string, serviceOptions?: IServiceOptions, 
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
+            
+        var baseObs = this.xCoreServices.Http
+                .delete(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(requestOptions))
+        var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+        return this.executeObservable(tailObs);
     }
-        
+    
     protected setApiController(relativeUrl: string) {
         this.actionUrl = `${this.xCoreServices.AppSettings.ApiEndpoint}/${relativeUrl}`; 
+        return null;
     }
-           
-           
-     
+                
 }
+
+
+export interface IServiceOptions {
+    SuppressDefaultException?: boolean;
+    ServiceDataDescription?: string;
+    ServiceError?: string;
+    PropogateException?: boolean;
+}
+
+

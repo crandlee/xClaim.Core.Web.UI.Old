@@ -1,4 +1,4 @@
-System.register(['@angular/http', '@angular/core', './core-services.service', 'rxjs/add/operator/finally'], function(exports_1, context_1) {
+System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-services.service', 'rxjs/add/operator/finally', 'rxjs/add/observable/empty'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,12 +10,15 @@ System.register(['@angular/http', '@angular/core', './core-services.service', 'r
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var http_1, core_1, core_services_service_1;
+    var http_1, Observable_1, core_1, core_services_service_1;
     var BaseService;
     return {
         setters:[
             function (http_1_1) {
                 http_1 = http_1_1;
+            },
+            function (Observable_1_1) {
+                Observable_1 = Observable_1_1;
             },
             function (core_1_1) {
                 core_1 = core_1_1;
@@ -23,7 +26,8 @@ System.register(['@angular/http', '@angular/core', './core-services.service', 'r
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
             },
-            function (_1) {}],
+            function (_1) {},
+            function (_2) {}],
         execute: function() {
             BaseService = (function () {
                 function BaseService(xCoreServices) {
@@ -79,31 +83,78 @@ System.register(['@angular/http', '@angular/core', './core-services.service', 'r
                         this.xCoreServices.BusyService.notifyBusy(true);
                         return obs;
                     }
+                    else {
+                        //This case shouldn't occur as the user must be authenticated to get here
+                        return null;
+                    }
                 };
-                BaseService.prototype.getData = function (routePath, options) {
+                BaseService.prototype.getTextData = function (routePath, serviceOptions, requestOptions, onError) {
+                    var baseObs = this.xCoreServices.Http
+                        .get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(requestOptions))
+                        .map(function (res) { return res.text(); });
+                    var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    return this.executeObservable(tailObs);
+                };
+                BaseService.prototype.getBaseGetObservable = function (routePath, options) {
+                    return this.xCoreServices.Http
+                        .get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options));
+                };
+                BaseService.prototype.getTailGetObservable = function (currentObservable, serviceOptions, onError) {
                     var _this = this;
-                    var obs = this.executeObservable(this.xCoreServices.Http.get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options))
-                        .map(function (res) { return res.json(); }))
+                    if (!onError)
+                        onError = function (error, caught) { _this.xCoreServices.LoggingService.error(error); };
+                    var swallowException = (!serviceOptions || !serviceOptions.PropogateException);
+                    var suppressDefaultException = (serviceOptions && serviceOptions.SuppressDefaultException);
+                    currentObservable = currentObservable
                         .catch(function (err, caught) {
-                        _this.xCoreServices.LoggingService.error(err);
-                        return obs;
-                    })
-                        .finally(function () {
+                        if (suppressDefaultException)
+                            throw err;
+                        var newError = _this.getGeneralErrorMessage("retrieving", serviceOptions);
+                        onError(newError, caught);
+                        if (swallowException)
+                            return Observable_1.Observable.empty();
+                        throw newError;
+                    });
+                    return currentObservable.finally(function () {
                         _this.xCoreServices.BusyService.notifyBusy(false);
                     });
-                    return obs;
                 };
-                BaseService.prototype.postData = function (data, routePath, options) {
-                    return this.executeObservable(this.xCoreServices.Http.post("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options)));
+                BaseService.prototype.getGeneralErrorMessage = function (action, serviceOptions) {
+                    var dataDescription = serviceOptions && serviceOptions.ServiceDataDescription;
+                    if (!dataDescription)
+                        dataDescription = "requested data";
+                    var errorDescription = serviceOptions && serviceOptions.ServiceError;
+                    if (!errorDescription)
+                        errorDescription = "There was an error " + action + " the " + dataDescription;
+                    return errorDescription;
                 };
-                BaseService.prototype.putData = function (data, routePath, options) {
-                    return this.executeObservable(this.xCoreServices.Http.put("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(options)));
+                BaseService.prototype.getObjectData = function (routePath, serviceOptions, requestOptions, onError) {
+                    var baseObs = this.getBaseGetObservable(routePath, requestOptions)
+                        .map(function (res) { return res.json(); });
+                    var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    return this.executeObservable(tailObs);
                 };
-                BaseService.prototype.deleteData = function (routePath, options) {
-                    return this.executeObservable(this.xCoreServices.Http.delete("" + this.actionUrl + this.getCleanRoutePath(routePath), this.setHeaders(options)));
+                BaseService.prototype.postData = function (data, routePath, serviceOptions, requestOptions, onError) {
+                    var baseObs = this.xCoreServices.Http
+                        .post("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions));
+                    var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    return this.executeObservable(tailObs);
+                };
+                BaseService.prototype.putData = function (data, routePath, serviceOptions, requestOptions, onError) {
+                    var baseObs = this.xCoreServices.Http
+                        .put("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions));
+                    var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    return this.executeObservable(tailObs);
+                };
+                BaseService.prototype.deleteData = function (data, routePath, serviceOptions, requestOptions, onError) {
+                    var baseObs = this.xCoreServices.Http
+                        .delete("" + this.actionUrl + this.getCleanRoutePath(routePath), this.setHeaders(requestOptions));
+                    var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    return this.executeObservable(tailObs);
                 };
                 BaseService.prototype.setApiController = function (relativeUrl) {
                     this.actionUrl = this.xCoreServices.AppSettings.ApiEndpoint + "/" + relativeUrl;
+                    return null;
                 };
                 BaseService = __decorate([
                     core_1.Injectable(), 

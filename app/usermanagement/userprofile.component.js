@@ -40,14 +40,9 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.userProfileService = userProfileService;
                 }
                 UserProfileComponent.prototype.ngOnInit = function () {
-                    var _this = this;
                     this.userProfileService.getUserProfile().subscribe(function (up) {
-                        try {
-                            _this.userNames = up.map(function (u) { return u.UserName; });
-                        }
-                        catch (serr) {
-                            _this.xCoreServices.LoggingService.error(serr, "There was an error retrieving the users");
-                        }
+                        //this.userNames = up.map(u => u.UserName);
+                        console.log(up);
                     });
                 };
                 UserProfileComponent = __decorate([

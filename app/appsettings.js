@@ -22,7 +22,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 function AppSettings() {
                 }
                 Object.defineProperty(AppSettings.prototype, "ApiEndpoint", {
-                    get: function () { return 'http://localhost:10001/api'; },
+                    get: function () { return 'http://localhost:5000/api'; },
                     enumerable: true,
                     configurable: true
                 });
@@ -47,13 +47,13 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 });
                 ;
                 Object.defineProperty(AppSettings.prototype, "Client_Id", {
-                    get: function () { return 'xclaim.webapi'; },
+                    get: function () { return 'xclaim.web.api.hub'; },
                     enumerable: true,
                     configurable: true
                 });
                 ;
                 Object.defineProperty(AppSettings.prototype, "Scopes", {
-                    get: function () { return 'xclaim.webapi.security openid email profile'; },
+                    get: function () { return 'openid profile'; },
                     enumerable: true,
                     configurable: true
                 });

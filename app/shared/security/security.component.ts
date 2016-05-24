@@ -15,7 +15,6 @@ export class SecurityComponent implements OnInit {
 
     constructor( 
         private xCoreServices: XCoreServices) {
-        this.isBusy = true;           
     }
             
     
@@ -48,7 +47,7 @@ export class SecurityComponent implements OnInit {
     
     public ngOnInit(): void {
         try {
-            this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();
+            this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();            
             this.userName = this.xCoreServices.SecurityService.getUserName();
             this.performPostLoginRouting();
             this.subscribeToIsApplicationBusy();                                                            

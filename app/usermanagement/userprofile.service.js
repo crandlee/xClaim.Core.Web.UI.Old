@@ -33,10 +33,10 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                 __extends(UserProfileService, _super);
                 function UserProfileService(xCoreServices) {
                     _super.call(this, xCoreServices);
-                    _super.prototype.setApiController.call(this, 'UserProfile');
+                    _super.prototype.setApiController.call(this, 'Values');
                 }
                 UserProfileService.prototype.getUserProfile = function () {
-                    return _super.prototype.getData.call(this);
+                    return _super.prototype.getTextData.call(this, null, { ServiceDataDescription: "test data", PropogateException: true });
                 };
                 UserProfileService = __decorate([
                     core_1.Injectable(), 
@@ -48,4 +48,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
         }
     }
 });
+// export interface IUserProfile {
+//     UserName: string;
+// } 
 //# sourceMappingURL=userprofile.service.js.map

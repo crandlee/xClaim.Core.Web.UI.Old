@@ -25,7 +25,6 @@ System.register(['@angular/core', '../service/core-services.service'], function(
                 function SecurityComponent(xCoreServices) {
                     this.xCoreServices = xCoreServices;
                     this.isBusy = false;
-                    this.isBusy = true;
                 }
                 SecurityComponent.prototype.performPostLoginRouting = function () {
                     //Check for needed routing from post-login (where are previous route was requested and stored)
