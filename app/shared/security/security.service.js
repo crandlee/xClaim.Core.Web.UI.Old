@@ -66,10 +66,10 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     console.log("BEGIN Authorize, no auth data");
                     var authServer = this.appSettings.IdentityServerEndpoint;
                     var authorizationUrl = authServer + "/connect/authorize";
-                    var client_id = this.appSettings.Client_Id;
+                    var client_id = this.appSettings.HubClientId;
                     var redirect_uri = this.appSettings.ApiRedirectOnLogin;
                     var response_type = this.appSettings.ResponseType;
-                    var scope = this.appSettings.Scopes;
+                    var scope = this.appSettings.HubScopes;
                     var nonce = "N" + Math.random() + "" + Date.now();
                     var state = Date.now() + "" + Math.random();
                     this.store("xc.authStateControl", state);

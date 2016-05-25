@@ -7,6 +7,7 @@ import { XCoreServices } from '../service/core-services.service';
 })
 export class LoginComponent  {
     constructor(private xCoreServices: XCoreServices) {
-        this.xCoreServices.SecurityService.Authorize();
+        this.xCoreServices.SecurityService
+            .Authorize();
     }
 }

@@ -24,7 +24,8 @@ System.register(['@angular/core', '../service/core-services.service'], function(
             LoginComponent = (function () {
                 function LoginComponent(xCoreServices) {
                     this.xCoreServices = xCoreServices;
-                    this.xCoreServices.SecurityService.Authorize();
+                    this.xCoreServices.SecurityService
+                        .Authorize();
                 }
                 LoginComponent = __decorate([
                     core_1.Component({

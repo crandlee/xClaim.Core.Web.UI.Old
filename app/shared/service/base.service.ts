@@ -8,10 +8,7 @@ import 'rxjs/add/observable/empty';
 
  @Injectable()
 export class BaseService {
-    
-    protected token: string;
-    protected actionUrl: string;
-       
+        
     constructor(
         public xCoreServices: XCoreServices
         ) {}
@@ -31,7 +28,7 @@ export class BaseService {
         }
         return options;
     }
-
+    
     public logError(message: string, options?: any): void {
         this.xCoreServices.LoggingService.error(message, options);
     }
@@ -78,17 +75,16 @@ export class BaseService {
         }   
     }
 
-    protected getTextData(routePath?: string, serviceOptions?: IServiceOptions, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
-        var baseObs = this.xCoreServices.Http
-                .get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(requestOptions))                                        
+    protected getTextData(serviceOptions: IServiceOptions, routePath?: string, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
+        var baseObs = this.getBaseGetObservable(serviceOptions.ApiController, routePath)                                        
                 .map(res => { return res.text(); })
             var tailObs = this.getTailGetObservable<string>(baseObs, serviceOptions, onError);   
         return this.executeObservable(tailObs);
     }
 
-    private getBaseGetObservable(routePath?: string, options?: RequestOptions): Observable<Response> {
+    private getBaseGetObservable(apiRoot: string, controllerUrl: string, routePath?: string, options?: RequestOptions): Observable<Response> {
         return this.xCoreServices.Http
-            .get(`${this.actionUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options));                                                
+            .get(`${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options));                                                
     }   
      
     private getTailGetObservable<TData>(currentObservable: Observable<TData>, serviceOptions?: IServiceOptions,
@@ -118,45 +114,41 @@ export class BaseService {
         return errorDescription; 
     }   
      
-    protected getObjectData<TData>(routePath?: string, serviceOptions?: IServiceOptions, 
+    protected getObjectData<TData>(serviceOptions: IServiceOptions, routePath?: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TData>) => void): Observable<TData> {            
-            var baseObs = this.getBaseGetObservable(routePath, requestOptions)
+            var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, serviceOptions.ApiController, routePath, requestOptions)
                 .map<TData>(res => { return res.json(); });                
             var tailObs = this.getTailGetObservable<TData>(baseObs, serviceOptions, onError);   
         return this.executeObservable(tailObs);
     }
     
-    protected postData(data: any, routePath?: string, serviceOptions?: IServiceOptions, 
+    protected postData(data: any, serviceOptions: IServiceOptions,routePath?: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
 
         var baseObs = this.xCoreServices.Http
-                .post(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(requestOptions))
+                .post(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(requestOptions))
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
         return this.executeObservable(tailObs);
     }
 
-    protected putData(data: any, routePath?: string, serviceOptions?: IServiceOptions, 
+    protected putData(data: any, serviceOptions: IServiceOptions, routePath?: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
 
         var baseObs = this.xCoreServices.Http
-                .put(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(requestOptions))
+                .put(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, JSON.stringify(data), this.setHeaders(requestOptions))
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
         return this.executeObservable(tailObs);
     }
 
-    protected deleteData(data: any, routePath?: string, serviceOptions?: IServiceOptions, 
+    protected deleteData(data: any, serviceOptions: IServiceOptions, routePath?: string,  
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
             
         var baseObs = this.xCoreServices.Http
-                .delete(`${this.actionUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(requestOptions))
+                .delete(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, this.setHeaders(requestOptions))
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
         return this.executeObservable(tailObs);
     }
     
-    protected setApiController(relativeUrl: string) {
-        this.actionUrl = `${this.xCoreServices.AppSettings.ApiEndpoint}/${relativeUrl}`; 
-        return null;
-    }
                 
 }
 
@@ -166,6 +158,8 @@ export interface IServiceOptions {
     ServiceDataDescription?: string;
     ServiceError?: string;
     PropogateException?: boolean;
+    ApiRoot: string,
+    ApiController: string
 }
 
 

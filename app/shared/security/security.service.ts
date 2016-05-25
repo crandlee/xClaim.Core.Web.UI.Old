@@ -31,7 +31,7 @@ export class SecurityService {
     public GetToken(): any {
         return this.retrieve("xc.authorizationData");
     }
-
+    
     public ResetAuthorizationData() {
         this.store("xc.authorizationData", "");
         this.store("xc.authorizationDataIdToken", "");
@@ -60,10 +60,10 @@ export class SecurityService {
         var authServer = this.appSettings.IdentityServerEndpoint;
         
         var authorizationUrl = `${authServer}/connect/authorize`;
-        var client_id = this.appSettings.Client_Id;
+        var client_id = this.appSettings.HubClientId;
         var redirect_uri = this.appSettings.ApiRedirectOnLogin;
         var response_type = this.appSettings.ResponseType;
-        var scope = this.appSettings.Scopes;
+        var scope = this.appSettings.HubScopes;
         var nonce = "N" + Math.random() + "" + Date.now();
         var state = Date.now() + "" + Math.random();
 

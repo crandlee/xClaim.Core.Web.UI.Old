@@ -5,13 +5,15 @@ export class AppSettings {
     
     constructor() {}
     
-    public get ApiEndpoint(): string { return 'http://localhost:5000/api' };
     public get IdentityServerEndpoint(): string { return 'https://www.localidentity.com:10000'};
     //public get IdentityServerEndpoint(): string { return 'http://localhost:5000'};   
     public get ApiRedirectOnLogin(): string { return `${window.location.protocol}//${window.location.host}`};
     public get ApiRedirectOnLogout():  string { return `${window.location.protocol}//${window.location.host}`};
-    public get Client_Id(): string { return 'xclaim.web.api.hub' };
-    public get Scopes(): string { return 'openid profile'};
+    public get HubApiEndpoint(): string { return 'http://localhost:5000/api' };
+    public get HubController(): string { return 'Hub'};
+    public get HubClientId(): string { return 'xclaim.web.api.hub' };
+    public get ApiClientId(): string { return 'xclaim.web.api' };
+    public get HubScopes(): string { return 'openid profile'};
     public get ResponseType(): string { return 'id_token token'};
     public get LoginRoute(): string { return '/Login'};
     public get LogoutRoute(): string { return '/Logout'};

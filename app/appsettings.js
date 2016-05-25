@@ -21,12 +21,6 @@ System.register(['@angular/core'], function(exports_1, context_1) {
             AppSettings = (function () {
                 function AppSettings() {
                 }
-                Object.defineProperty(AppSettings.prototype, "ApiEndpoint", {
-                    get: function () { return 'http://localhost:5000/api'; },
-                    enumerable: true,
-                    configurable: true
-                });
-                ;
                 Object.defineProperty(AppSettings.prototype, "IdentityServerEndpoint", {
                     get: function () { return 'https://www.localidentity.com:10000'; },
                     enumerable: true,
@@ -46,13 +40,31 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     configurable: true
                 });
                 ;
-                Object.defineProperty(AppSettings.prototype, "Client_Id", {
+                Object.defineProperty(AppSettings.prototype, "HubApiEndpoint", {
+                    get: function () { return 'http://localhost:5000/api'; },
+                    enumerable: true,
+                    configurable: true
+                });
+                ;
+                Object.defineProperty(AppSettings.prototype, "HubController", {
+                    get: function () { return 'Hub'; },
+                    enumerable: true,
+                    configurable: true
+                });
+                ;
+                Object.defineProperty(AppSettings.prototype, "HubClientId", {
                     get: function () { return 'xclaim.web.api.hub'; },
                     enumerable: true,
                     configurable: true
                 });
                 ;
-                Object.defineProperty(AppSettings.prototype, "Scopes", {
+                Object.defineProperty(AppSettings.prototype, "ApiClientId", {
+                    get: function () { return 'xclaim.web.api'; },
+                    enumerable: true,
+                    configurable: true
+                });
+                ;
+                Object.defineProperty(AppSettings.prototype, "HubScopes", {
                     get: function () { return 'openid profile'; },
                     enumerable: true,
                     configurable: true

@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../service/core-services.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '../service/core-services.service', 'ng2-bootstrap', '@angular/common', '../hub/hub.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '../service/core-services.service'], function(
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1;
+    var core_1, core_services_service_1, ng2_bootstrap_1, common_1, hub_service_1;
     var SecurityComponent;
     return {
         setters:[
@@ -19,13 +19,43 @@ System.register(['@angular/core', '../service/core-services.service'], function(
             },
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
+            },
+            function (ng2_bootstrap_1_1) {
+                ng2_bootstrap_1 = ng2_bootstrap_1_1;
+            },
+            function (common_1_1) {
+                common_1 = common_1_1;
+            },
+            function (hub_service_1_1) {
+                hub_service_1 = hub_service_1_1;
             }],
         execute: function() {
             SecurityComponent = (function () {
-                function SecurityComponent(xCoreServices) {
+                function SecurityComponent(xCoreServices, hubService) {
                     this.xCoreServices = xCoreServices;
+                    this.hubService = hubService;
                     this.isBusy = false;
+                    this.disabled = false;
+                    this.status = { isopen: false };
+                    this.isCollapsed = true;
                 }
+                SecurityComponent.prototype.toggleDropdown = function ($event) {
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    this.status.isopen = !this.status.isopen;
+                };
+                SecurityComponent.prototype.performPostLoginProcedure = function () {
+                    this.subscribeToIsApplicationBusy();
+                    this.retrieveHubData();
+                    this.performPostLoginRouting();
+                };
+                SecurityComponent.prototype.retrieveHubData = function () {
+                    this.hubService.getHubData().subscribe(function (hubData) {
+                        console.log(hubData);
+                    });
+                };
+                SecurityComponent.prototype.recheckAuthenticationWithNewScopes = function () {
+                };
                 SecurityComponent.prototype.performPostLoginRouting = function () {
                     //Check for needed routing from post-login (where are previous route was requested and stored)
                     var needRoute = this.xCoreServices.CookieService.get(this.xCoreServices.AppSettings.CookieKeys.RouteAfterLoginKey);
@@ -47,6 +77,7 @@ System.register(['@angular/core', '../service/core-services.service'], function(
                     try {
                         this.xCoreServices.SecurityService.Logoff();
                         this.loggedIn = false;
+                        this.isCollapsed = true;
                         this.xCoreServices.Router.navigate(['/']);
                     }
                     catch (err) {
@@ -58,14 +89,16 @@ System.register(['@angular/core', '../service/core-services.service'], function(
                     try {
                         this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();
                         this.userName = this.xCoreServices.SecurityService.getUserName();
-                        this.performPostLoginRouting();
-                        this.subscribeToIsApplicationBusy();
+                        this.performPostLoginProcedure();
                     }
                     catch (err) {
                         this.xCoreServices.LoggingService.error(JSON.stringify(err));
                     }
                 };
                 ;
+                SecurityComponent.prototype.navigateToRoute = function (route) {
+                    this.xCoreServices.Router.navigate([route]);
+                };
                 SecurityComponent.prototype.subscribeToIsApplicationBusy = function () {
                     var _this = this;
                     this.xCoreServices.BusyService.notifyBusy$.subscribe(function (busyCount) {
@@ -76,9 +109,11 @@ System.register(['@angular/core', '../service/core-services.service'], function(
                     core_1.Component({
                         selector: 'xcore-security',
                         templateUrl: 'app/shared/security/security.component.html',
-                        providers: [core_services_service_1.XCoreServices]
+                        styleUrls: ['app/shared/security/security.component.css'],
+                        directives: [ng2_bootstrap_1.CollapseDirective, ng2_bootstrap_1.DROPDOWN_DIRECTIVES, common_1.CORE_DIRECTIVES],
+                        providers: [core_services_service_1.XCoreServices, hub_service_1.HubService]
                     }), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, hub_service_1.HubService])
                 ], SecurityComponent);
                 return SecurityComponent;
             }());

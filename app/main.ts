@@ -9,6 +9,7 @@ import { Injectable, provide, ExceptionHandler } from '@angular/core';
 import { CookieService } from 'angular2-cookie/core';
 import { SecurityService } from './shared/security/security.service';
 import { BusyService } from './shared/service/busy.service';
+import { HubService } from './shared/hub/hub.service';
 
 // Our main component
 import { AppComponent } from './app.component';
@@ -19,14 +20,16 @@ export class RootExceptionHandler  {
   constructor(private logService: LoggingService) {}
   
   call(error, stackTrace = null, reason = null) {
-    this.logService.error(error);      
+    //this.logService.error(error);
+    console.log(error);      
   }
   
 }
 
   
 bootstrap(AppComponent, [
-   ToastyService, ToastyConfig, HTTP_PROVIDERS, AppSettings, XCoreToastService, LoggingService, SecurityService, CookieService, BusyService,
+   ToastyService, ToastyConfig, HTTP_PROVIDERS, AppSettings, XCoreToastService, 
+   LoggingService, SecurityService, CookieService, BusyService, HubService,
    ROUTER_PROVIDERS, provide(ExceptionHandler, { useClass: RootExceptionHandler})
 ]);
 

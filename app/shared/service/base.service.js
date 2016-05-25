@@ -88,16 +88,15 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                         return null;
                     }
                 };
-                BaseService.prototype.getTextData = function (routePath, serviceOptions, requestOptions, onError) {
-                    var baseObs = this.xCoreServices.Http
-                        .get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(requestOptions))
+                BaseService.prototype.getTextData = function (serviceOptions, routePath, requestOptions, onError) {
+                    var baseObs = this.getBaseGetObservable(serviceOptions.ApiController, routePath)
                         .map(function (res) { return res.text(); });
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     return this.executeObservable(tailObs);
                 };
-                BaseService.prototype.getBaseGetObservable = function (routePath, options) {
+                BaseService.prototype.getBaseGetObservable = function (apiRoot, controllerUrl, routePath, options) {
                     return this.xCoreServices.Http
-                        .get("" + this.actionUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options));
+                        .get(apiRoot + "/" + controllerUrl + this.getCleanRoutePath(routePath) + "/", this.setHeaders(options));
                 };
                 BaseService.prototype.getTailGetObservable = function (currentObservable, serviceOptions, onError) {
                     var _this = this;
@@ -128,33 +127,29 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                         errorDescription = "There was an error " + action + " the " + dataDescription;
                     return errorDescription;
                 };
-                BaseService.prototype.getObjectData = function (routePath, serviceOptions, requestOptions, onError) {
-                    var baseObs = this.getBaseGetObservable(routePath, requestOptions)
+                BaseService.prototype.getObjectData = function (serviceOptions, routePath, requestOptions, onError) {
+                    var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, serviceOptions.ApiController, routePath, requestOptions)
                         .map(function (res) { return res.json(); });
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     return this.executeObservable(tailObs);
                 };
-                BaseService.prototype.postData = function (data, routePath, serviceOptions, requestOptions, onError) {
+                BaseService.prototype.postData = function (data, serviceOptions, routePath, requestOptions, onError) {
                     var baseObs = this.xCoreServices.Http
-                        .post("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions));
+                        .post(serviceOptions.ApiRoot + "/" + serviceOptions.ApiController + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions));
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     return this.executeObservable(tailObs);
                 };
-                BaseService.prototype.putData = function (data, routePath, serviceOptions, requestOptions, onError) {
+                BaseService.prototype.putData = function (data, serviceOptions, routePath, requestOptions, onError) {
                     var baseObs = this.xCoreServices.Http
-                        .put("" + this.actionUrl + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions));
+                        .put(serviceOptions.ApiRoot + "/" + serviceOptions.ApiController + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions));
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     return this.executeObservable(tailObs);
                 };
-                BaseService.prototype.deleteData = function (data, routePath, serviceOptions, requestOptions, onError) {
+                BaseService.prototype.deleteData = function (data, serviceOptions, routePath, requestOptions, onError) {
                     var baseObs = this.xCoreServices.Http
-                        .delete("" + this.actionUrl + this.getCleanRoutePath(routePath), this.setHeaders(requestOptions));
+                        .delete(serviceOptions.ApiRoot + "/" + serviceOptions.ApiController + this.getCleanRoutePath(routePath), this.setHeaders(requestOptions));
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     return this.executeObservable(tailObs);
-                };
-                BaseService.prototype.setApiController = function (relativeUrl) {
-                    this.actionUrl = this.xCoreServices.AppSettings.ApiEndpoint + "/" + relativeUrl;
-                    return null;
                 };
                 BaseService = __decorate([
                     core_1.Injectable(), 
