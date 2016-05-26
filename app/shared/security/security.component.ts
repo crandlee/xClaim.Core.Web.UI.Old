@@ -27,35 +27,26 @@ export class SecurityComponent implements OnInit {
     constructor( 
         private xCoreServices: XCoreServices, private hubService: HubService) {
     }
-          
-    public toggleDropdown($event:MouseEvent):void {
-        $event.preventDefault();
-        $event.stopPropagation();
-        console.log($event);
-        //this.status.isopen = !this.status.isopen;
-        //this.toggleDropdownMenuStatus(String($event.AT_TARGET));
-    }  
+              
+    // private getDropdownMenuStatus(name: string) {
+    //     var existingStatus = _.find(this.menuStatuses, name);
+    //     if (!existingStatus) return { MenuName: name, MenuOpen: false }    
+    // }
     
-    private getDropdownMenuStatus(name: string) {
-        var existingStatus = _.find(this.menuStatuses, name);
-        if (!existingStatus) return { MenuName: name, MenuOpen: false }    
-    }
-    
-    private toggleDropdownMenuStatus(name: string) {
-        var existingStatus = this.getDropdownMenuStatus(name);
-        existingStatus.MenuOpen = !existingStatus.MenuOpen;            
-    }   
+    // private toggleDropdownMenuStatus(name: string) {
+    //     var existingStatus = this.getDropdownMenuStatus(name);
+    //     existingStatus.MenuOpen = !existingStatus.MenuOpen;            
+    // }   
      
-    private saveDropdownMenuStatus(name: string, open: boolean) {
-        var existingStatus = this.getDropdownMenuStatus(name);
-        existingStatus.MenuOpen = open;
-    }
+    // private saveDropdownMenuStatus(name: string, open: boolean) {
+    //     var existingStatus = this.getDropdownMenuStatus(name);
+    //     existingStatus.MenuOpen = open;
+    // }
     
     private performPostLoginProcedure() {
         
         this.subscribeToIsApplicationBusy();
         this.retrieveHubData();
-        this.performPostLoginRouting();    
     }
     
     private retrieveHubData() {
@@ -66,13 +57,16 @@ export class SecurityComponent implements OnInit {
             _.each(this.hubData.MenuItems, mi => {
                 this.menuStatuses.push({ MenuName: mi.Name, MenuOpen: false});
             });
-        });
+            if (this.hubData.Scopes !== this.xCoreServices.AppSettings.HubScopes 
+                && this.xCoreServices.SecurityService.getCurrentScopes() == this.xCoreServices.AppSettings.HubScopes) {                
+                //Now that hub has returned data, request new authorization with requested scopes
+                //(only if requested scopes are different, which they should be)
+                this.xCoreServices.SecurityService.requestNewScopeAuthorization(this.hubData.Scopes);                        
+            }
+            this.performPostLoginRouting();            
+        });            
     }
-    
-    private recheckAuthenticationWithNewScopes() {
         
-    }
-    
     
     private performPostLoginRouting() {
         //Check for needed routing from post-login (where are previous route was requested and stored)
@@ -91,12 +85,16 @@ export class SecurityComponent implements OnInit {
         }
     };
         
+    public resetHubData() {
+        this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes:"" }        
+    }
     public logout(): void {
         try {
             this.xCoreServices.SecurityService.Logoff();
             this.loggedIn = false;
             this.isCollapsed = true;
-            this.xCoreServices.Router.navigate(['/']);
+            this.resetHubData();
+            this.xCoreServices.Router.navigate(['/']);            
         } catch (err) {
             this.xCoreServices.LoggingService.error(JSON.stringify(err));
         }

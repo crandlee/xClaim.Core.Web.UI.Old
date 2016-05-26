@@ -44,30 +44,21 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     this.menuStatuses = [];
                     this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
                 }
-                SecurityComponent.prototype.toggleDropdown = function ($event) {
-                    $event.preventDefault();
-                    $event.stopPropagation();
-                    console.log($event);
-                    //this.status.isopen = !this.status.isopen;
-                    //this.toggleDropdownMenuStatus(String($event.AT_TARGET));
-                };
-                SecurityComponent.prototype.getDropdownMenuStatus = function (name) {
-                    var existingStatus = lodash_1.default.find(this.menuStatuses, name);
-                    if (!existingStatus)
-                        return { MenuName: name, MenuOpen: false };
-                };
-                SecurityComponent.prototype.toggleDropdownMenuStatus = function (name) {
-                    var existingStatus = this.getDropdownMenuStatus(name);
-                    existingStatus.MenuOpen = !existingStatus.MenuOpen;
-                };
-                SecurityComponent.prototype.saveDropdownMenuStatus = function (name, open) {
-                    var existingStatus = this.getDropdownMenuStatus(name);
-                    existingStatus.MenuOpen = open;
-                };
+                // private getDropdownMenuStatus(name: string) {
+                //     var existingStatus = _.find(this.menuStatuses, name);
+                //     if (!existingStatus) return { MenuName: name, MenuOpen: false }    
+                // }
+                // private toggleDropdownMenuStatus(name: string) {
+                //     var existingStatus = this.getDropdownMenuStatus(name);
+                //     existingStatus.MenuOpen = !existingStatus.MenuOpen;            
+                // }   
+                // private saveDropdownMenuStatus(name: string, open: boolean) {
+                //     var existingStatus = this.getDropdownMenuStatus(name);
+                //     existingStatus.MenuOpen = open;
+                // }
                 SecurityComponent.prototype.performPostLoginProcedure = function () {
                     this.subscribeToIsApplicationBusy();
                     this.retrieveHubData();
-                    this.performPostLoginRouting();
                 };
                 SecurityComponent.prototype.retrieveHubData = function () {
                     var _this = this;
@@ -78,9 +69,14 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                         lodash_1.default.each(_this.hubData.MenuItems, function (mi) {
                             _this.menuStatuses.push({ MenuName: mi.Name, MenuOpen: false });
                         });
+                        if (_this.hubData.Scopes !== _this.xCoreServices.AppSettings.HubScopes
+                            && _this.xCoreServices.SecurityService.getCurrentScopes() == _this.xCoreServices.AppSettings.HubScopes) {
+                            //Now that hub has returned data, request new authorization with requested scopes
+                            //(only if requested scopes are different, which they should be)
+                            _this.xCoreServices.SecurityService.requestNewScopeAuthorization(_this.hubData.Scopes);
+                        }
+                        _this.performPostLoginRouting();
                     });
-                };
-                SecurityComponent.prototype.recheckAuthenticationWithNewScopes = function () {
                 };
                 SecurityComponent.prototype.performPostLoginRouting = function () {
                     //Check for needed routing from post-login (where are previous route was requested and stored)
@@ -99,11 +95,15 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     }
                 };
                 ;
+                SecurityComponent.prototype.resetHubData = function () {
+                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
+                };
                 SecurityComponent.prototype.logout = function () {
                     try {
                         this.xCoreServices.SecurityService.Logoff();
                         this.loggedIn = false;
                         this.isCollapsed = true;
+                        this.resetHubData();
                         this.xCoreServices.Router.navigate(['/']);
                     }
                     catch (err) {

@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular2-cookie/core', 'rxjs/add/operator/take', '../logging/logging.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', 'rxjs/add/operator/take', '../logging/logging.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,15 +10,12 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, http_1, appsettings_1, core_2, logging_service_1;
+    var core_1, appsettings_1, core_2, logging_service_1;
     var SecurityService;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
-            },
-            function (http_1_1) {
-                http_1 = http_1_1;
             },
             function (appsettings_1_1) {
                 appsettings_1 = appsettings_1_1;
@@ -35,10 +32,8 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                 function SecurityService(cookieService, loggingService) {
                     this.cookieService = cookieService;
                     this.loggingService = loggingService;
+                    //Make sure to always create these appSettings new because injecting them creates a circular reference at the moment
                     this.appSettings = new appsettings_1.AppSettings();
-                    this.headers = new http_1.Headers();
-                    this.headers.append('Content-Type', 'application/json');
-                    this.headers.append('Accept', 'application/json');
                     this.storage = localStorage;
                     if (this.retrieve("xc.IsAuthorized") !== "") {
                         this.HasAdminRole = this.retrieve("xc.HasAdminRole");
@@ -65,17 +60,22 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     this.IsAuthorized = true;
                     this.store("xc.IsAuthorized", true);
                 };
-                SecurityService.prototype.Authorize = function () {
+                SecurityService.prototype.requestNewScopeAuthorization = function (scopes) {
+                    //Replace initial Hub Scopes with the proper scopes that the user will use
+                    //throughout the session
+                    this.Authorize(scopes);
+                };
+                SecurityService.prototype.Authorize = function (scopes) {
                     this.ResetAuthorizationData();
-                    this.loggingService.debug("BEGIN Authorize, no auth data");
                     var authServer = this.appSettings.IdentityServerEndpoint;
                     var authorizationUrl = authServer + "/connect/authorize";
                     var client_id = this.appSettings.ApiClientId;
                     var redirect_uri = this.appSettings.ApiRedirectOnLogin;
                     var response_type = this.appSettings.ResponseType;
-                    var scope = this.appSettings.HubScopes;
+                    var scopeRequest = scopes || this.appSettings.HubScopes;
                     var nonce = "N" + Math.random() + "" + Date.now();
                     var state = Date.now() + "" + Math.random();
+                    this.loggingService.debug("Begin authorization, requesting scopes [" + scopeRequest + "]");
                     this.store("xc.authStateControl", state);
                     this.store("xc.authNonce", nonce);
                     //this.loggingService.debug("AuthorizedController created. adding myautostate: " + this.retrieve("authStateControl"));
@@ -83,7 +83,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                         "response_type=" + encodeURI(response_type) + "&" +
                         "client_id=" + encodeURI(client_id) + "&" +
                         "redirect_uri=" + encodeURI(redirect_uri) + "&" +
-                        "scope=" + encodeURI(scope) + "&" +
+                        "scope=" + encodeURI(scopeRequest) + "&" +
                         "nonce=" + encodeURI(nonce) + "&" +
                         "state=" + encodeURI(state);
                     window.location.href = url;
@@ -170,6 +170,15 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                         var dataIdToken = this.getDataFromToken(id_token);
                         if (dataIdToken)
                             return dataIdToken.given_name;
+                    }
+                    return "";
+                };
+                SecurityService.prototype.getCurrentScopes = function () {
+                    var token = this.cookieService.get("xc.authorizationData");
+                    if (token) {
+                        var accessToken = this.getDataFromToken(token);
+                        if (accessToken)
+                            return accessToken.scope.join(" ");
                     }
                     return "";
                 };

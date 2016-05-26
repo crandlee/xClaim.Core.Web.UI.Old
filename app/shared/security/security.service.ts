@@ -10,16 +10,13 @@ import { LoggingService } from '../logging/logging.service';
 @Injectable()
 export class SecurityService {
 
-    private headers: Headers;
     private storage: any;
     private appSettings: AppSettings;
     constructor(private cookieService: CookieService, private loggingService: LoggingService) {
+        //Make sure to always create these appSettings new because injecting them creates a circular reference at the moment
         this.appSettings = new AppSettings();
-        this.headers = new Headers();
-        this.headers.append('Content-Type', 'application/json');
-        this.headers.append('Accept', 'application/json');
         this.storage = localStorage;
-
+        
         if (this.retrieve("xc.IsAuthorized") !== "") {
             this.HasAdminRole = this.retrieve("xc.HasAdminRole");
             this.IsAuthorized = this.retrieve("xc.IsAuthorized");
@@ -53,10 +50,15 @@ export class SecurityService {
         this.store("xc.IsAuthorized", true);
     }
 
-    public Authorize() {
+    public requestNewScopeAuthorization(scopes: string) {
+        //Replace initial Hub Scopes with the proper scopes that the user will use
+        //throughout the session
+        this.Authorize(scopes);    
+    }
+    
+    public Authorize(scopes?: string) {
         this.ResetAuthorizationData();
 
-        this.loggingService.debug("BEGIN Authorize, no auth data");
 
         var authServer = this.appSettings.IdentityServerEndpoint;
         
@@ -64,9 +66,11 @@ export class SecurityService {
         var client_id = this.appSettings.ApiClientId;
         var redirect_uri = this.appSettings.ApiRedirectOnLogin;
         var response_type = this.appSettings.ResponseType;
-        var scope = this.appSettings.HubScopes;
+        var scopeRequest = scopes || this.appSettings.HubScopes;
         var nonce = "N" + Math.random() + "" + Date.now();
         var state = Date.now() + "" + Math.random();
+
+        this.loggingService.debug(`Begin authorization, requesting scopes [${scopeRequest}]`);
 
         this.store("xc.authStateControl", state);
         this.store("xc.authNonce", nonce);
@@ -77,7 +81,7 @@ export class SecurityService {
             "response_type=" + encodeURI(response_type) + "&" +
             "client_id=" + encodeURI(client_id) + "&" +
             "redirect_uri=" + encodeURI(redirect_uri) + "&" +
-            "scope=" + encodeURI(scope) + "&" +
+            "scope=" + encodeURI(scopeRequest) + "&" +
             "nonce=" + encodeURI(nonce) + "&" +
             "state=" + encodeURI(state);
         
@@ -176,6 +180,15 @@ export class SecurityService {
         if (id_token) {
             var dataIdToken: any = this.getDataFromToken(id_token);
             if (dataIdToken) return dataIdToken.given_name;             
+        }
+        return "";
+    }
+
+    public getCurrentScopes():string {
+        var token = this.cookieService.get("xc.authorizationData");
+        if (token) {
+            var accessToken: any = this.getDataFromToken(token);
+            if (accessToken) return accessToken.scope.join(" ");             
         }
         return "";
     }
