@@ -4,6 +4,8 @@ import { XCoreServices } from '../service/core-services.service';
 import { DROPDOWN_DIRECTIVES, CollapseDirective } from 'ng2-bootstrap';
 import { CORE_DIRECTIVES } from '@angular/common';
 import { HubService, IHubServiceData } from '../hub/hub.service';
+import _ from 'lodash';
+
 @Component({
     selector: 'xcore-security',
     templateUrl: 'app/shared/security/security.component.html',
@@ -17,10 +19,10 @@ export class SecurityComponent implements OnInit {
     public userName: string;
     public isBusy: boolean = false;
     public disabled: boolean = false;
-    public status:{isopen:boolean} = {isopen: false};
+    public status:{isopen: boolean} = {isopen: true};
     public isCollapsed:boolean = true;
-    
-    public hubData: IHubServiceData;
+    public menuStatuses: IDropDownMenuStatus[] = [];    
+    public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"" };
     
     constructor( 
         private xCoreServices: XCoreServices, private hubService: HubService) {
@@ -29,8 +31,25 @@ export class SecurityComponent implements OnInit {
     public toggleDropdown($event:MouseEvent):void {
         $event.preventDefault();
         $event.stopPropagation();
-        this.status.isopen = !this.status.isopen;
+        console.log($event);
+        //this.status.isopen = !this.status.isopen;
+        //this.toggleDropdownMenuStatus(String($event.AT_TARGET));
     }  
+    
+    private getDropdownMenuStatus(name: string) {
+        var existingStatus = _.find(this.menuStatuses, name);
+        if (!existingStatus) return { MenuName: name, MenuOpen: false }    
+    }
+    
+    private toggleDropdownMenuStatus(name: string) {
+        var existingStatus = this.getDropdownMenuStatus(name);
+        existingStatus.MenuOpen = !existingStatus.MenuOpen;            
+    }   
+     
+    private saveDropdownMenuStatus(name: string, open: boolean) {
+        var existingStatus = this.getDropdownMenuStatus(name);
+        existingStatus.MenuOpen = open;
+    }
     
     private performPostLoginProcedure() {
         
@@ -40,14 +59,20 @@ export class SecurityComponent implements OnInit {
     }
     
     private retrieveHubData() {
-        this.hubService.getHubData().subscribe(hubData => {
-            console.log(hubData);
+        this.xCoreServices.LoggingService.debug(`Retrieving data from hub at ${this.xCoreServices.AppSettings.HubApiEndpoint}`, { noToast: true });
+        this.hubService.retrieveHubData().subscribe(hubData => {
+            this.xCoreServices.LoggingService.debug(`Retrieved ${this.hubService.HubData.ApiEndpoints.length} api endpoints and ${this.hubService.HubData.MenuItems.length} menu items from the hub`);                
+            this.hubData = this.hubService.HubData;
+            _.each(this.hubData.MenuItems, mi => {
+                this.menuStatuses.push({ MenuName: mi.Name, MenuOpen: false});
+            });
         });
     }
     
     private recheckAuthenticationWithNewScopes() {
         
     }
+    
     
     private performPostLoginRouting() {
         //Check for needed routing from post-login (where are previous route was requested and stored)
@@ -78,18 +103,18 @@ export class SecurityComponent implements OnInit {
     };
     
     public ngOnInit(): void {
-        try {            
-            this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();            
-            this.userName = this.xCoreServices.SecurityService.getUserName();                                   
-            this.performPostLoginProcedure();
+         try {            
+             this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();            
+             this.userName = this.xCoreServices.SecurityService.getUserName();                                   
+             this.performPostLoginProcedure();
             
-        } catch (err) {            
-            this.xCoreServices.LoggingService.error(JSON.stringify(err));
-        }
-
+         } catch (err) {            
+             this.xCoreServices.LoggingService.error(JSON.stringify(err));
+         }
     };
     
     public navigateToRoute(route: string): void {
+        if (!route) return;
         this.xCoreServices.Router.navigate([route]);        
     }
     
@@ -99,5 +124,11 @@ export class SecurityComponent implements OnInit {
         });
     }
 
-              
+
+                  
 }
+
+interface IDropDownMenuStatus {
+    MenuName: string,
+    MenuOpen: boolean
+}  

@@ -11,9 +11,8 @@ export class AppSettings {
     public get ApiRedirectOnLogout():  string { return `${window.location.protocol}//${window.location.host}`};
     public get HubApiEndpoint(): string { return 'http://localhost:5000/api' };
     public get HubController(): string { return 'Hub'};
-    public get HubClientId(): string { return 'xclaim.web.api.hub' };
     public get ApiClientId(): string { return 'xclaim.web.api' };
-    public get HubScopes(): string { return 'openid profile'};
+    public get HubScopes(): string { return 'openid profile xclaim.hub'};
     public get ResponseType(): string { return 'id_token token'};
     public get LoginRoute(): string { return '/Login'};
     public get LogoutRoute(): string { return '/Logout'};

@@ -61,8 +61,7 @@ System.register(['@angular/platform-browser-dynamic', './shared/ng2-toasty/ng2-t
                 RootExceptionHandler.prototype.call = function (error, stackTrace, reason) {
                     if (stackTrace === void 0) { stackTrace = null; }
                     if (reason === void 0) { reason = null; }
-                    //this.logService.error(error);
-                    console.log(error);
+                    this.logService.error(error);
                 };
                 RootExceptionHandler = __decorate([
                     core_1.Injectable(), 

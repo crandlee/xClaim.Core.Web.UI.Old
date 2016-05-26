@@ -12,10 +12,10 @@ export class HubService extends XCoreServiceBase {
     
     private clientId: string;
     private scopes: string;
-    private menuItems: IHubServiceMenuItem[];
-    private apiEndpoints: IHubServiceApiEndpoint[];    
+    private hubData: IHubServiceData;
     private hubDataLoaded: boolean = false;
     
+    public get HubData(): IHubServiceData { return this.hubData; }
     public get ClientId():string { return this.clientId; }
     public get Scopes():string { return this.scopes; }
     
@@ -24,12 +24,12 @@ export class HubService extends XCoreServiceBase {
             
         //Initially set hub client/scope to the hub client scope.  These will
         //get modified when the hub sends new scopes
-        this.clientId = this.xCoreServices.AppSettings.HubClientId;
+        this.clientId = this.xCoreServices.AppSettings.ApiClientId;
         this.scopes = this.xCoreServices.AppSettings.HubScopes;
                        
     }
 
-    public getHubData(): Observable<IHubServiceData> {
+    public retrieveHubData(): Observable<IHubServiceData> {
         
         if (this.hubDataLoaded) return new Observable<IHubServiceData>();
         
@@ -41,19 +41,14 @@ export class HubService extends XCoreServiceBase {
            //Update with the proper api scopes - hub should not be called again until total refresh
            this.clientId = this.xCoreServices.AppSettings.ApiClientId;
            this.scopes = hb.Scopes;
-           this.apiEndpoints = hb.ApiEndpoints,
-           this.menuItems = hb.MenuItems,
+           this.hubData = hb;
            this.hubDataLoaded = true;
         });
         return obs;
     }    
     
-    public getApiEndPoint(apiKey: string): IHubServiceApiEndpoint {
-        return _.find(this.apiEndpoints, e => { e.ApiKey == apiKey }); 
-    }
-
-    public getMenus(): IHubServiceMenuItem[] {
-        return this.menuItems; 
+    public findApiEndPoint(apiKey: string): IHubServiceApiEndpoint {
+        return _.find(this.hubData.ApiEndpoints, e => { e.ApiKey == apiKey }); 
     }
 
     

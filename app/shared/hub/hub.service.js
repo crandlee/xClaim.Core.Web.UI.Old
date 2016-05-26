@@ -42,9 +42,14 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                     this.hubDataLoaded = false;
                     //Initially set hub client/scope to the hub client scope.  These will
                     //get modified when the hub sends new scopes
-                    this.clientId = this.xCoreServices.AppSettings.HubClientId;
+                    this.clientId = this.xCoreServices.AppSettings.ApiClientId;
                     this.scopes = this.xCoreServices.AppSettings.HubScopes;
                 }
+                Object.defineProperty(HubService.prototype, "HubData", {
+                    get: function () { return this.hubData; },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(HubService.prototype, "ClientId", {
                     get: function () { return this.clientId; },
                     enumerable: true,
@@ -55,7 +60,7 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                     enumerable: true,
                     configurable: true
                 });
-                HubService.prototype.getHubData = function () {
+                HubService.prototype.retrieveHubData = function () {
                     var _this = this;
                     if (this.hubDataLoaded)
                         return new Observable_1.Observable();
@@ -67,17 +72,13 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                         //Update with the proper api scopes - hub should not be called again until total refresh
                         _this.clientId = _this.xCoreServices.AppSettings.ApiClientId;
                         _this.scopes = hb.Scopes;
-                        _this.apiEndpoints = hb.ApiEndpoints,
-                            _this.menuItems = hb.MenuItems,
-                            _this.hubDataLoaded = true;
+                        _this.hubData = hb;
+                        _this.hubDataLoaded = true;
                     });
                     return obs;
                 };
-                HubService.prototype.getApiEndPoint = function (apiKey) {
-                    return lodash_1.default.find(this.apiEndpoints, function (e) { e.ApiKey == apiKey; });
-                };
-                HubService.prototype.getMenus = function () {
-                    return this.menuItems;
+                HubService.prototype.findApiEndPoint = function (apiKey) {
+                    return lodash_1.default.find(this.hubData.ApiEndpoints, function (e) { e.ApiKey == apiKey; });
                 };
                 HubService = __decorate([
                     core_1.Injectable(), 

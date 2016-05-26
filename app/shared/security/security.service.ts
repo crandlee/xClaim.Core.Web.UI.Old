@@ -5,6 +5,7 @@ import { AppSettings } from '../../appsettings';
 import { CookieService } from 'angular2-cookie/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/take';
+import { LoggingService } from '../logging/logging.service';
 
 @Injectable()
 export class SecurityService {
@@ -12,7 +13,7 @@ export class SecurityService {
     private headers: Headers;
     private storage: any;
     private appSettings: AppSettings;
-    constructor(private cookieService: CookieService) {
+    constructor(private cookieService: CookieService, private loggingService: LoggingService) {
         this.appSettings = new AppSettings();
         this.headers = new Headers();
         this.headers.append('Content-Type', 'application/json');
@@ -55,12 +56,12 @@ export class SecurityService {
     public Authorize() {
         this.ResetAuthorizationData();
 
-        console.log("BEGIN Authorize, no auth data");
+        this.loggingService.debug("BEGIN Authorize, no auth data");
 
         var authServer = this.appSettings.IdentityServerEndpoint;
         
         var authorizationUrl = `${authServer}/connect/authorize`;
-        var client_id = this.appSettings.HubClientId;
+        var client_id = this.appSettings.ApiClientId;
         var redirect_uri = this.appSettings.ApiRedirectOnLogin;
         var response_type = this.appSettings.ResponseType;
         var scope = this.appSettings.HubScopes;
@@ -69,7 +70,7 @@ export class SecurityService {
 
         this.store("xc.authStateControl", state);
         this.store("xc.authNonce", nonce);
-        //console.log("AuthorizedController created. adding myautostate: " + this.retrieve("authStateControl"));
+        //this.loggingService.debug("AuthorizedController created. adding myautostate: " + this.retrieve("authStateControl"));
 
         var url =
             authorizationUrl + "?" +
@@ -79,7 +80,7 @@ export class SecurityService {
             "scope=" + encodeURI(scope) + "&" +
             "nonce=" + encodeURI(nonce) + "&" +
             "state=" + encodeURI(state);
-
+        
         window.location.href = url;
     }
 
@@ -100,23 +101,23 @@ export class SecurityService {
     
     private isTokenExpired(token: string): boolean {
         var dataToken: any = this.getDataFromToken(token);
-        console.log('Checking for token expiration');
+        this.loggingService.debug('Checking for token expiration');
         if (!dataToken.exp || isNaN(parseInt(dataToken.exp)) || this.getUtcNowTicks() >= parseInt(dataToken.exp)) {
-            console.log('Token is expired.  Cannot continue authorization');
+            this.loggingService.debug('Token is expired.  Cannot continue authorization');
             return true;
         }        
         return false;
     }
 
     private isCookieTokenValid(token: string, id_token: string): boolean {
-        console.log('Found token and id token in cookies. Continuing check');
+        this.loggingService.debug('Found token and id token in cookies. Continuing check');
         if (this.isTokenExpired(token)) {
             this.ResetAuthorizationData();
-            console.log('Could not validate authorization.  New login is required.');
+            this.loggingService.warn('Could not validate authorization.  New login is required.', null, { noToast: true});
             return false;
         } else {
             this.SetAuthorizationData(token, id_token);
-            console.log('Authorization complete and valid (cookie)');                
+            this.loggingService.success('Authorization complete and valid (cookie)', { noToast:true });                
             return true;
         };        
     }    
@@ -127,7 +128,7 @@ export class SecurityService {
 
                 if (access_token && id_token) {
                     
-                    console.log("Retrieved token and id token in hash. Continuing check.");                    
+                    this.loggingService.debug("Retrieved token and id token in hash. Continuing check.");                    
                     
                     var dataIdToken: any = this.getDataFromToken(id_token);
                     if (this.isTokenExpired(access_token)) return false;
@@ -136,7 +137,7 @@ export class SecurityService {
                     if (dataIdToken.nonce == this.retrieve("xc.authNonce")) {
                         this.store("xc.authNonce", "");
                         this.store("xc.authStateControl", "");
-                        console.log('Authorization Successful');
+                        this.loggingService.success('Authorization Successful', { noToast: true });
                         return true;
                     }                
                 }
@@ -146,7 +147,7 @@ export class SecurityService {
     }
     public checkAuthorized(): boolean {
 
-        console.log('Checking for valid authorization');
+        this.loggingService.debug('Checking for valid authorization');
         
         //If stored in cookies then get tokens from there
         var token = this.cookieService.get("xc.authorizationData");
@@ -160,11 +161,11 @@ export class SecurityService {
         var hashResult: any = this.retrieveTokensFromUrlHash();        
         if (this.isHashResultValid(hashResult.error, hashResult.state, hashResult.access_token, hashResult.id_token)) {
             this.SetAuthorizationData(hashResult.access_token, hashResult.id_token);
-            console.log('Authorization complete and valid (hash)');
+            this.loggingService.success('Authorization complete and valid (hash)', { noToast: true});
         }
         else {
             this.ResetAuthorizationData();
-            console.log('No valid authorization found');
+            this.loggingService.warn('No valid authorization found', null, { noToast: true });
         }
 
         return this.IsAuthorized;
@@ -192,17 +193,6 @@ export class SecurityService {
 
         // window.location.href = url;
     }
-
-    // public HandleError(error: any) {
-    //     console.log(error);
-    //     if (error.status == 403) {
-    //         this._router.navigate(['Forbidden'])
-    //     }
-    //     else if (error.status == 401) {
-    //         this.ResetAuthorizationData();
-    //         this._router.navigate(['Unauthorized'])
-    //     }
-    // }
 
     private urlBase64Decode(str) {
         var output = str.replace('-', '+').replace('_', '/');

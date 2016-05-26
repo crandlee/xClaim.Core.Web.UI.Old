@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../service/core-services.service', 'ng2-bootstrap', '@angular/common', '../hub/hub.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '../service/core-services.service', 'ng2-bootstrap', '@angular/common', '../hub/hub.service', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1, ng2_bootstrap_1, common_1, hub_service_1;
+    var core_1, core_services_service_1, ng2_bootstrap_1, common_1, hub_service_1, lodash_1;
     var SecurityComponent;
     return {
         setters:[
@@ -28,6 +28,9 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
             },
             function (hub_service_1_1) {
                 hub_service_1 = hub_service_1_1;
+            },
+            function (lodash_1_1) {
+                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             SecurityComponent = (function () {
@@ -36,13 +39,30 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     this.hubService = hubService;
                     this.isBusy = false;
                     this.disabled = false;
-                    this.status = { isopen: false };
+                    this.status = { isopen: true };
                     this.isCollapsed = true;
+                    this.menuStatuses = [];
+                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
                 }
                 SecurityComponent.prototype.toggleDropdown = function ($event) {
                     $event.preventDefault();
                     $event.stopPropagation();
-                    this.status.isopen = !this.status.isopen;
+                    console.log($event);
+                    //this.status.isopen = !this.status.isopen;
+                    //this.toggleDropdownMenuStatus(String($event.AT_TARGET));
+                };
+                SecurityComponent.prototype.getDropdownMenuStatus = function (name) {
+                    var existingStatus = lodash_1.default.find(this.menuStatuses, name);
+                    if (!existingStatus)
+                        return { MenuName: name, MenuOpen: false };
+                };
+                SecurityComponent.prototype.toggleDropdownMenuStatus = function (name) {
+                    var existingStatus = this.getDropdownMenuStatus(name);
+                    existingStatus.MenuOpen = !existingStatus.MenuOpen;
+                };
+                SecurityComponent.prototype.saveDropdownMenuStatus = function (name, open) {
+                    var existingStatus = this.getDropdownMenuStatus(name);
+                    existingStatus.MenuOpen = open;
                 };
                 SecurityComponent.prototype.performPostLoginProcedure = function () {
                     this.subscribeToIsApplicationBusy();
@@ -50,8 +70,14 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     this.performPostLoginRouting();
                 };
                 SecurityComponent.prototype.retrieveHubData = function () {
-                    this.hubService.getHubData().subscribe(function (hubData) {
-                        console.log(hubData);
+                    var _this = this;
+                    this.xCoreServices.LoggingService.debug("Retrieving data from hub at " + this.xCoreServices.AppSettings.HubApiEndpoint, { noToast: true });
+                    this.hubService.retrieveHubData().subscribe(function (hubData) {
+                        _this.xCoreServices.LoggingService.debug("Retrieved " + _this.hubService.HubData.ApiEndpoints.length + " api endpoints and " + _this.hubService.HubData.MenuItems.length + " menu items from the hub");
+                        _this.hubData = _this.hubService.HubData;
+                        lodash_1.default.each(_this.hubData.MenuItems, function (mi) {
+                            _this.menuStatuses.push({ MenuName: mi.Name, MenuOpen: false });
+                        });
                     });
                 };
                 SecurityComponent.prototype.recheckAuthenticationWithNewScopes = function () {
@@ -97,6 +123,8 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                 };
                 ;
                 SecurityComponent.prototype.navigateToRoute = function (route) {
+                    if (!route)
+                        return;
                     this.xCoreServices.Router.navigate([route]);
                 };
                 SecurityComponent.prototype.subscribeToIsApplicationBusy = function () {

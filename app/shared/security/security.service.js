@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular2-cookie/core', 'rxjs/add/operator/take'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular2-cookie/core', 'rxjs/add/operator/take', '../logging/logging.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, http_1, appsettings_1, core_2;
+    var core_1, http_1, appsettings_1, core_2, logging_service_1;
     var SecurityService;
     return {
         setters:[
@@ -26,11 +26,15 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
             function (core_2_1) {
                 core_2 = core_2_1;
             },
-            function (_1) {}],
+            function (_1) {},
+            function (logging_service_1_1) {
+                logging_service_1 = logging_service_1_1;
+            }],
         execute: function() {
             SecurityService = (function () {
-                function SecurityService(cookieService) {
+                function SecurityService(cookieService, loggingService) {
                     this.cookieService = cookieService;
+                    this.loggingService = loggingService;
                     this.appSettings = new appsettings_1.AppSettings();
                     this.headers = new http_1.Headers();
                     this.headers.append('Content-Type', 'application/json');
@@ -63,10 +67,10 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                 };
                 SecurityService.prototype.Authorize = function () {
                     this.ResetAuthorizationData();
-                    console.log("BEGIN Authorize, no auth data");
+                    this.loggingService.debug("BEGIN Authorize, no auth data");
                     var authServer = this.appSettings.IdentityServerEndpoint;
                     var authorizationUrl = authServer + "/connect/authorize";
-                    var client_id = this.appSettings.HubClientId;
+                    var client_id = this.appSettings.ApiClientId;
                     var redirect_uri = this.appSettings.ApiRedirectOnLogin;
                     var response_type = this.appSettings.ResponseType;
                     var scope = this.appSettings.HubScopes;
@@ -74,7 +78,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     var state = Date.now() + "" + Math.random();
                     this.store("xc.authStateControl", state);
                     this.store("xc.authNonce", nonce);
-                    //console.log("AuthorizedController created. adding myautostate: " + this.retrieve("authStateControl"));
+                    //this.loggingService.debug("AuthorizedController created. adding myautostate: " + this.retrieve("authStateControl"));
                     var url = authorizationUrl + "?" +
                         "response_type=" + encodeURI(response_type) + "&" +
                         "client_id=" + encodeURI(client_id) + "&" +
@@ -98,23 +102,23 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                 };
                 SecurityService.prototype.isTokenExpired = function (token) {
                     var dataToken = this.getDataFromToken(token);
-                    console.log('Checking for token expiration');
+                    this.loggingService.debug('Checking for token expiration');
                     if (!dataToken.exp || isNaN(parseInt(dataToken.exp)) || this.getUtcNowTicks() >= parseInt(dataToken.exp)) {
-                        console.log('Token is expired.  Cannot continue authorization');
+                        this.loggingService.debug('Token is expired.  Cannot continue authorization');
                         return true;
                     }
                     return false;
                 };
                 SecurityService.prototype.isCookieTokenValid = function (token, id_token) {
-                    console.log('Found token and id token in cookies. Continuing check');
+                    this.loggingService.debug('Found token and id token in cookies. Continuing check');
                     if (this.isTokenExpired(token)) {
                         this.ResetAuthorizationData();
-                        console.log('Could not validate authorization.  New login is required.');
+                        this.loggingService.warn('Could not validate authorization.  New login is required.', null, { noToast: true });
                         return false;
                     }
                     else {
                         this.SetAuthorizationData(token, id_token);
-                        console.log('Authorization complete and valid (cookie)');
+                        this.loggingService.success('Authorization complete and valid (cookie)', { noToast: true });
                         return true;
                     }
                     ;
@@ -123,7 +127,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     if (!error) {
                         if (!state || state == this.retrieve("xc.authStateControl")) {
                             if (access_token && id_token) {
-                                console.log("Retrieved token and id token in hash. Continuing check.");
+                                this.loggingService.debug("Retrieved token and id token in hash. Continuing check.");
                                 var dataIdToken = this.getDataFromToken(id_token);
                                 if (this.isTokenExpired(access_token))
                                     return false;
@@ -131,7 +135,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                                 if (dataIdToken.nonce == this.retrieve("xc.authNonce")) {
                                     this.store("xc.authNonce", "");
                                     this.store("xc.authStateControl", "");
-                                    console.log('Authorization Successful');
+                                    this.loggingService.success('Authorization Successful', { noToast: true });
                                     return true;
                                 }
                             }
@@ -140,7 +144,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     return false;
                 };
                 SecurityService.prototype.checkAuthorized = function () {
-                    console.log('Checking for valid authorization');
+                    this.loggingService.debug('Checking for valid authorization');
                     //If stored in cookies then get tokens from there
                     var token = this.cookieService.get("xc.authorizationData");
                     var id_token = this.cookieService.get("xc.authorizationDataIdToken");
@@ -152,11 +156,11 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     var hashResult = this.retrieveTokensFromUrlHash();
                     if (this.isHashResultValid(hashResult.error, hashResult.state, hashResult.access_token, hashResult.id_token)) {
                         this.SetAuthorizationData(hashResult.access_token, hashResult.id_token);
-                        console.log('Authorization complete and valid (hash)');
+                        this.loggingService.success('Authorization complete and valid (hash)', { noToast: true });
                     }
                     else {
                         this.ResetAuthorizationData();
-                        console.log('No valid authorization found');
+                        this.loggingService.warn('No valid authorization found', null, { noToast: true });
                     }
                     return this.IsAuthorized;
                 };
@@ -178,16 +182,6 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                     //     `post_logout_redirect_uri=${this._appSettings.ApiRedirectOnLogout}`;
                     // window.location.href = url;
                 };
-                // public HandleError(error: any) {
-                //     console.log(error);
-                //     if (error.status == 403) {
-                //         this._router.navigate(['Forbidden'])
-                //     }
-                //     else if (error.status == 401) {
-                //         this.ResetAuthorizationData();
-                //         this._router.navigate(['Unauthorized'])
-                //     }
-                // }
                 SecurityService.prototype.urlBase64Decode = function (str) {
                     var output = str.replace('-', '+').replace('_', '/');
                     switch (output.length % 4) {
@@ -233,7 +227,7 @@ System.register(['@angular/core', '@angular/http', '../../appsettings', 'angular
                 };
                 SecurityService = __decorate([
                     core_1.Injectable(), 
-                    __metadata('design:paramtypes', [core_2.CookieService])
+                    __metadata('design:paramtypes', [core_2.CookieService, logging_service_1.LoggingService])
                 ], SecurityService);
                 return SecurityService;
             }());

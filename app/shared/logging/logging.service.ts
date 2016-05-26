@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import _ from 'lodash';
 
 
+
 @Injectable()
 export class LoggingService {
 
@@ -13,10 +14,10 @@ export class LoggingService {
         if (!options || !options.noToast) {
             if (!toastMessage) toastMessage = message;
             var toastOptions = this.setToastOptions(toastMessage, options);
-            toastFunc(toastOptions);            
+            if (toastFunc) toastFunc(toastOptions);            
         }
         if (!options || !options.noConsole) {
-            var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+            var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
             console.log(`%c${consolePrefix}: ${msg}`, `${style}`);
         }        
     }
@@ -29,8 +30,9 @@ export class LoggingService {
         this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, null, options);
     }
 
-    public default(message: any, options?: IxLoggingOptions) {
-        this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, null, options);        
+    public debug(message: any, options?: IxLoggingOptions) {
+        //No toast for debug        
+        this.performLogging("Debug", null, 'background: black; color: white', message, null, options);        
     }
 
     public info(message: any, options?: IxLoggingOptions) {
@@ -46,7 +48,7 @@ export class LoggingService {
     }
     
     private setToastOptions(message: any, options?: IxLoggingOptions): IXCoreToastOptions {
-        var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+        var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
         var toastOptions: IXCoreToastOptions = { message: msg };        
         if (options) {
             toastOptions.showClose = options.showClose || true;

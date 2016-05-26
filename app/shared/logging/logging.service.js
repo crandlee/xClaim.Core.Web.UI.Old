@@ -33,10 +33,11 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', 'lodas
                         if (!toastMessage)
                             toastMessage = message;
                         var toastOptions = this.setToastOptions(toastMessage, options);
-                        toastFunc(toastOptions);
+                        if (toastFunc)
+                            toastFunc(toastOptions);
                     }
                     if (!options || !options.noConsole) {
-                        var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+                        var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
                         console.log("%c" + consolePrefix + ": " + msg, "" + style);
                     }
                 };
@@ -46,8 +47,9 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', 'lodas
                 LoggingService.prototype.success = function (message, options) {
                     this.performLogging("Success", this.xCoreToast.success.bind(this.xCoreToast), 'background: green; color: white', message, null, options);
                 };
-                LoggingService.prototype.default = function (message, options) {
-                    this.performLogging("Default", this.xCoreToast.default.bind(this.xCoreToast), 'background: black; color: white', message, null, options);
+                LoggingService.prototype.debug = function (message, options) {
+                    //No toast for debug        
+                    this.performLogging("Debug", null, 'background: black; color: white', message, null, options);
                 };
                 LoggingService.prototype.info = function (message, options) {
                     this.performLogging("Info", this.xCoreToast.info.bind(this.xCoreToast), 'background: blue; color: white', message, null, options);
@@ -59,7 +61,7 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', 'lodas
                     this.performLogging("Wait", this.xCoreToast.wait.bind(this.xCoreToast), 'background: orange; color: black', message, null, options);
                 };
                 LoggingService.prototype.setToastOptions = function (message, options) {
-                    var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
+                    var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
                     var toastOptions = { message: msg };
                     if (options) {
                         toastOptions.showClose = options.showClose || true;

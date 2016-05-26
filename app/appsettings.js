@@ -52,12 +52,6 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     configurable: true
                 });
                 ;
-                Object.defineProperty(AppSettings.prototype, "HubClientId", {
-                    get: function () { return 'xclaim.web.api.hub'; },
-                    enumerable: true,
-                    configurable: true
-                });
-                ;
                 Object.defineProperty(AppSettings.prototype, "ApiClientId", {
                     get: function () { return 'xclaim.web.api'; },
                     enumerable: true,
@@ -65,7 +59,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 });
                 ;
                 Object.defineProperty(AppSettings.prototype, "HubScopes", {
-                    get: function () { return 'openid profile'; },
+                    get: function () { return 'openid profile xclaim.hub'; },
                     enumerable: true,
                     configurable: true
                 });

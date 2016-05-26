@@ -20,8 +20,7 @@ export class RootExceptionHandler  {
   constructor(private logService: LoggingService) {}
   
   call(error, stackTrace = null, reason = null) {
-    //this.logService.error(error);
-    console.log(error);      
+    this.logService.error(error);
   }
   
 }
