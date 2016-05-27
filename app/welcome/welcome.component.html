@@ -1,26 +1,20 @@
-<div class="container">
-    <!--<div class="jumbotron">
-        <h1>xClaim Platform</h1>
-        <p>This is the core software.  Modify this later to be whatever</p>            
-    </div>         -->
-    <!--<accordion [closeOthers]="true">
-        <accordion-group heading="Static Header, initially expanded" [isOpen]="status.isFirstOpen" [isDisabled]="status.isFirstDisabled">
-            This content is straight in the template.
-        </accordion-group>
-        <accordion-group *ngFor="let group of groups" [heading]="group.title">
-            {{ group?.content }}
-        </accordion-group>
-        <accordion-group heading="Dynamic Body Content">
-            <p>The body of the accordion group grows to fit the contents</p>
-            <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">Add Item</button>
-            <div *ngFor="let item of items">{{item}}</div>
-        </accordion-group>
-        <accordion-group let group [isOpen]="status.open">
-            <div accordion-heading>
-                I can have markup, too!
-                <i class="pull-right glyphicon" [ngClass]="{'glyphicon-chevron-down': group?.isOpen, 'glyphicon-chevron-right': !group?.isOpen}"></i>
-            </div>
-            This is just some content to illustrate fancy headings.
-        </accordion-group>
-    </accordion>-->
+<div class="container main-menu">
+    <div class="jumbotron">
+        <h3 class="menu-header">xClaim Web</h3>
+        <div>
+            <ul>
+                <li (click)="reactToItemClick(mainMenuItem.Id)"
+                    [ngClass]="{'transition': mainMenuItem.IsDisplayed, 
+                    'indent1': mainMenuItem.Level == 2, 'indent2': mainMenuItem.Level == 3, 'indent3': mainMenuItem.Level == 4}" 
+                    *ngFor="let mainMenuItem of menuItems">
+                    <img src="http://lorempixum.com/50/50/nature/3">
+                    <h3>{{mainMenuItem.MenuItem.Name}}</h3>
+                    <p>{{mainMenuItem.MenuItem.Description}}</p>
+                    <span *ngIf="hasSubItems(mainMenuItem)" 
+                        [ngClass]= "{'fa-caret-left': showLeftCaret(mainMenuItem), 'fa-caret-down': showDownCaret(mainMenuItem)}" 
+                        class="fa pull-right"></span>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
