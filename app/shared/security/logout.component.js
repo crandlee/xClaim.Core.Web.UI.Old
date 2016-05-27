@@ -31,7 +31,7 @@ System.register(['@angular/core', '../service/core-services.service'], function(
                 LogoutComponent = __decorate([
                     core_1.Component({
                         template: '<div></div>',
-                        providers: [core_services_service_1.XCoreServices]
+                        providers: []
                     }), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices])
                 ], LogoutComponent);

@@ -1,6 +1,26 @@
 <div class="container">
-    <div class="jumbotron">
+    <!--<div class="jumbotron">
         <h1>xClaim Platform</h1>
         <p>This is the core software.  Modify this later to be whatever</p>            
-    </div>         
+    </div>         -->
+    <!--<accordion [closeOthers]="true">
+        <accordion-group heading="Static Header, initially expanded" [isOpen]="status.isFirstOpen" [isDisabled]="status.isFirstDisabled">
+            This content is straight in the template.
+        </accordion-group>
+        <accordion-group *ngFor="let group of groups" [heading]="group.title">
+            {{ group?.content }}
+        </accordion-group>
+        <accordion-group heading="Dynamic Body Content">
+            <p>The body of the accordion group grows to fit the contents</p>
+            <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">Add Item</button>
+            <div *ngFor="let item of items">{{item}}</div>
+        </accordion-group>
+        <accordion-group let group [isOpen]="status.open">
+            <div accordion-heading>
+                I can have markup, too!
+                <i class="pull-right glyphicon" [ngClass]="{'glyphicon-chevron-down': group?.isOpen, 'glyphicon-chevron-right': !group?.isOpen}"></i>
+            </div>
+            This is just some content to illustrate fancy headings.
+        </accordion-group>
+    </accordion>-->
 </div>

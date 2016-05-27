@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../service/core-services.service', 'ng2-bootstrap', '@angular/common', '../hub/hub.service', 'lodash'], function(exports_1, context_1) {
+System.register(['@angular/core', '../service/core-services.service', 'ng2-bootstrap', '@angular/common', '../hub/hub.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1, ng2_bootstrap_1, common_1, hub_service_1, lodash_1;
+    var core_1, core_services_service_1, ng2_bootstrap_1, common_1, hub_service_1;
     var SecurityComponent;
     return {
         setters:[
@@ -28,9 +28,6 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
             },
             function (hub_service_1_1) {
                 hub_service_1 = hub_service_1_1;
-            },
-            function (lodash_1_1) {
-                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             SecurityComponent = (function () {
@@ -38,45 +35,37 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     this.xCoreServices = xCoreServices;
                     this.hubService = hubService;
                     this.isBusy = false;
-                    this.disabled = false;
-                    this.status = { isopen: true };
                     this.isCollapsed = true;
-                    this.menuStatuses = [];
                     this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
                 }
-                // private getDropdownMenuStatus(name: string) {
-                //     var existingStatus = _.find(this.menuStatuses, name);
-                //     if (!existingStatus) return { MenuName: name, MenuOpen: false }    
-                // }
-                // private toggleDropdownMenuStatus(name: string) {
-                //     var existingStatus = this.getDropdownMenuStatus(name);
-                //     existingStatus.MenuOpen = !existingStatus.MenuOpen;            
-                // }   
-                // private saveDropdownMenuStatus(name: string, open: boolean) {
-                //     var existingStatus = this.getDropdownMenuStatus(name);
-                //     existingStatus.MenuOpen = open;
-                // }
                 SecurityComponent.prototype.performPostLoginProcedure = function () {
                     this.subscribeToIsApplicationBusy();
                     this.retrieveHubData();
                 };
                 SecurityComponent.prototype.retrieveHubData = function () {
                     var _this = this;
-                    this.xCoreServices.LoggingService.debug("Retrieving data from hub at " + this.xCoreServices.AppSettings.HubApiEndpoint, { noToast: true });
-                    this.hubService.retrieveHubData().subscribe(function (hubData) {
-                        _this.xCoreServices.LoggingService.debug("Retrieved " + _this.hubService.HubData.ApiEndpoints.length + " api endpoints and " + _this.hubService.HubData.MenuItems.length + " menu items from the hub");
-                        _this.hubData = _this.hubService.HubData;
-                        lodash_1.default.each(_this.hubData.MenuItems, function (mi) {
-                            _this.menuStatuses.push({ MenuName: mi.Name, MenuOpen: false });
-                        });
-                        if (_this.hubData.Scopes !== _this.xCoreServices.AppSettings.HubScopes
-                            && _this.xCoreServices.SecurityService.getCurrentScopes() == _this.xCoreServices.AppSettings.HubScopes) {
-                            //Now that hub has returned data, request new authorization with requested scopes
-                            //(only if requested scopes are different, which they should be)
-                            _this.xCoreServices.SecurityService.requestNewScopeAuthorization(_this.hubData.Scopes);
-                        }
-                        _this.performPostLoginRouting();
+                    //Set up event subscriptions   
+                    this.hubService.HubDataRetrievedEvent.subscribe(function (hubData) {
+                        _this.receiveHubDataAndReAuthorize();
                     });
+                    this.xCoreServices.LoggingService.debug("Retrieving data from hub at " + this.xCoreServices.AppSettings.HubApiEndpoint, { noToast: true });
+                    this.hubService.retrieveHubData();
+                };
+                SecurityComponent.prototype.receiveHubDataAndReAuthorize = function () {
+                    this.xCoreServices.LoggingService.debug("Retrieved " + this.hubService.HubData.ApiEndpoints.length + " api endpoints and " + this.hubService.HubData.MenuItems.length + " menu items from the hub");
+                    this.hubData = this.hubService.HubData;
+                    if (this.hubData.Scopes !== this.xCoreServices.AppSettings.HubScopes
+                        && this.xCoreServices.SecurityService.getCurrentScopes() == this.xCoreServices.AppSettings.HubScopes) {
+                        //Now that hub has returned data, request new authorization with requested scopes
+                        //(only if requested scopes are different, which they should be)
+                        this.xCoreServices.SecurityService.requestNewScopeAuthorization(this.hubData.Scopes);
+                    }
+                    else {
+                        this.xCoreServices.LoggingService.debug("No more reauthorization needed. Scopes are up to date");
+                    }
+                    //This call is to allow other components interested in hub data to know it is finalized.
+                    this.hubService.triggerHubDataCompletedLoading();
+                    this.performPostLoginRouting();
                 };
                 SecurityComponent.prototype.performPostLoginRouting = function () {
                     //Check for needed routing from post-login (where are previous route was requested and stored)
@@ -95,7 +84,7 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     }
                 };
                 ;
-                SecurityComponent.prototype.resetHubData = function () {
+                SecurityComponent.prototype.resetLocalHubData = function () {
                     this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
                 };
                 SecurityComponent.prototype.logout = function () {
@@ -103,7 +92,7 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                         this.xCoreServices.SecurityService.Logoff();
                         this.loggedIn = false;
                         this.isCollapsed = true;
-                        this.resetHubData();
+                        this.resetLocalHubData();
                         this.xCoreServices.Router.navigate(['/']);
                     }
                     catch (err) {
@@ -139,7 +128,7 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                         templateUrl: 'app/shared/security/security.component.html',
                         styleUrls: ['app/shared/security/security.component.css'],
                         directives: [ng2_bootstrap_1.CollapseDirective, ng2_bootstrap_1.DROPDOWN_DIRECTIVES, common_1.CORE_DIRECTIVES],
-                        providers: [core_services_service_1.XCoreServices, hub_service_1.HubService]
+                        providers: []
                     }), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices, hub_service_1.HubService])
                 ], SecurityComponent);

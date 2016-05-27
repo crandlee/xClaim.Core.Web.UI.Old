@@ -1,4 +1,4 @@
-System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../service/core-services.service', 'lodash'], function(exports_1, context_1) {
+System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../service/core-services.service', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,12 +15,12 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var Observable_1, core_1, core_services_service_1, lodash_1;
+    var Subject_1, core_1, core_services_service_1, lodash_1;
     var HubService;
     return {
         setters:[
-            function (Observable_1_1) {
-                Observable_1 = Observable_1_1;
+            function (Subject_1_1) {
+                Subject_1 = Subject_1_1;
             },
             function (core_1_1) {
                 core_1 = core_1_1;
@@ -39,12 +39,21 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                 __extends(HubService, _super);
                 function HubService(xCoreServices) {
                     _super.call(this, xCoreServices);
-                    this.hubDataLoaded = false;
+                    this.HubDataRetrievedSource = new Subject_1.Subject();
+                    this.HubDataCompletedSource = new Subject_1.Subject();
+                    this.HubDataRetrievedEvent = this.HubDataRetrievedSource.asObservable().share();
+                    this.HubDataCompletedEvent = this.HubDataCompletedSource.asObservable().share();
                     //Initially set hub client/scope to the hub client scope.  These will
                     //get modified when the hub sends new scopes
                     this.clientId = this.xCoreServices.AppSettings.ApiClientId;
                     this.scopes = this.xCoreServices.AppSettings.HubScopes;
+                    this.id = parseInt(String(Math.random() * 100));
                 }
+                Object.defineProperty(HubService.prototype, "Id", {
+                    get: function () { return this.id; },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(HubService.prototype, "HubData", {
                     get: function () { return this.hubData; },
                     enumerable: true,
@@ -62,8 +71,6 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                 });
                 HubService.prototype.retrieveHubData = function () {
                     var _this = this;
-                    if (this.hubDataLoaded)
-                        return new Observable_1.Observable();
                     var obs = _super.prototype.getObjectData.call(this, {
                         ApiRoot: this.xCoreServices.AppSettings.HubApiEndpoint,
                         ApiController: this.xCoreServices.AppSettings.HubController,
@@ -73,9 +80,11 @@ System.register(['rxjs/Observable', '@angular/core', 'rxjs/add/operator/map', 'r
                         _this.clientId = _this.xCoreServices.AppSettings.ApiClientId;
                         _this.scopes = hb.Scopes;
                         _this.hubData = hb;
-                        _this.hubDataLoaded = true;
+                        _this.HubDataRetrievedSource.next(hb);
                     });
-                    return obs;
+                };
+                HubService.prototype.triggerHubDataCompletedLoading = function () {
+                    this.HubDataCompletedSource.next(this.hubData);
                 };
                 HubService.prototype.findApiEndPoint = function (apiKey) {
                     return lodash_1.default.find(this.hubData.ApiEndpoints, function (e) { e.ApiKey == apiKey; });

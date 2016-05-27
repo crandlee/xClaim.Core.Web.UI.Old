@@ -68,7 +68,7 @@ export class BaseService {
     
     private executeObservable<TData>(obs: Observable<TData>): Observable<TData> {
         if (this.passedAuthentication()) {
-            this.xCoreServices.BusyService.notifyBusy(true);                        
+            this.xCoreServices.BusyService.notifyBusy(true); 
             return obs;                
         } else {
             //This case shouldn't occur as the user must be authenticated to get here

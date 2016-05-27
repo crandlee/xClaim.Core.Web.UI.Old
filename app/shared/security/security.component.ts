@@ -11,63 +11,53 @@ import _ from 'lodash';
     templateUrl: 'app/shared/security/security.component.html',
     styleUrls: ['app/shared/security/security.component.css'],
     directives: [CollapseDirective, DROPDOWN_DIRECTIVES, CORE_DIRECTIVES],
-    providers: [XCoreServices, HubService]
+    providers: []
 })
 export class SecurityComponent implements OnInit {
 
     public loggedIn: boolean;
     public userName: string;
     public isBusy: boolean = false;
-    public disabled: boolean = false;
-    public status:{isopen: boolean} = {isopen: true};
     public isCollapsed:boolean = true;
-    public menuStatuses: IDropDownMenuStatus[] = [];    
     public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"" };
     
     constructor( 
         private xCoreServices: XCoreServices, private hubService: HubService) {
     }
-              
-    // private getDropdownMenuStatus(name: string) {
-    //     var existingStatus = _.find(this.menuStatuses, name);
-    //     if (!existingStatus) return { MenuName: name, MenuOpen: false }    
-    // }
-    
-    // private toggleDropdownMenuStatus(name: string) {
-    //     var existingStatus = this.getDropdownMenuStatus(name);
-    //     existingStatus.MenuOpen = !existingStatus.MenuOpen;            
-    // }   
-     
-    // private saveDropdownMenuStatus(name: string, open: boolean) {
-    //     var existingStatus = this.getDropdownMenuStatus(name);
-    //     existingStatus.MenuOpen = open;
-    // }
-    
+                  
     private performPostLoginProcedure() {
         
         this.subscribeToIsApplicationBusy();
         this.retrieveHubData();
+
     }
     
     private retrieveHubData() {
+        //Set up event subscriptions   
+        this.hubService.HubDataRetrievedEvent.subscribe(hubData => {
+            this.receiveHubDataAndReAuthorize();
+        });                    
         this.xCoreServices.LoggingService.debug(`Retrieving data from hub at ${this.xCoreServices.AppSettings.HubApiEndpoint}`, { noToast: true });
-        this.hubService.retrieveHubData().subscribe(hubData => {
-            this.xCoreServices.LoggingService.debug(`Retrieved ${this.hubService.HubData.ApiEndpoints.length} api endpoints and ${this.hubService.HubData.MenuItems.length} menu items from the hub`);                
-            this.hubData = this.hubService.HubData;
-            _.each(this.hubData.MenuItems, mi => {
-                this.menuStatuses.push({ MenuName: mi.Name, MenuOpen: false});
-            });
-            if (this.hubData.Scopes !== this.xCoreServices.AppSettings.HubScopes 
-                && this.xCoreServices.SecurityService.getCurrentScopes() == this.xCoreServices.AppSettings.HubScopes) {                
-                //Now that hub has returned data, request new authorization with requested scopes
-                //(only if requested scopes are different, which they should be)
-                this.xCoreServices.SecurityService.requestNewScopeAuthorization(this.hubData.Scopes);                        
-            }
-            this.performPostLoginRouting();            
-        });            
+        this.hubService.retrieveHubData();        
     }
         
-    
+
+    private receiveHubDataAndReAuthorize() {
+        this.xCoreServices.LoggingService.debug(`Retrieved ${this.hubService.HubData.ApiEndpoints.length} api endpoints and ${this.hubService.HubData.MenuItems.length} menu items from the hub`);                
+        this.hubData = this.hubService.HubData;
+        if (this.hubData.Scopes !== this.xCoreServices.AppSettings.HubScopes 
+            && this.xCoreServices.SecurityService.getCurrentScopes() == this.xCoreServices.AppSettings.HubScopes) {                
+            //Now that hub has returned data, request new authorization with requested scopes
+            //(only if requested scopes are different, which they should be)
+            this.xCoreServices.SecurityService.requestNewScopeAuthorization(this.hubData.Scopes);
+        } else {
+            this.xCoreServices.LoggingService.debug("No more reauthorization needed. Scopes are up to date");
+        }
+        //This call is to allow other components interested in hub data to know it is finalized.
+        this.hubService.triggerHubDataCompletedLoading();
+        this.performPostLoginRouting();                    
+    }
+        
     private performPostLoginRouting() {
         //Check for needed routing from post-login (where are previous route was requested and stored)
         var needRoute = this.xCoreServices.CookieService.get(this.xCoreServices.AppSettings.CookieKeys.RouteAfterLoginKey);
@@ -85,15 +75,16 @@ export class SecurityComponent implements OnInit {
         }
     };
         
-    public resetHubData() {
+    public resetLocalHubData() {
         this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes:"" }        
     }
+    
     public logout(): void {
         try {
             this.xCoreServices.SecurityService.Logoff();
             this.loggedIn = false;
             this.isCollapsed = true;
-            this.resetHubData();
+            this.resetLocalHubData();
             this.xCoreServices.Router.navigate(['/']);            
         } catch (err) {
             this.xCoreServices.LoggingService.error(JSON.stringify(err));
@@ -101,7 +92,8 @@ export class SecurityComponent implements OnInit {
     };
     
     public ngOnInit(): void {
-         try {            
+         try {  
+                                    
              this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();            
              this.userName = this.xCoreServices.SecurityService.getUserName();                                   
              this.performPostLoginProcedure();
@@ -109,7 +101,9 @@ export class SecurityComponent implements OnInit {
          } catch (err) {            
              this.xCoreServices.LoggingService.error(JSON.stringify(err));
          }
+         
     };
+    
     
     public navigateToRoute(route: string): void {
         if (!route) return;
@@ -121,12 +115,6 @@ export class SecurityComponent implements OnInit {
             this.isBusy = (busyCount > 0);
         });
     }
-
-
                   
 }
 
-interface IDropDownMenuStatus {
-    MenuName: string,
-    MenuOpen: boolean
-}  

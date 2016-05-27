@@ -1,4 +1,4 @@
-System.register(['@angular/core', './shared/security/security.component', '@angular/router', './shared/ng2-toasty/ng2-toasty', './domain.service', './shared/service/core-services.service'], function(exports_1, context_1) {
+System.register(['@angular/core', './shared/security/security.component', '@angular/router', './shared/ng2-toasty/ng2-toasty', './domain.service', './shared/service/core-services.service', './shared/hub/hub.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, security_component_1, router_1, ng2_toasty_1, domain_service_1, core_services_service_1;
+    var core_1, security_component_1, router_1, ng2_toasty_1, domain_service_1, core_services_service_1, hub_service_1;
     var AppComponent;
     return {
         setters:[
@@ -31,11 +31,13 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
             },
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
+            },
+            function (hub_service_1_1) {
+                hub_service_1 = hub_service_1_1;
             }],
         execute: function() {
             AppComponent = (function () {
-                function AppComponent(xCoreServices) {
-                    this.xCoreServices = xCoreServices;
+                function AppComponent() {
                 }
                 AppComponent = __decorate([
                     core_1.Component({
@@ -43,10 +45,10 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
                         templateUrl: 'app/app.component.html',
                         styles: ['app/app.component.css'],
                         directives: [security_component_1.SecurityComponent, ng2_toasty_1.Toasty, router_1.ROUTER_DIRECTIVES],
-                        providers: [core_services_service_1.XCoreServices]
+                        providers: [core_services_service_1.XCoreServices, hub_service_1.HubService]
                     }),
                     router_1.Routes([].concat(domain_service_1.DomainService.getRoutes())), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices])
+                    __metadata('design:paramtypes', [])
                 ], AppComponent);
                 return AppComponent;
             }());

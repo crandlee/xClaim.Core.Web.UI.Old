@@ -3,7 +3,7 @@ import { XCoreServices } from '../service/core-services.service';
 
 @Component({
     template: '<div></div>',
-    providers: [XCoreServices]
+    providers: []
 })
 export class LoginComponent  {
     constructor(private xCoreServices: XCoreServices) {

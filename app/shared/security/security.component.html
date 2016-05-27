@@ -16,20 +16,10 @@
     </div>
     <div class="collapse navbar-collapse" [collapse]="isCollapsed">
         <ul class="nav navbar-nav">
-            <li *ngFor="let menuItem of hubData.MenuItems" dropdown keyboardNav="true" class="dropdown">
-                <a *ngIf="menuItem.SubMenus.length == 0" href="#" (click)="navigateToRoute(menuItem.Route)">{{menuItem.Description}}</a>
-                <a *ngIf="menuItem.SubMenus.length > 0" href="#" class="dropdown-toggle" 
-                    dropdownToggle [disabled]="disabled" role="button" aria-haspopup="true" aria-expanded="false">
-                    {{menuItem.Description}} <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                    <li *ngFor="let submenuItem of menuItem.SubMenus">
-                        <a *ngIf="submenuItem.SubMenus.length == 0" href="#" (click)="navigateToRoute(submenuItem.Route)">{{submenuItem.Description}}</a>
-                    </li>
-                </ul>
-            </li>
+            <li><a href="#" (click)="navigateToRoute('/')">Home</a></li>            
         </ul> <!-- navbar-nav -->
         <ul class="nav navbar-nav navbar-right" id="login-menu">
+            <li *ngIf="loggedIn"><a href="#">My User Information</a></li>
             <li *ngIf="!loggedIn"><a href="#" (click)='login()'>Login</a></li>
             <li *ngIf="loggedIn"><a href="#" (click)='logout()'>Logout</a></li>
         </ul>            
