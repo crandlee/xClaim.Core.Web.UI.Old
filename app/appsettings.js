@@ -22,7 +22,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 function AppSettings() {
                 }
                 Object.defineProperty(AppSettings.prototype, "IdentityServerEndpoint", {
-                    get: function () { return 'https://www.localidentity.com:10000'; },
+                    get: function () { return 'http://192.168.1.147:10001'; },
                     enumerable: true,
                     configurable: true
                 });
@@ -41,7 +41,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 });
                 ;
                 Object.defineProperty(AppSettings.prototype, "HubApiEndpoint", {
-                    get: function () { return 'http://localhost:5000/api'; },
+                    get: function () { return 'http://192.168.1.147:5000/api'; },
                     enumerable: true,
                     configurable: true
                 });

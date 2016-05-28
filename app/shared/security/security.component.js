@@ -115,6 +115,7 @@ System.register(['@angular/core', '../service/core-services.service', 'ng2-boots
                     if (!route)
                         return;
                     this.xCoreServices.Router.navigate([route]);
+                    this.isCollapsed = true;
                 };
                 SecurityComponent.prototype.subscribeToIsApplicationBusy = function () {
                     var _this = this;

@@ -47,6 +47,10 @@ export class WelcomeComponent implements OnInit {
         return ret;
     }
 
+    public getClassMap(menuItem: IMainMenuItem): string {
+        return `menu-image pull-left glyphicon ${menuItem.MenuItem.Icon}`;    
+    }
+    
     public reactToItemClick(id: number): void {
         var item = _.find(this.menuItems, mi => mi.Id == id);
         if (!item) this.xCoreServices.LoggingService.warn(`Unable to select element with Id ${id}`);

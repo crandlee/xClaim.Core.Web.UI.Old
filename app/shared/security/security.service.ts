@@ -6,13 +6,14 @@ import { CookieService } from 'angular2-cookie/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/take';
 import { LoggingService } from '../logging/logging.service';
+import { BusyService } from '../service/busy.service';
 
 @Injectable()
 export class SecurityService {
 
     private storage: any;
     private appSettings: AppSettings;
-    constructor(private cookieService: CookieService, private loggingService: LoggingService) {
+    constructor(private cookieService: CookieService, private loggingService: LoggingService, private busyService: BusyService) {
         //Make sure to always create these appSettings new because injecting them creates a circular reference at the moment
         this.appSettings = new AppSettings();
         this.storage = localStorage;
@@ -59,7 +60,7 @@ export class SecurityService {
     public Authorize(scopes?: string) {
         this.ResetAuthorizationData();
 
-
+        this.busyService.notifyBusy(true);
         var authServer = this.appSettings.IdentityServerEndpoint;
         
         var authorizationUrl = `${authServer}/connect/authorize`;

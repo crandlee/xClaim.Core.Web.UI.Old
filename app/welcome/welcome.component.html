@@ -7,9 +7,9 @@
                     [ngClass]="{'transition': mainMenuItem.IsDisplayed, 
                     'indent1': mainMenuItem.Level == 2, 'indent2': mainMenuItem.Level == 3, 'indent3': mainMenuItem.Level == 4}" 
                     *ngFor="let mainMenuItem of menuItems">
-                    <img src="http://lorempixum.com/50/50/nature/3">
+                    <span [class]="getClassMap(mainMenuItem)" style=""></span>
                     <h3>{{mainMenuItem.MenuItem.Name}}</h3>
-                    <p>{{mainMenuItem.MenuItem.Description}}</p>
+                    <p class="hidden-xs">{{mainMenuItem.MenuItem.Description}}</p>
                     <span *ngIf="hasSubItems(mainMenuItem)" 
                         [ngClass]= "{'fa-caret-left': showLeftCaret(mainMenuItem), 'fa-caret-down': showDownCaret(mainMenuItem)}" 
                         class="fa pull-right"></span>

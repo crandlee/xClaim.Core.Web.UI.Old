@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', 'rxjs/add/operator/take', '../logging/logging.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', 'rxjs/add/operator/take', '../logging/logging.service', '../service/busy.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', '
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, appsettings_1, core_2, logging_service_1;
+    var core_1, appsettings_1, core_2, logging_service_1, busy_service_1;
     var SecurityService;
     return {
         setters:[
@@ -26,12 +26,16 @@ System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', '
             function (_1) {},
             function (logging_service_1_1) {
                 logging_service_1 = logging_service_1_1;
+            },
+            function (busy_service_1_1) {
+                busy_service_1 = busy_service_1_1;
             }],
         execute: function() {
             SecurityService = (function () {
-                function SecurityService(cookieService, loggingService) {
+                function SecurityService(cookieService, loggingService, busyService) {
                     this.cookieService = cookieService;
                     this.loggingService = loggingService;
+                    this.busyService = busyService;
                     //Make sure to always create these appSettings new because injecting them creates a circular reference at the moment
                     this.appSettings = new appsettings_1.AppSettings();
                     this.storage = localStorage;
@@ -67,6 +71,7 @@ System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', '
                 };
                 SecurityService.prototype.Authorize = function (scopes) {
                     this.ResetAuthorizationData();
+                    this.busyService.notifyBusy(true);
                     var authServer = this.appSettings.IdentityServerEndpoint;
                     var authorizationUrl = authServer + "/connect/authorize";
                     var client_id = this.appSettings.ApiClientId;
@@ -236,7 +241,7 @@ System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', '
                 };
                 SecurityService = __decorate([
                     core_1.Injectable(), 
-                    __metadata('design:paramtypes', [core_2.CookieService, logging_service_1.LoggingService])
+                    __metadata('design:paramtypes', [core_2.CookieService, logging_service_1.LoggingService, busy_service_1.BusyService])
                 ], SecurityService);
                 return SecurityService;
             }());

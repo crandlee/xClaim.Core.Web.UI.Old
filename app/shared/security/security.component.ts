@@ -93,11 +93,9 @@ export class SecurityComponent implements OnInit {
     
     public ngOnInit(): void {
          try {  
-                                    
              this.loggedIn = this.xCoreServices.SecurityService.checkAuthorized();            
              this.userName = this.xCoreServices.SecurityService.getUserName();                                   
              this.performPostLoginProcedure();
-            
          } catch (err) {            
              this.xCoreServices.LoggingService.error(JSON.stringify(err));
          }
@@ -107,7 +105,8 @@ export class SecurityComponent implements OnInit {
     
     public navigateToRoute(route: string): void {
         if (!route) return;
-        this.xCoreServices.Router.navigate([route]);        
+        this.xCoreServices.Router.navigate([route]);  
+        this.isCollapsed = true;      
     }
     
     private subscribeToIsApplicationBusy() {

@@ -64,6 +64,9 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.getMenuItemChildren(level, null, parents, this.hubData.MenuItems, ret);
                     return ret;
                 };
+                WelcomeComponent.prototype.getClassMap = function (menuItem) {
+                    return "menu-image pull-left glyphicon " + menuItem.MenuItem.Icon;
+                };
                 WelcomeComponent.prototype.reactToItemClick = function (id) {
                     var item = lodash_1.default.find(this.menuItems, function (mi) { return mi.Id == id; });
                     if (!item)
