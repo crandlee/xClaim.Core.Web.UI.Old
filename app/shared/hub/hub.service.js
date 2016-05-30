@@ -43,11 +43,15 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                     this.HubDataCompletedSource = new Subject_1.Subject();
                     this.HubDataRetrievedEvent = this.HubDataRetrievedSource.asObservable().share();
                     this.HubDataCompletedEvent = this.HubDataCompletedSource.asObservable().share();
+                    this.initializeTrace("HubService");
+                    var trace = this.classTrace("constructor");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
                     //Initially set hub client/scope to the hub client scope.  These will
                     //get modified when the hub sends new scopes
                     this.clientId = this.xCoreServices.AppSettings.ApiClientId;
                     this.scopes = this.xCoreServices.AppSettings.HubScopes;
                     this.id = parseInt(String(Math.random() * 100));
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 }
                 Object.defineProperty(HubService.prototype, "Id", {
                     get: function () { return this.id; },
@@ -71,6 +75,8 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                 });
                 HubService.prototype.retrieveHubData = function () {
                     var _this = this;
+                    var trace = this.classTrace("retrieveHubData");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = _super.prototype.getObjectData.call(this, {
                         ApiRoot: this.xCoreServices.AppSettings.HubApiEndpoint,
                         ApiController: this.xCoreServices.AppSettings.HubController,
@@ -82,12 +88,20 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                         _this.hubData = hb;
                         _this.HubDataRetrievedSource.next(hb);
                     });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 HubService.prototype.triggerHubDataCompletedLoading = function () {
+                    var trace = this.classTrace("triggerHubDataCompletedLoading");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
                     this.HubDataCompletedSource.next(this.hubData);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 HubService.prototype.findApiEndPoint = function (apiKey) {
-                    return lodash_1.default.find(this.hubData.ApiEndpoints, function (e) { e.ApiKey == apiKey; });
+                    var trace = this.classTrace("findApiEndPoint");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var ret = lodash_1.default.find(this.hubData.ApiEndpoints, function (e) { e.ApiKey == apiKey; });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return ret;
                 };
                 HubService = __decorate([
                     core_1.Injectable(), 

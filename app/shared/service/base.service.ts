@@ -1,7 +1,7 @@
 import {Response, RequestOptions, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
-import { XCoreServices } from './core-services.service';
+import { XCoreServices, TraceMethodPosition } from './core-services.service';
 import { BusyService } from './busy.service';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/observable/empty';
@@ -12,7 +12,9 @@ export class BaseService {
         
     constructor(
         public xCoreServices: XCoreServices
-        ) {}
+        ) {
+            this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UnspecifiedService");
+        }
     
     private setHeaders(options: RequestOptions): RequestOptions {
         
@@ -30,6 +32,12 @@ export class BaseService {
         return options;
     }
     
+    protected initializeTrace(className: string) {
+        this.classTrace = this.xCoreServices.LoggingService.getTraceFunction(className);
+    }
+    
+    protected classTrace: (methodName: string) => (methodPosition: TraceMethodPosition, extraMessage?: string) => void;
+
     public logError(message: string, options?: any): void {
         this.xCoreServices.LoggingService.error(message, options);
     }
@@ -50,25 +58,34 @@ export class BaseService {
         this.xCoreServices.LoggingService.info(message, options);
     }
 
-    public logWait(message: string, options?: any): void {
-        this.xCoreServices.LoggingService.wait(message, options);
+    public logTrace(message: string, options?: any): void {
+        this.xCoreServices.LoggingService.trace(message, options);
     }
 
     private passedAuthentication(): boolean {
-        if (this.xCoreServices.SecurityService.checkAuthorized()) return true;        
+        var trace = this.classTrace("passedAuthentication");
+        trace(TraceMethodPosition.Entry);
+        if (this.xCoreServices.SecurityService.checkAuthorized()) {
+            trace(TraceMethodPosition.Exit);
+            return true;
+        }        
         var currentRoute = this.xCoreServices.Router.serializeUrl(this.xCoreServices.Router.urlTree);
         this.xCoreServices.CookieService.put(this.xCoreServices.AppSettings.CookieKeys.RouteAfterLoginKey,currentRoute);
         this.xCoreServices.SecurityService.Authorize();
+        trace(TraceMethodPosition.Exit);
         return false;
     }    
     
-    private getCleanRoutePath(routePath: string): string {
+    private getCleanRoutePath(routePath: string): string {        
         return routePath ? `/${routePath}` : '';
     }
     
     private executeObservable<TData>(obs: Observable<TData>): Observable<TData> {
+        var trace = this.classTrace("executeObservable");
+        trace(TraceMethodPosition.Entry);
         if (this.passedAuthentication()) {
-            this.xCoreServices.BusyService.notifyBusy(true); 
+            this.xCoreServices.BusyService.notifyBusy(true);
+            trace(TraceMethodPosition.Exit); 
             return obs;                
         } else {
             //This case shouldn't occur as the user must be authenticated to get here
@@ -77,20 +94,31 @@ export class BaseService {
     }
 
     protected getTextData(serviceOptions: IServiceOptions, routePath?: string, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
+        var trace = this.classTrace("getTextData");
+        trace(TraceMethodPosition.Entry);
         var baseObs = this.getBaseGetObservable(serviceOptions.ApiController, routePath)                                        
                 .map(res => { return res.text(); });
             var tailObs = this.getTailGetObservable<string>(baseObs, serviceOptions, onError);   
-        return this.executeObservable(tailObs);
+        var ret  = this.executeObservable(tailObs);
+        trace(TraceMethodPosition.Exit);
+        return ret;
     }
 
     private getBaseGetObservable(apiRoot: string, controllerUrl: string, routePath?: string, options?: RequestOptions): Observable<Response> {
+        var trace = this.classTrace("getBaseGetObservable");
+        trace(TraceMethodPosition.Entry);
         this.xCoreServices.LoggingService.debug(`Making a GET request to ${apiRoot}/${controllerUrl}/${routePath || ''}`);
-        return this.xCoreServices.Http
-            .get(`${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options)).share();                                                
+        var ret = this.xCoreServices.Http
+            .get(`${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options)).share();
+        trace(TraceMethodPosition.Exit);
+        return ret;
     }   
      
     private getTailGetObservable<TData>(currentObservable: Observable<TData>, serviceOptions?: IServiceOptions,
-            onError?:(error: any, caught: Observable<TData>) => void): Observable<TData> {        
+            onError?:(error: any, caught: Observable<TData>) => void): Observable<TData> {
+                
+        var trace = this.classTrace("getTailGetObservable");
+        trace(TraceMethodPosition.Entry);
         if (!onError) onError = (error: any, caught: any) => { this.xCoreServices.LoggingService.error(error); }
         var swallowException = (!serviceOptions || !serviceOptions.PropogateException);
         var suppressDefaultException = (serviceOptions && serviceOptions.SuppressDefaultException); 
@@ -102,59 +130,84 @@ export class BaseService {
                 if (swallowException) return Observable.empty<TData>();
                 throw newError;
             }).share();
-        return currentObservable.finally(() => {
+        var ret = currentObservable.finally(() => {
             this.xCoreServices.BusyService.notifyBusy(false);
         });
-                       
+        
+        trace(TraceMethodPosition.Exit);
+        return ret;
+        
     }
 
     private getGeneralErrorMessage(action:string, serviceOptions?: IServiceOptions): string {
+        
+        var trace = this.classTrace("getGeneralErrorMessage");
+        
+        trace(TraceMethodPosition.Entry);
         var dataDescription: string = serviceOptions && serviceOptions.ServiceDataDescription;
         if (!dataDescription) dataDescription = "requested data"; 
         var errorDescription: string = serviceOptions && serviceOptions.ServiceError; 
         if (!errorDescription) errorDescription = `There was an error ${action} the ${dataDescription}`;
+        
+        trace(TraceMethodPosition.Exit);
         return errorDescription; 
     }   
      
     protected getObjectData<TData>(serviceOptions: IServiceOptions, routePath?: string, 
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TData>) => void): Observable<TData> {            
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TData>) => void): Observable<TData> {
+            
+            var trace = this.classTrace("getObjectData");
+            trace(TraceMethodPosition.Entry);
             var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, serviceOptions.ApiController, routePath, requestOptions)
                 .map<TData>(res => { return res.json(); });                
             var tailObs = this.getTailGetObservable<TData>(baseObs, serviceOptions, onError);   
-        return this.executeObservable(tailObs);
+        var ret =  this.executeObservable(tailObs);
+        trace(TraceMethodPosition.Exit);
+        return ret;
     }
     
     protected postData(data: any, serviceOptions: IServiceOptions,routePath?: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
-
+        
+        var trace = this.classTrace("postData");
+        trace(TraceMethodPosition.Entry);
         var baseObs = this.xCoreServices.Http
                 .post(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share();
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
-        return this.executeObservable(tailObs);
+        var ret =  this.executeObservable(tailObs);
+        trace(TraceMethodPosition.Exit);
+        return ret;
     }
 
     protected putData(data: any, serviceOptions: IServiceOptions, routePath?: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
-
+        
+        var trace = this.classTrace("putData");
+        trace(TraceMethodPosition.Entry);
         var baseObs = this.xCoreServices.Http
                 .put(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share();
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
-        return this.executeObservable(tailObs);
+        var ret = this.executeObservable(tailObs);
+        trace(TraceMethodPosition.Exit);
+        return ret;
     }
 
     protected deleteData(data: any, serviceOptions: IServiceOptions, routePath?: string,  
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
-            
+        
+        var trace = this.classTrace("deleteData");
+        trace(TraceMethodPosition.Entry);
         var baseObs = this.xCoreServices.Http
                 .delete(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
                     this.setHeaders(requestOptions)).share();
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
-        return this.executeObservable(tailObs);
+        var ret =  this.executeObservable(tailObs);
+        trace(TraceMethodPosition.Exit);
+        return ret;
     }
-    
-                
+        
 }
 
 

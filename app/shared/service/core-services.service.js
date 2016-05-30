@@ -16,7 +16,7 @@ System.register(['../../appsettings', '../security/security.service', '../loggin
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
     var appsettings_1, security_service_1, logging_service_1, base_service_1, core_1, http_1, router_1, core_2, busy_service_1;
-    var XCoreServices, XCoreServiceBase;
+    var XCoreServices, XCoreServiceBase, TraceMethodPosition;
     return {
         setters:[
             function (appsettings_1_1) {
@@ -76,6 +76,14 @@ System.register(['../../appsettings', '../security/security.service', '../loggin
                 return XCoreServiceBase;
             }(base_service_1.BaseService));
             exports_1("XCoreServiceBase", XCoreServiceBase);
+            (function (TraceMethodPosition) {
+                TraceMethodPosition[TraceMethodPosition["Entry"] = 0] = "Entry";
+                TraceMethodPosition[TraceMethodPosition["Exit"] = 1] = "Exit";
+                TraceMethodPosition[TraceMethodPosition["Callback"] = 2] = "Callback";
+                TraceMethodPosition[TraceMethodPosition["CallbackStart"] = 3] = "CallbackStart";
+                TraceMethodPosition[TraceMethodPosition["CallbackEnd"] = 4] = "CallbackEnd";
+            })(TraceMethodPosition || (TraceMethodPosition = {}));
+            exports_1("TraceMethodPosition", TraceMethodPosition);
         }
     }
 });

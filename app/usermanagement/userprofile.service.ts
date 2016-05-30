@@ -10,19 +10,15 @@ import { XCoreServiceBase, XCoreServices } from '../shared/service/core-services
 @Injectable()
 export class UserProfileService extends XCoreServiceBase {
     
-    private apiController: string = 'Values';
+    private apiController: string = 'UserProfile';
      
     constructor(xCoreServices: XCoreServices) {
         super(xCoreServices);        
     }
             
     public getUserProfile(): Observable<string> {
-        return super.getTextData({ 
-            ApiRoot: "",
-            ApiController: this.apiController,
-            ServiceDataDescription: "test data", 
-            PropogateException: true 
-        });
+        
+        return null;
     }
     
 }

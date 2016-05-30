@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { XCoreServices } from '../shared/service/core-services.service';
+import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { HubService, IHubServiceData, IHubServiceMenuItem } from '../shared/hub/hub.service';
 import { ACCORDION_DIRECTIVES } from 'ng2-bootstrap';
-
+import { XCoreBaseComponent } from '../shared/component/base.component';
 import _ from 'lodash';
 
 @Component({
@@ -11,39 +11,57 @@ import _ from 'lodash';
     providers: [],
     styleUrls: ['app/welcome/welcome.component.css']
 })
-export class WelcomeComponent implements OnInit {
+export class WelcomeComponent extends XCoreBaseComponent implements OnInit {
 
     public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"" };;
     public menuItems: IMainMenuItem[] = [];
     public menuItemIdGenerator: number = 0;
     
-    constructor(private xCoreServices: XCoreServices, private hubService: HubService) {
+    constructor(protected xCoreServices: XCoreServices, private hubService: HubService) {
+        super(xCoreServices);
+        
+        this.initializeTrace("WelcomeComponent");
+        var trace = this.classTrace("constructor");
+        trace(TraceMethodPosition.Entry);
+        
         //Set up events
         this.hubService.HubDataCompletedEvent.subscribe(hd => {
+            trace(TraceMethodPosition.CallbackStart);
             this.hubData = hd;
             this.hubData.MenuItems = _.chain(this.hubData.MenuItems)
                 .sortBy(mi => mi.Description)
                 .value();
             this.menuItems = this.flattenMenuItems();
-            
+            trace(TraceMethodPosition.CallbackEnd);            
         });
+        
+        trace(TraceMethodPosition.Exit);
     }
 
     public visibleMenuItems() {
-        return _.chain(this.menuItems).filter(mi => mi.IsDisplayed).value();
+        var trace = this.classTrace("visibleMenuItems");
+        trace(TraceMethodPosition.Entry);        
+        var ret = _.chain(this.menuItems).filter(mi => mi.IsDisplayed).value();
+        trace(TraceMethodPosition.Exit);
     }
     
     public navigateToRoute(route: string): void {
-        if (!route) return;
-        this.xCoreServices.Router.navigate([route]);        
+        if (!route) return;        
+        var trace = this.classTrace("navigateToRoute");
+        trace(TraceMethodPosition.Entry);
+        this.xCoreServices.Router.navigate([route]); 
+        trace(TraceMethodPosition.Exit);       
     }
 
     private flattenMenuItems(): IMainMenuItem[]  {
+        var trace = this.classTrace("flattenMenuItems");
+        trace(TraceMethodPosition.Entry);        
         var ret: IMainMenuItem[] = [];
         var level: number = 1;
         var parents: number[] = [];
         this.menuItemIdGenerator = 0;
         this.getMenuItemChildren(level, null, parents, this.hubData.MenuItems, ret);
+        trace(TraceMethodPosition.Exit);
         return ret;
     }
 
@@ -52,6 +70,10 @@ export class WelcomeComponent implements OnInit {
     }
     
     public reactToItemClick(id: number): void {
+        
+        var trace = this.classTrace("reactToItemClick");
+        trace(TraceMethodPosition.Entry);
+        
         var item = _.find(this.menuItems, mi => mi.Id == id);
         if (!item) this.xCoreServices.LoggingService.warn(`Unable to select element with Id ${id}`);
         if (item.MenuItem.SubMenus.length > 0) {
@@ -59,9 +81,15 @@ export class WelcomeComponent implements OnInit {
         } else {
             this.navigateToRoute(item.MenuItem.Route);
         }
+        
+        trace(TraceMethodPosition.Exit);
     }
     
     private setMenuItemState(item: IMainMenuItem, open: boolean) {
+        
+        var trace = this.classTrace("setMenuItemState");
+        trace(TraceMethodPosition.Entry);
+        
         item.IsOpen = open;        
         _.each(this.menuItems, mi => {
            //If an item has this item in the parent chain then check to see if its immediate parent is open
@@ -78,6 +106,8 @@ export class WelcomeComponent implements OnInit {
                 .filter(mi => mi.Id !== item.Id && mi.Level == item.Level)
                 .each(mi => { if (mi.IsOpen) this.setMenuItemState(mi, false); }).value();            
         }
+        
+        trace(TraceMethodPosition.Exit);
     }
     
     public hasSubItems(menuItem: IMainMenuItem): boolean {
@@ -93,6 +123,10 @@ export class WelcomeComponent implements OnInit {
     }
     
     private getMenuItemChildren(level: number, parent: IMainMenuItem, parents: number[], currentChildren: IHubServiceMenuItem[], allItems: IMainMenuItem[] ): void {
+        
+        var trace = this.classTrace("getMenuItemChildren");
+        trace(TraceMethodPosition.Entry);
+        
         _.each(currentChildren, (mi) => {
             this.menuItemIdGenerator += 1;
             var newMenuItem: IMainMenuItem = {
@@ -108,9 +142,12 @@ export class WelcomeComponent implements OnInit {
             allItems.push(newMenuItem);            
             this.getMenuItemChildren(level + 1, newMenuItem, parents.concat(newMenuItem.Id), mi.SubMenus, allItems);
         });    
+        
+        trace(TraceMethodPosition.Exit);
     }
     
     ngOnInit() {
+        super.NotifyLoaded("Welcome");
     }
 
 }

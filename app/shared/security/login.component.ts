@@ -1,13 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { XCoreServices } from '../service/core-services.service';
+import { XCoreBaseComponent } from '../component/base.component';
 
 @Component({
     template: '<div></div>',
     providers: []
 })
-export class LoginComponent  {
-    constructor(private xCoreServices: XCoreServices) {
-        this.xCoreServices.SecurityService
-            .Authorize();
+export class LoginComponent extends XCoreBaseComponent implements OnInit {
+    constructor(protected xCoreServices: XCoreServices) {
+        super(xCoreServices);
+    }
+    ngOnInit() {
+        this.xCoreServices.SecurityService.Authorize();
     }
 }

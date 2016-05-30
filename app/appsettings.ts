@@ -19,9 +19,19 @@ export class AppSettings {
     public get CookieKeys(): ICookieKeys { return { 
         RouteAfterLoginKey: 'xc.routeAfterLogin'
     }};
-    
+    public get MinimumLogLevel(): LogLevel {return LogLevel.Debug }
 }
 
+
+export enum LogLevel {
+    Trace,
+    Debug,
+    Info,
+    Success,
+    Warn,
+    Error,
+    None
+}
 
 export interface ICookieKeys {
     RouteAfterLoginKey: string;

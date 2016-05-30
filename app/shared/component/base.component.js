@@ -8,9 +8,14 @@ System.register([], function(exports_1, context_1) {
             XCoreBaseComponent = (function () {
                 function XCoreBaseComponent(xCoreServices) {
                     this.xCoreServices = xCoreServices;
+                    this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UnspecifiedService");
                 }
-                XCoreBaseComponent.prototype.ngOnInit = function () {
-                    this.xCoreServices.LoggingService.info("Loaded " + this.xCoreServices.Router.serializeUrl(this.xCoreServices.Router.urlTree), { noToast: true });
+                XCoreBaseComponent.prototype.initializeTrace = function (className) {
+                    this.classTrace = this.xCoreServices.LoggingService.getTraceFunction(className);
+                };
+                XCoreBaseComponent.prototype.NotifyLoaded = function (componentName) {
+                    this.xCoreServices.LoggingService.info("Component: " + componentName, { noToast: true });
+                    this.xCoreServices.LoggingService.info("Route: " + (this.xCoreServices.Router.serializeUrl(this.xCoreServices.Router.urlTree) || "root"), { noToast: true });
                 };
                 return XCoreBaseComponent;
             }());

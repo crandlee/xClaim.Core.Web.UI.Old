@@ -28,3 +28,11 @@ export class XCoreServiceBase extends BaseService {
     }
     
 } 
+
+export enum TraceMethodPosition {
+    Entry,
+    Exit,
+    Callback,
+    CallbackStart,
+    CallbackEnd
+}
