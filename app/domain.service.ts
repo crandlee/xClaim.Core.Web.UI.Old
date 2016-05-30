@@ -16,8 +16,7 @@ export class DomainService {
             { path: '/Forbidden', component: ForbiddenComponent },
             { path: '/Unauthorized', component: UnauthorizedComponent },
             { path: '/Login', component: LoginComponent },
-            { path: '/Logout', component: LogoutComponent },
-            { path: '/Welcome', component: WelcomeComponent }
+            { path: '/Logout', component: LogoutComponent }
         ];
         return baseRoutes
             .concat(UserManagementRoutes).concat([{ path: '/', component: WelcomeComponent }]);

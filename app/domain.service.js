@@ -44,8 +44,7 @@ System.register(['@angular/core', './usermanagement/routes', './shared/security/
                         { path: '/Forbidden', component: forbidden_component_1.ForbiddenComponent },
                         { path: '/Unauthorized', component: unauthorized_component_1.UnauthorizedComponent },
                         { path: '/Login', component: login_component_1.LoginComponent },
-                        { path: '/Logout', component: logout_component_1.LogoutComponent },
-                        { path: '/Welcome', component: welcome_component_1.WelcomeComponent }
+                        { path: '/Logout', component: logout_component_1.LogoutComponent }
                     ];
                     return baseRoutes
                         .concat(routes_1.UserManagementRoutes).concat([{ path: '/', component: welcome_component_1.WelcomeComponent }]);

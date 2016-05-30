@@ -1,4 +1,4 @@
-System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service'], function(exports_1, context_1) {
+System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service', 'rxjs/Subject'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1;
+    var core_1, core_services_service_1, Subject_1;
     var UserProfileService;
     return {
         setters:[
@@ -27,21 +27,25 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
             function (_3) {},
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
+            },
+            function (Subject_1_1) {
+                Subject_1 = Subject_1_1;
             }],
         execute: function() {
             UserProfileService = (function (_super) {
                 __extends(UserProfileService, _super);
                 function UserProfileService(xCoreServices) {
                     _super.call(this, xCoreServices);
-                    this.apiController = 'Values';
+                    this.apiController = 'UserProfile';
+                    this.userProfileSubject = new Subject_1.Subject();
+                    this.userProfileObservable = this.userProfileSubject.asObservable().share();
                 }
                 UserProfileService.prototype.getUserProfile = function () {
-                    return _super.prototype.getTextData.call(this, {
-                        ApiRoot: "",
-                        ApiController: this.apiController,
-                        ServiceDataDescription: "test data",
-                        PropogateException: true
+                    this.userProfileSubject.next({
+                        UserName: "rlee",
+                        EmailAddress: "crandlee@gmail.com"
                     });
+                    return this.userProfileObservable;
                 };
                 UserProfileService = __decorate([
                     core_1.Injectable(), 
@@ -53,7 +57,4 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
         }
     }
 });
-// export interface IUserProfile {
-//     UserName: string;
-// } 
 //# sourceMappingURL=userprofile.service.js.map

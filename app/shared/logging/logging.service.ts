@@ -31,7 +31,7 @@ export class LoggingService {
             if (toastFunc) toastFunc(toastOptions);            
         }
         if (!options || !options.noConsole) {
-            var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
+            var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
             console.log(`%c${consolePrefix}: ${msg}`, `${style}`);
         }        
     }

@@ -1,3 +1,54 @@
+/*Color scheme
+#206c7f, #e5faff, #40d9ff, #737d7f, #38bddf, #647299*/
+
 div.panel-heading {
    font-size: x-large; 
+}
+
+/*Page header styles*/
+
+.navbar-inverse h1 {
+    margin-left: 10px;
+    color: #FFFFFF;
+    margin-top: 8px;
+}
+
+.navbar-inverse h2 {
+    margin-left: 10px;
+    color: #FFFFFF;
+    margin-top: 12px;
+}
+
+.navbar-inverse h3 {
+    margin-left: 10px;    
+    color: #FFFFFF;
+    margin-top: 16px;
+}
+
+.navbar-inverse h4 {
+    margin-left: 10px;    
+    color: #FFFFFF;
+    margin-top: 20px;
+}
+
+.center {
+    text-align: center
+}
+
+.edit-panel {
+    background: #ecf0f1;
+    color: #206c7f;
+    min-height: 200px;
+    padding: 10px;
+}
+
+
+/*Edit form styles*/
+
+.ng-valid[required] {
+  border-left: 5px solid #42A948; /* green */
+}
+
+.ng-invalid {
+  border-left: 5px solid #a94442; /* red */
 }

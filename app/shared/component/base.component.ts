@@ -1,7 +1,7 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component } from '@angular/core';
 import { XCoreServices, TraceMethodPosition } from '../service/core-services.service';
 
-export class XCoreBaseComponent implements OnInit  {
+export class XCoreBaseComponent  {
     
     protected classTrace: (methodName: string) => (methodPosition: TraceMethodPosition, extraMessage?: string) => void;
 
@@ -19,3 +19,5 @@ export class XCoreBaseComponent implements OnInit  {
     }
               
 }
+
+

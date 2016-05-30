@@ -52,7 +52,7 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../..
                             toastFunc(toastOptions);
                     }
                     if (!options || !options.noConsole) {
-                        var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
+                        var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
                         console.log("%c" + consolePrefix + ": " + msg, "" + style);
                     }
                 };
