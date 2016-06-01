@@ -46,7 +46,7 @@ System.register(['@angular/core', '../service/core-services.service', '../compon
                     this.hubService = hubService;
                     this.isBusy = false;
                     this.isCollapsed = true;
-                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
+                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "", UserId: null };
                     this.initializeTrace("SecurityComponent");
                 }
                 SecurityComponent.prototype.performPostLoginProcedure = function () {
@@ -62,7 +62,9 @@ System.register(['@angular/core', '../service/core-services.service', '../compon
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     //Set up event subscriptions   
                     this.hubService.HubDataRetrievedEvent.subscribe(function (hubData) {
+                        trace(core_services_service_1.TraceMethodPosition.CallbackStart, "HubDataRetrievedEvent");
                         _this.receiveHubDataAndReAuthorize();
+                        trace(core_services_service_1.TraceMethodPosition.CallbackEnd, "HubDataRetrievedEvent");
                     });
                     this.xCoreServices.LoggingService.debug("Retrieving data from hub at " + this.xCoreServices.AppSettings.HubApiEndpoint, { noToast: true });
                     this.hubService.retrieveHubData();

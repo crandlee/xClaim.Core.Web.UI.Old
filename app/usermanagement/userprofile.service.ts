@@ -5,6 +5,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import { XCoreServiceBase, XCoreServices } from '../shared/service/core-services.service';
+import { HubService } from '../shared/hub/hub.service';
 
 import { Subject } from 'rxjs/Subject';
 
@@ -12,19 +13,21 @@ import { Subject } from 'rxjs/Subject';
 export class UserProfileService extends XCoreServiceBase {
     
     private apiController: string = 'UserProfile';
-    public userProfileSubject = new Subject<IUserProfile>();
-    public userProfileObservable = this.userProfileSubject.asObservable().share();
+    //public userProfileSubject = new Subject<IUserProfile>();
+    //public userProfileObservable = this.userProfileSubject.asObservable().share();
 
-    constructor(xCoreServices: XCoreServices) {
-        super(xCoreServices);        
+    constructor(xCoreServices: XCoreServices, private hubService: HubService) {
+        super(xCoreServices);
+        
     }
             
-    public getUserProfile(): Observable<IUserProfile> {        
-        this.userProfileSubject.next({
-           UserName: "rlee",
-           EmailAddress: "crandlee@gmail.com"            
-        });
-        return this.userProfileObservable;
+    public getUserProfile(userId: string): Observable<any> {        
+        // this.userProfileSubject.next({
+        //    UserName: "rlee",
+        //    EmailAddress: "crandlee@gmail.com"            
+        // });
+        // return this.userProfileObservable;
+        return this.getObjectData<any>({ ApiController: 'users', ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot }, `${userId}`);
     }
     
 }

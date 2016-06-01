@@ -79,6 +79,10 @@ export class BaseService {
     private getCleanRoutePath(routePath: string): string {        
         return routePath ? `/${routePath}` : '';
     }
+
+    private getCleanApiRoot(apiRoot: string): string {        
+        return apiRoot.endsWith('/api') ? apiRoot : apiRoot + '/api';
+    }
     
     private executeObservable<TData>(obs: Observable<TData>): Observable<TData> {
         var trace = this.classTrace("executeObservable");
@@ -107,9 +111,10 @@ export class BaseService {
     private getBaseGetObservable(apiRoot: string, controllerUrl: string, routePath?: string, options?: RequestOptions): Observable<Response> {
         var trace = this.classTrace("getBaseGetObservable");
         trace(TraceMethodPosition.Entry);
-        this.xCoreServices.LoggingService.debug(`Making a GET request to ${apiRoot}/${controllerUrl}/${routePath || ''}`);
+        apiRoot = this.getCleanApiRoot(apiRoot);
+        this.xCoreServices.LoggingService.debug(`Making a GET request to ${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}`);
         var ret = this.xCoreServices.Http
-            .get(`${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}/`, this.setHeaders(options)).share();
+            .get(`${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(options)).share();
         trace(TraceMethodPosition.Exit);
         return ret;
     }   
@@ -171,6 +176,7 @@ export class BaseService {
         
         var trace = this.classTrace("postData");
         trace(TraceMethodPosition.Entry);
+        serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);        
         var baseObs = this.xCoreServices.Http
                 .post(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share();
@@ -185,6 +191,7 @@ export class BaseService {
         
         var trace = this.classTrace("putData");
         trace(TraceMethodPosition.Entry);
+        serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
                 .put(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share();
@@ -199,6 +206,7 @@ export class BaseService {
         
         var trace = this.classTrace("deleteData");
         trace(TraceMethodPosition.Entry);
+        serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
                 .delete(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
                     this.setHeaders(requestOptions)).share();

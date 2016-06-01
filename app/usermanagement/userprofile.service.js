@@ -1,4 +1,4 @@
-System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service', 'rxjs/Subject'], function(exports_1, context_1) {
+System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service', '../shared/hub/hub.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1, Subject_1;
+    var core_1, core_services_service_1, hub_service_1;
     var UserProfileService;
     return {
         setters:[
@@ -28,28 +28,30 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
             },
-            function (Subject_1_1) {
-                Subject_1 = Subject_1_1;
+            function (hub_service_1_1) {
+                hub_service_1 = hub_service_1_1;
             }],
         execute: function() {
             UserProfileService = (function (_super) {
                 __extends(UserProfileService, _super);
-                function UserProfileService(xCoreServices) {
+                //public userProfileSubject = new Subject<IUserProfile>();
+                //public userProfileObservable = this.userProfileSubject.asObservable().share();
+                function UserProfileService(xCoreServices, hubService) {
                     _super.call(this, xCoreServices);
+                    this.hubService = hubService;
                     this.apiController = 'UserProfile';
-                    this.userProfileSubject = new Subject_1.Subject();
-                    this.userProfileObservable = this.userProfileSubject.asObservable().share();
                 }
-                UserProfileService.prototype.getUserProfile = function () {
-                    this.userProfileSubject.next({
-                        UserName: "rlee",
-                        EmailAddress: "crandlee@gmail.com"
-                    });
-                    return this.userProfileObservable;
+                UserProfileService.prototype.getUserProfile = function (userId) {
+                    // this.userProfileSubject.next({
+                    //    UserName: "rlee",
+                    //    EmailAddress: "crandlee@gmail.com"            
+                    // });
+                    // return this.userProfileObservable;
+                    return this.getObjectData({ ApiController: 'users', ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot }, "" + userId);
                 };
                 UserProfileService = __decorate([
                     core_1.Injectable(), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, hub_service_1.HubService])
                 ], UserProfileService);
                 return UserProfileService;
             }(core_services_service_1.XCoreServiceBase));

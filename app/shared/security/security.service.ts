@@ -257,6 +257,24 @@ export class SecurityService {
         return "";
     }
 
+    public getUserId():string {
+
+        var trace = this.classTrace("getUserId");
+        trace(TraceMethodPosition.Entry);
+        
+        var id_token = this.cookieService.get("xc.authorizationDataIdToken");
+        if (id_token) {
+            var dataIdToken: any = this.getDataFromToken(id_token);
+            if (dataIdToken) {
+                trace(TraceMethodPosition.Exit); 
+                return dataIdToken.sub;
+            }
+        }
+        
+        trace(TraceMethodPosition.Exit);
+        return "";
+    }
+
     public getCurrentScopes():string {
         var token = this.cookieService.get("xc.authorizationData");
         if (token) {

@@ -223,6 +223,20 @@ System.register(['@angular/core', '../../appsettings', 'angular2-cookie/core', '
                     trace(logging_service_1.TraceMethodPosition.Exit);
                     return "";
                 };
+                SecurityService.prototype.getUserId = function () {
+                    var trace = this.classTrace("getUserId");
+                    trace(logging_service_1.TraceMethodPosition.Entry);
+                    var id_token = this.cookieService.get("xc.authorizationDataIdToken");
+                    if (id_token) {
+                        var dataIdToken = this.getDataFromToken(id_token);
+                        if (dataIdToken) {
+                            trace(logging_service_1.TraceMethodPosition.Exit);
+                            return dataIdToken.sub;
+                        }
+                    }
+                    trace(logging_service_1.TraceMethodPosition.Exit);
+                    return "";
+                };
                 SecurityService.prototype.getCurrentScopes = function () {
                     var token = this.cookieService.get("xc.authorizationData");
                     if (token) {

@@ -5,6 +5,12 @@ div.panel-heading {
    font-size: x-large; 
 }
 
+.loading-message {
+    text-align:center;
+    font-size:1.2em;
+    margin-top:20px;
+}
+
 /*Page header styles*/
 
 .navbar-inverse h1 {

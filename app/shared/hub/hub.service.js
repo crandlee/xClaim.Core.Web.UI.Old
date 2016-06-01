@@ -43,6 +43,7 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                     this.HubDataCompletedSource = new Subject_1.Subject();
                     this.HubDataRetrievedEvent = this.HubDataRetrievedSource.asObservable().share();
                     this.HubDataCompletedEvent = this.HubDataCompletedSource.asObservable().share();
+                    this.HubDataLoaded = false;
                     this.initializeTrace("HubService");
                     var trace = this.classTrace("constructor");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
@@ -82,11 +83,14 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                         ApiController: this.xCoreServices.AppSettings.HubController,
                         ServiceDataDescription: "Menu Items" });
                     obs.subscribe(function (hb) {
+                        trace(core_services_service_1.TraceMethodPosition.CallbackStart, "HubDataRetrievedEvent");
                         //Update with the proper api scopes - hub should not be called again until total refresh
                         _this.clientId = _this.xCoreServices.AppSettings.ApiClientId;
                         _this.scopes = hb.Scopes;
+                        hb.UserId = _this.xCoreServices.SecurityService.getUserId();
                         _this.hubData = hb;
                         _this.HubDataRetrievedSource.next(hb);
+                        trace(core_services_service_1.TraceMethodPosition.CallbackEnd, "HubDataRetrievedEvent");
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
@@ -94,12 +98,13 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                     var trace = this.classTrace("triggerHubDataCompletedLoading");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     this.HubDataCompletedSource.next(this.hubData);
+                    this.HubDataLoaded = true;
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 HubService.prototype.findApiEndPoint = function (apiKey) {
                     var trace = this.classTrace("findApiEndPoint");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var ret = lodash_1.default.find(this.hubData.ApiEndpoints, function (e) { e.ApiKey == apiKey; });
+                    var ret = lodash_1.default.find(this.hubData.ApiEndpoints, function (e) { return e.ApiKey === apiKey; });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return ret;
                 };

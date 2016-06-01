@@ -21,7 +21,7 @@ export class SecurityComponent extends XCoreBaseComponent implements OnInit  {
     public userName: string;
     public isBusy: boolean = false;
     public isCollapsed:boolean = true;
-    public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"" };
+    public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"", UserId: null };
     
     constructor( 
         protected xCoreServices: XCoreServices, private hubService: HubService) {
@@ -48,7 +48,9 @@ export class SecurityComponent extends XCoreBaseComponent implements OnInit  {
         
         //Set up event subscriptions   
         this.hubService.HubDataRetrievedEvent.subscribe(hubData => {
+            trace(TraceMethodPosition.CallbackStart, "HubDataRetrievedEvent");
             this.receiveHubDataAndReAuthorize();
+            trace(TraceMethodPosition.CallbackEnd, "HubDataRetrievedEvent");
         });                    
         this.xCoreServices.LoggingService.debug(`Retrieving data from hub at ${this.xCoreServices.AppSettings.HubApiEndpoint}`, { noToast: true });
         this.hubService.retrieveHubData();        

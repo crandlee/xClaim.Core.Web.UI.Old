@@ -1,35 +1,34 @@
 <div class="container">
-    <div class="edit-panel" >
+    <div *ngIf="active" class="edit-panel" >
         <div class="navbar navbar-inverse center">
             <h4>User Information for: {{userProfile.UserName}}</h4>
         </div>
-        <form *ngIf="active" (ngSubmit)="onSubmit()" [ngFormModel]="form">
+        <form (ngSubmit)="onSubmit()" [ngFormModel]="form">
             <div class="form-group">
                 <label for="email">EMail</label>
                 <input type="email" placeholder="Email" name="email" class="form-control" ngControl="EMailControl" [(ngModel)]="userProfile.EmailAddress" required />
-                <div *ngIf="EMailControl.dirty && !EMailControl.valid && !EMailControl.pending" class="alert alert-danger">
-                    EMail is messed up
-                </div>
             </div>    
-            <!--<div class="form-group">
+            <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" placeholder="Password" name="password" class="form-control" #password="ngForm" [(ngModel)]="userProfile.Password" required />
-                <div *ngIf="!password.valid && !password.pristine" class="alert alert-danger">
-                    Something else is wrong
-                </div>
+                <input type="password" placeholder="Password" name="password" class="form-control" ngControl="PasswordControl" [(ngModel)]="userProfile.Password" required />
             </div>    
             <div class="form-group">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" placeholder="Confirm Password" name="confirmPassword" #confirmPassword="ngForm" class="form-control" [(ngModel)]="userProfile.ConfirmPassword" required />
+                <input type="password" placeholder="Confirm Password" name="confirmPassword" class="form-control" ngControl="ConfirmPasswordControl" [(ngModel)]="userProfile.ConfirmPassword" required />
             </div>
-            <div *ngIf="!userProfileForm.valid">
-                There is definitely something wrong
-            </div>-->
+            <div *ngIf="validationMessages.length > 0" class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span>Please correct the following errors:</span>
+                <ul>
+                    <li *ngFor="let msg of validationMessages">{{msg.getMessage()}}</li>                     
+                </ul>
+            </div>
             <div class="form-group clearfix">
-                <button type="submit" class="btn btn-default pull-right" [disabled]="!form.valid">Save</button>
+                <button type="submit" class="btn btn-default pull-right" [disabled]="validationMessages.length > 0">Save</button>
             </div>    
-            
-        </form>
-            
-    </div>    
+        </form>            
+    </div>
+    <div *ngIf="!active" class="loading-message">
+        Loading User Profile
+    </div>
 </div>

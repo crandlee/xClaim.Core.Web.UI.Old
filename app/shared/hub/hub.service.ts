@@ -27,6 +27,7 @@ export class HubService extends XCoreServiceBase {
     public HubDataRetrievedEvent = this.HubDataRetrievedSource.asObservable().share();
     public HubDataCompletedEvent = this.HubDataCompletedSource.asObservable().share();
     
+    public HubDataLoaded: boolean = false;
     
     constructor(xCoreServices: XCoreServices) {
         super(xCoreServices);
@@ -54,11 +55,14 @@ export class HubService extends XCoreServiceBase {
              ApiController: this.xCoreServices.AppSettings.HubController,
              ServiceDataDescription: "Menu Items" });
         obs.subscribe(hb => {
+            trace(TraceMethodPosition.CallbackStart, "HubDataRetrievedEvent");
            //Update with the proper api scopes - hub should not be called again until total refresh
            this.clientId = this.xCoreServices.AppSettings.ApiClientId;
            this.scopes = hb.Scopes;
+           hb.UserId = this.xCoreServices.SecurityService.getUserId()
            this.hubData = hb;
            this.HubDataRetrievedSource.next(hb);
+           trace(TraceMethodPosition.CallbackEnd, "HubDataRetrievedEvent");
         });
         trace(TraceMethodPosition.Exit);        
     }    
@@ -68,15 +72,16 @@ export class HubService extends XCoreServiceBase {
         var trace = this.classTrace("triggerHubDataCompletedLoading");        
         trace(TraceMethodPosition.Entry);
 
-        this.HubDataCompletedSource.next(this.hubData);        
+        this.HubDataCompletedSource.next(this.hubData);  
+        this.HubDataLoaded = true;      
         trace(TraceMethodPosition.Exit);
     }
     
     public findApiEndPoint(apiKey: string): IHubServiceApiEndpoint {
         
         var trace = this.classTrace("findApiEndPoint");        
-        trace(TraceMethodPosition.Entry);        
-        var ret = _.find(this.hubData.ApiEndpoints, e => { e.ApiKey == apiKey });
+        trace(TraceMethodPosition.Entry);
+        var ret = _.find(this.hubData.ApiEndpoints, e => { return e.ApiKey === apiKey; });
         trace(TraceMethodPosition.Exit);
         return ret; 
     }
@@ -86,7 +91,8 @@ export class HubService extends XCoreServiceBase {
 export interface IHubServiceData {
     ApiEndpoints: IHubServiceApiEndpoint[],
     MenuItems: IHubServiceMenuItem[],
-    Scopes: string
+    Scopes: string,
+    UserId: string
 }
 
 export interface IHubServiceApiEndpoint {
