@@ -113,7 +113,7 @@ System.register(['@angular/core', '../service/core-services.service', '../compon
                 };
                 ;
                 SecurityComponent.prototype.resetLocalHubData = function () {
-                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
+                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "", UserId: "" };
                 };
                 SecurityComponent.prototype.logout = function () {
                     var trace = this.classTrace("logout");

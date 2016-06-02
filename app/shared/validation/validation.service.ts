@@ -7,7 +7,7 @@ import { ValidatorFn, AsyncValidatorFn } from '@angular/common/src/forms/directi
 @Injectable()
 export class ValidationService {
     
-    private classTrace: (methodName: string) => (methodPosition: TraceMethodPosition, extraMessage?: string) => void;
+    protected classTrace: (methodName: string) => (methodPosition: TraceMethodPosition, extraMessage?: string) => void;
 
     public getValidatorErrorMessage(code: string): string {
         let config = {
@@ -22,16 +22,7 @@ export class ValidationService {
         this.classTrace = this.loggingService.getTraceFunction("ValidationService");
     }
     
-    // static creditCardValidator(control) {
-    //     // Visa, MasterCard, American Express, Diners Club, Discover, JCB
-    //     if (control.value.match(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/)) {
-    //         return null;
-    //     } else {
-    //         return { "invalidCreditCard": true };
-    //     }
-    // }
-
-    public static emailValidator(control) {
+    public static emailValidator(control): IValidationResult {
         // RFC 2822 compliant regex
         if (control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
             return null;
@@ -41,7 +32,7 @@ export class ValidationService {
     }
 
     public getValidationResults(controlGroup: ControlGroup, controlDescriptions: string[], 
-        formLevelValidation?: ValidatorFn, asyncFormLevelValidation?: AsyncValidatorFn, options?: IValidationOptions): IFormValidationResult[] {
+        formLevelValidation?: ValidatorFn, asyncFormLevelValidation?: AsyncValidatorFn, options?: IValidationOptions): Promise<IFormValidationResult[]> {
         
         var trace = this.classTrace("getValidationResults");
         trace(TraceMethodPosition.Entry);
@@ -50,24 +41,29 @@ export class ValidationService {
                     
         //Process form level validation not attached to any particular control
         var flv: IFormValidationResult[] = [];
+        var flp: Promise<IFormValidationResult[]>;
         if (formLevelValidation || asyncFormLevelValidation) {
-            flv = this.processFormLevelValidation(controlGroup, formLevelValidation, asyncFormLevelValidation);
+            flp = this.processFormLevelValidation(controlGroup, formLevelValidation, asyncFormLevelValidation);
+        } else {
+            flp = Promise.resolve([]);
         }
         
-        //Build form validation results from control-level validation/form-level validation        
-        var ret = _.map(this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), ce => {
-                var res = <IFormValidationResult>{ control: ce.control, message: this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription, 
-                    type: ValidationResultType.Error, getMessage: () => { return res.controlDescription + ": " + res.message; } }; 
-                return res;   
-            }).concat(flv);
-            
+        //Build form validation results from control-level validation/form-level validation
+        var clp = flp.then(flv => {
+            return Promise.resolve(_.map(this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), ce => {
+                    var res = <IFormValidationResult>{ control: ce.control, message: this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription, 
+                        type: ValidationResultType.Error, getMessage: () => { return res.controlDescription + ": " + res.message; } }; 
+                    return res;   
+                }).concat(flv));            
+        });
+                                  
         trace(TraceMethodPosition.Exit);
-        return ret;
+        return clp;
         
     }
     
     private processControlLevelValidation(controlGroup: ControlGroup, controlDescriptions: string[], dirtyOnly: boolean): IControlLevelErrorResult[] {
-
+                
         var trace = this.classTrace("processControlLevelValidation");
         trace(TraceMethodPosition.Entry);
 
@@ -90,25 +86,53 @@ export class ValidationService {
         return controlErrors;
     }
     
-    private processFormLevelValidation(controlGroup: ControlGroup, formLevelValidation: ValidatorFn, asyncFormLevelValidation: AsyncValidatorFn): IFormValidationResult[] {
+    private processFormLevelValidation(controlGroup: ControlGroup, formLevelValidation: ValidatorFn, asyncFormLevelValidation: AsyncValidatorFn): Promise<IFormValidationResult[]> {
+        
         var trace = this.classTrace("processFormLevelValidation");
         trace(TraceMethodPosition.Entry);
 
-        var formLevelResults = [];
-        if (formLevelValidation) 
-            formLevelResults = _.chain(formLevelValidation(controlGroup))
-                .pickBy(flv => flv === true)
-                .map((flv, flr) => {
-                    var res = <IFormValidationResult>{ control: null, message: this.getValidatorErrorMessage(flr), controlDescription: null, 
-                        type: ValidationResultType.Error, getMessage: () => { return res.message; }};
-                    return res;  
-                }).value();
-                
+        var formLevelResultsPromise = new Promise<IFormValidationResult[]>((resolve,reject) => {
+            var formLevelResults = [];
+            if (formLevelValidation)
+                formLevelResults = formLevelResults.concat(this.buildValidationResultsFromValidatorResults(formLevelValidation(controlGroup))); 
+            
+            if (asyncFormLevelValidation) {
+                asyncFormLevelValidation(controlGroup).then(results => {
+                    formLevelResults = formLevelResults.concat(this.buildValidationResultsFromValidatorResults(results));
+                    resolve(formLevelResults);
+                }, err => {
+                    this.loggingService.error(err, "Unable to complete validation. An error occurred");
+                    reject(err);
+                });                
+            } else {
+                resolve(formLevelResults);
+            }
+
+        });
+            
+
         trace(TraceMethodPosition.Exit);
-        return formLevelResults;
+        return formLevelResultsPromise;
         
     }
     
+    
+    private buildValidationResultsFromValidatorResults(results: any): IFormValidationResult[] {
+
+        var trace = this.classTrace("buildValidationResultsFromValidatorResults");
+        trace(TraceMethodPosition.Entry);
+
+        var ret = _.chain(results)            
+            .pickBy(flv => flv === true)
+            .map((flv, flr) => {
+                var res = <IFormValidationResult>{ control: null, message: this.getValidatorErrorMessage(flr), controlDescription: null, 
+                    type: ValidationResultType.Error, getMessage: () => { return res.message; }};
+                return res;  
+            }).value();
+            
+        trace(TraceMethodPosition.Exit);
+        return ret;
+    }
     
     public buildControlGroup(builder: FormBuilder, controlDefinitions: IControlDefinition[]): { controlGroup: ControlGroup, controlDataDescriptions: string[] } {
         
@@ -162,4 +186,8 @@ export enum ValidationResultType {
 
 export interface IValidationOptions {
     dirtyOnly?: boolean;
+}
+
+export interface IValidationResult {
+    [key:string]: boolean;
 }

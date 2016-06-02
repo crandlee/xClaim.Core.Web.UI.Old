@@ -1,7 +1,7 @@
 <div class="container">
     <div *ngIf="active" class="edit-panel" >
         <div class="navbar navbar-inverse center">
-            <h4>User Information for: {{userProfile.UserName}}</h4>
+            <h4>User Information for: {{userProfile.Name}}</h4>
         </div>
         <form (ngSubmit)="onSubmit()" [ngFormModel]="form">
             <div class="form-group">

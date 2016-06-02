@@ -111,7 +111,7 @@ export class SecurityComponent extends XCoreBaseComponent implements OnInit  {
     };
         
     public resetLocalHubData() {
-        this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes:"" }        
+        this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes:"", UserId: "" }        
     }
     
     public logout(): void {

@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', './userprofile.validation',
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1;
+    var core_1, common_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1, lodash_1;
     var UserProfileComponent;
     return {
         setters:[
@@ -24,6 +24,9 @@ System.register(['@angular/core', '@angular/common', './userprofile.validation',
             },
             function (common_1_1) {
                 common_1 = common_1_1;
+            },
+            function (async_validator_service_1_1) {
+                async_validator_service_1 = async_validator_service_1_1;
             },
             function (userprofile_validation_1_1) {
                 userprofile_validation_1 = userprofile_validation_1_1;
@@ -39,6 +42,9 @@ System.register(['@angular/core', '@angular/common', './userprofile.validation',
             },
             function (hub_service_1_1) {
                 hub_service_1 = hub_service_1_1;
+            },
+            function (lodash_1_1) {
+                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             UserProfileComponent = (function (_super) {
@@ -58,8 +64,10 @@ System.register(['@angular/core', '@angular/common', './userprofile.validation',
                     var _this = this;
                     var trace = this.classTrace("initializeForm");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var emailControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required]));
+                    var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userProfileService, _this.userProfile.Id); });
                     var buildReturn = this.validationService.buildControlGroup(builder, [
-                        { controlName: "EMailControl", description: "EMail", control: new common_1.Control("", common_1.Validators.compose([common_1.Validators.required, userprofile_validation_1.UserProfileValidationService.emailValidator])) },
+                        { controlName: "EMailControl", description: "EMail", control: emailControl },
                         { controlName: "PasswordControl", description: "Password", control: new common_1.Control("", common_1.Validators.compose([common_1.Validators.required])) },
                         { controlName: "ConfirmPasswordControl", description: "Confirm Password", control: new common_1.Control("", common_1.Validators.compose([common_1.Validators.required])) }
                     ]);
@@ -68,7 +76,10 @@ System.register(['@angular/core', '@angular/common', './userprofile.validation',
                     this.form.valueChanges.subscribe(function (form) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart, "FormChangesEvent");
                         var flv = common_1.Validators.compose([userprofile_validation_1.UserProfileValidationService.passwordCompare]);
-                        _this.validationMessages = _this.validationService.getValidationResults(_this.form, _this.controlDataDescriptions, flv);
+                        var flav = common_1.Validators.composeAsync([emailAsyncValidator]);
+                        _this.validationService.getValidationResults(_this.form, _this.controlDataDescriptions, flv, flav).then(function (results) {
+                            _this.validationMessages = results;
+                        });
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd, "FormChangesEvent");
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -79,13 +90,14 @@ System.register(['@angular/core', '@angular/common', './userprofile.validation',
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     userProfileService.getUserProfile(this.hubService.HubData.UserId).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        console.log(up);
-                        // this.userProfile = {
-                        //     UserName: up.UserName,
-                        //     EmailAddress: up.EmailAddress,
-                        //     Password: up.Password,
-                        //     ConfirmPassword: up.ConfirmPassword      
-                        // };            
+                        var emailClaim = lodash_1.default.find(up.Claims, function (c) { return c.Definition && c.Definition.Name == "email"; });
+                        _this.userProfile = {
+                            Id: up.Id,
+                            Name: up.Name,
+                            EmailAddress: (emailClaim && emailClaim.Value) || "",
+                            Password: "",
+                            ConfirmPassword: ""
+                        };
                         _this.active = true;
                         _this.initializeForm(_this.builder);
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd);

@@ -46,7 +46,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     configurable: true
                 });
                 ;
-                Object.defineProperty(AppSettings.prototype, "HubController", {
+                Object.defineProperty(AppSettings.prototype, "HubRoute", {
                     get: function () { return 'Hub'; },
                     enumerable: true,
                     configurable: true

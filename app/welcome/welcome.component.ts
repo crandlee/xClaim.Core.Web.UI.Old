@@ -13,7 +13,7 @@ import _ from 'lodash';
 })
 export class WelcomeComponent extends XCoreBaseComponent implements OnInit {
 
-    public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"" };;
+    public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"", UserId: "" };
     public menuItems: IMainMenuItem[] = [];
     public menuItemIdGenerator: number = 0;
     
@@ -21,23 +21,18 @@ export class WelcomeComponent extends XCoreBaseComponent implements OnInit {
         super(xCoreServices);
         
         this.initializeTrace("WelcomeComponent");
-        var trace = this.classTrace("constructor");
-        trace(TraceMethodPosition.Entry);
-        
-        //Set up events
-        this.hubService.HubDataCompletedEvent.subscribe(hd => {
-            trace(TraceMethodPosition.CallbackStart);
-            this.hubData = hd;
-            this.hubData.MenuItems = _.chain(this.hubData.MenuItems)
-                .sortBy(mi => mi.Description)
-                .value();
-            this.menuItems = this.flattenMenuItems();
-            trace(TraceMethodPosition.CallbackEnd);            
-        });
-        
-        trace(TraceMethodPosition.Exit);
     }
 
+    private loadMenuItems(hd: IHubServiceData) {
+        var trace = this.classTrace("loadMenuItems");
+        trace(TraceMethodPosition.CallbackStart);
+        this.hubData = hd;
+        this.hubData.MenuItems = _.chain(this.hubData.MenuItems)
+            .sortBy(mi => mi.Description)
+            .value();
+        this.menuItems = this.flattenMenuItems();
+        trace(TraceMethodPosition.CallbackEnd);                    
+    }
     public visibleMenuItems() {
         var trace = this.classTrace("visibleMenuItems");
         trace(TraceMethodPosition.Entry);        
@@ -148,6 +143,14 @@ export class WelcomeComponent extends XCoreBaseComponent implements OnInit {
     
     ngOnInit() {
         super.NotifyLoaded("Welcome");
+        
+        if (this.hubService.HubDataLoaded)
+            this.loadMenuItems(this.hubService.HubData)
+        else                   
+            this.hubService.HubDataCompletedEvent.subscribe(hd => {
+                this.loadMenuItems(hd);
+            });
+
     }
 
 }

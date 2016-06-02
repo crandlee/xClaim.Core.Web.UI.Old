@@ -52,8 +52,7 @@ export class HubService extends XCoreServiceBase {
         trace(TraceMethodPosition.Entry);
         var obs = super.getObjectData<IHubServiceData>({
              ApiRoot: this.xCoreServices.AppSettings.HubApiEndpoint,
-             ApiController: this.xCoreServices.AppSettings.HubController,
-             ServiceDataDescription: "Menu Items" });
+             ServiceDataDescription: "Menu Items" }, this.xCoreServices.AppSettings.HubRoute);
         obs.subscribe(hb => {
             trace(TraceMethodPosition.CallbackStart, "HubDataRetrievedEvent");
            //Update with the proper api scopes - hub should not be called again until total refresh

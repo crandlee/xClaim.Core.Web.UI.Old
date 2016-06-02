@@ -41,29 +41,24 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
             WelcomeComponent = (function (_super) {
                 __extends(WelcomeComponent, _super);
                 function WelcomeComponent(xCoreServices, hubService) {
-                    var _this = this;
                     _super.call(this, xCoreServices);
                     this.xCoreServices = xCoreServices;
                     this.hubService = hubService;
-                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "" };
+                    this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "", UserId: "" };
                     this.menuItems = [];
                     this.menuItemIdGenerator = 0;
                     this.initializeTrace("WelcomeComponent");
-                    var trace = this.classTrace("constructor");
-                    trace(core_services_service_1.TraceMethodPosition.Entry);
-                    //Set up events
-                    this.hubService.HubDataCompletedEvent.subscribe(function (hd) {
-                        trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        _this.hubData = hd;
-                        _this.hubData.MenuItems = lodash_1.default.chain(_this.hubData.MenuItems)
-                            .sortBy(function (mi) { return mi.Description; })
-                            .value();
-                        _this.menuItems = _this.flattenMenuItems();
-                        trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
-                    });
-                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 }
-                ;
+                WelcomeComponent.prototype.loadMenuItems = function (hd) {
+                    var trace = this.classTrace("loadMenuItems");
+                    trace(core_services_service_1.TraceMethodPosition.CallbackStart);
+                    this.hubData = hd;
+                    this.hubData.MenuItems = lodash_1.default.chain(this.hubData.MenuItems)
+                        .sortBy(function (mi) { return mi.Description; })
+                        .value();
+                    this.menuItems = this.flattenMenuItems();
+                    trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
+                };
                 WelcomeComponent.prototype.visibleMenuItems = function () {
                     var trace = this.classTrace("visibleMenuItems");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
@@ -162,7 +157,14 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 WelcomeComponent.prototype.ngOnInit = function () {
+                    var _this = this;
                     _super.prototype.NotifyLoaded.call(this, "Welcome");
+                    if (this.hubService.HubDataLoaded)
+                        this.loadMenuItems(this.hubService.HubData);
+                    else
+                        this.hubService.HubDataCompletedEvent.subscribe(function (hd) {
+                            _this.loadMenuItems(hd);
+                        });
                 };
                 WelcomeComponent = __decorate([
                     core_1.Component({

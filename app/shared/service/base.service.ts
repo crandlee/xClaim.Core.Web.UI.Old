@@ -97,10 +97,10 @@ export class BaseService {
         }   
     }
 
-    protected getTextData(serviceOptions: IServiceOptions, routePath?: string, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
+    protected getTextData(serviceOptions: IServiceOptions, routePath: string, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
         var trace = this.classTrace("getTextData");
         trace(TraceMethodPosition.Entry);
-        var baseObs = this.getBaseGetObservable(serviceOptions.ApiController, routePath)                                        
+        var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, routePath)                                        
                 .map(res => { return res.text(); });
             var tailObs = this.getTailGetObservable<string>(baseObs, serviceOptions, onError);   
         var ret  = this.executeObservable(tailObs);
@@ -108,13 +108,13 @@ export class BaseService {
         return ret;
     }
 
-    private getBaseGetObservable(apiRoot: string, controllerUrl: string, routePath?: string, options?: RequestOptions): Observable<Response> {
+    private getBaseGetObservable(apiRoot: string, routePath: string, options?: RequestOptions): Observable<Response> {
         var trace = this.classTrace("getBaseGetObservable");
         trace(TraceMethodPosition.Entry);
         apiRoot = this.getCleanApiRoot(apiRoot);
-        this.xCoreServices.LoggingService.debug(`Making a GET request to ${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}`);
+        this.xCoreServices.LoggingService.debug(`Making a GET request to ${apiRoot}${this.getCleanRoutePath(routePath)}`);
         var ret = this.xCoreServices.Http
-            .get(`${apiRoot}/${controllerUrl}${this.getCleanRoutePath(routePath)}`, this.setHeaders(options)).share();
+            .get(`${apiRoot}${this.getCleanRoutePath(routePath)}`, this.setHeaders(options)).share();
         trace(TraceMethodPosition.Exit);
         return ret;
     }   
@@ -158,12 +158,12 @@ export class BaseService {
         return errorDescription; 
     }   
      
-    protected getObjectData<TData>(serviceOptions: IServiceOptions, routePath?: string, 
+    protected getObjectData<TData>(serviceOptions: IServiceOptions, routePath: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TData>) => void): Observable<TData> {
             
             var trace = this.classTrace("getObjectData");
             trace(TraceMethodPosition.Entry);
-            var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, serviceOptions.ApiController, routePath, requestOptions)
+            var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, routePath, requestOptions)
                 .map<TData>(res => { return res.json(); });                
             var tailObs = this.getTailGetObservable<TData>(baseObs, serviceOptions, onError);   
         var ret =  this.executeObservable(tailObs);
@@ -171,14 +171,14 @@ export class BaseService {
         return ret;
     }
     
-    protected postData(data: any, serviceOptions: IServiceOptions,routePath?: string, 
+    protected postData(data: any, serviceOptions: IServiceOptions, routePath: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
         
         var trace = this.classTrace("postData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);        
         var baseObs = this.xCoreServices.Http
-                .post(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
+                .post(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share();
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
         var ret =  this.executeObservable(tailObs);
@@ -186,14 +186,14 @@ export class BaseService {
         return ret;
     }
 
-    protected putData(data: any, serviceOptions: IServiceOptions, routePath?: string, 
+    protected putData(data: any, serviceOptions: IServiceOptions, routePath: string, 
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
         
         var trace = this.classTrace("putData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
-                .put(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
+                .put(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share();
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
         var ret = this.executeObservable(tailObs);
@@ -201,14 +201,14 @@ export class BaseService {
         return ret;
     }
 
-    protected deleteData(data: any, serviceOptions: IServiceOptions, routePath?: string,  
+    protected deleteData(data: any, serviceOptions: IServiceOptions, routePath: string,  
         requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
         
         var trace = this.classTrace("deleteData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
-                .delete(`${serviceOptions.ApiRoot}/${serviceOptions.ApiController}${this.getCleanRoutePath(routePath)}`, 
+                .delete(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
                     this.setHeaders(requestOptions)).share();
         var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
         var ret =  this.executeObservable(tailObs);
@@ -224,8 +224,7 @@ export interface IServiceOptions {
     ServiceDataDescription?: string;
     ServiceError?: string;
     PropogateException?: boolean;
-    ApiRoot: string,
-    ApiController: string
+    ApiRoot: string
 }
 
 

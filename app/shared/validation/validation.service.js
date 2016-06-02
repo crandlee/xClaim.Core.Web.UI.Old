@@ -36,14 +36,6 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                     };
                     return config[code] || "Unknown Error (key = " + code + ")";
                 };
-                // static creditCardValidator(control) {
-                //     // Visa, MasterCard, American Express, Diners Club, Discover, JCB
-                //     if (control.value.match(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/)) {
-                //         return null;
-                //     } else {
-                //         return { "invalidCreditCard": true };
-                //     }
-                // }
                 ValidationService.emailValidator = function (control) {
                     // RFC 2822 compliant regex
                     if (control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
@@ -60,17 +52,23 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                     var dirtyOnly = (options && options.dirtyOnly || false);
                     //Process form level validation not attached to any particular control
                     var flv = [];
+                    var flp;
                     if (formLevelValidation || asyncFormLevelValidation) {
-                        flv = this.processFormLevelValidation(controlGroup, formLevelValidation, asyncFormLevelValidation);
+                        flp = this.processFormLevelValidation(controlGroup, formLevelValidation, asyncFormLevelValidation);
                     }
-                    //Build form validation results from control-level validation/form-level validation        
-                    var ret = lodash_1.default.map(this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), function (ce) {
-                        var res = { control: ce.control, message: _this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription,
-                            type: ValidationResultType.Error, getMessage: function () { return res.controlDescription + ": " + res.message; } };
-                        return res;
-                    }).concat(flv);
+                    else {
+                        flp = Promise.resolve([]);
+                    }
+                    //Build form validation results from control-level validation/form-level validation
+                    var clp = flp.then(function (flv) {
+                        return Promise.resolve(lodash_1.default.map(_this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), function (ce) {
+                            var res = { control: ce.control, message: _this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription,
+                                type: ValidationResultType.Error, getMessage: function () { return res.controlDescription + ": " + res.message; } };
+                            return res;
+                        }).concat(flv));
+                    });
                     trace(logging_service_1.TraceMethodPosition.Exit);
-                    return ret;
+                    return clp;
                 };
                 ValidationService.prototype.processControlLevelValidation = function (controlGroup, controlDescriptions, dirtyOnly) {
                     var trace = this.classTrace("processControlLevelValidation");
@@ -94,17 +92,39 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                     var _this = this;
                     var trace = this.classTrace("processFormLevelValidation");
                     trace(logging_service_1.TraceMethodPosition.Entry);
-                    var formLevelResults = [];
-                    if (formLevelValidation)
-                        formLevelResults = lodash_1.default.chain(formLevelValidation(controlGroup))
-                            .pickBy(function (flv) { return flv === true; })
-                            .map(function (flv, flr) {
-                            var res = { control: null, message: _this.getValidatorErrorMessage(flr), controlDescription: null,
-                                type: ValidationResultType.Error, getMessage: function () { return res.message; } };
-                            return res;
-                        }).value();
+                    var formLevelResultsPromise = new Promise(function (resolve, reject) {
+                        var formLevelResults = [];
+                        if (formLevelValidation)
+                            formLevelResults = formLevelResults.concat(_this.buildValidationResultsFromValidatorResults(formLevelValidation(controlGroup)));
+                        if (asyncFormLevelValidation) {
+                            asyncFormLevelValidation(controlGroup).then(function (results) {
+                                formLevelResults = formLevelResults.concat(_this.buildValidationResultsFromValidatorResults(results));
+                                resolve(formLevelResults);
+                            }, function (err) {
+                                _this.loggingService.error(err, "Unable to complete validation. An error occurred");
+                                reject(err);
+                            });
+                        }
+                        else {
+                            resolve(formLevelResults);
+                        }
+                    });
                     trace(logging_service_1.TraceMethodPosition.Exit);
-                    return formLevelResults;
+                    return formLevelResultsPromise;
+                };
+                ValidationService.prototype.buildValidationResultsFromValidatorResults = function (results) {
+                    var _this = this;
+                    var trace = this.classTrace("buildValidationResultsFromValidatorResults");
+                    trace(logging_service_1.TraceMethodPosition.Entry);
+                    var ret = lodash_1.default.chain(results)
+                        .pickBy(function (flv) { return flv === true; })
+                        .map(function (flv, flr) {
+                        var res = { control: null, message: _this.getValidatorErrorMessage(flr), controlDescription: null,
+                            type: ValidationResultType.Error, getMessage: function () { return res.message; } };
+                        return res;
+                    }).value();
+                    trace(logging_service_1.TraceMethodPosition.Exit);
+                    return ret;
                 };
                 ValidationService.prototype.buildControlGroup = function (builder, controlDefinitions) {
                     var trace = this.classTrace("buildControlGroup");

@@ -34,20 +34,19 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
         execute: function() {
             UserProfileService = (function (_super) {
                 __extends(UserProfileService, _super);
-                //public userProfileSubject = new Subject<IUserProfile>();
-                //public userProfileObservable = this.userProfileSubject.asObservable().share();
                 function UserProfileService(xCoreServices, hubService) {
                     _super.call(this, xCoreServices);
                     this.hubService = hubService;
                     this.apiController = 'UserProfile';
                 }
+                UserProfileService.prototype.getEndpoint = function () {
+                    return { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot };
+                };
                 UserProfileService.prototype.getUserProfile = function (userId) {
-                    // this.userProfileSubject.next({
-                    //    UserName: "rlee",
-                    //    EmailAddress: "crandlee@gmail.com"            
-                    // });
-                    // return this.userProfileObservable;
-                    return this.getObjectData({ ApiController: 'users', ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot }, "" + userId);
+                    return this.getObjectData(this.getEndpoint(), "userfromid/" + userId);
+                };
+                UserProfileService.prototype.isEmailDuplicate = function (email, userId) {
+                    return this.getObjectData(this.getEndpoint(), "userfromemail/" + email + "/isduplicated/" + userId);
                 };
                 UserProfileService = __decorate([
                     core_1.Injectable(), 

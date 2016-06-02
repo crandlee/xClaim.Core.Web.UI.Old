@@ -80,8 +80,7 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = _super.prototype.getObjectData.call(this, {
                         ApiRoot: this.xCoreServices.AppSettings.HubApiEndpoint,
-                        ApiController: this.xCoreServices.AppSettings.HubController,
-                        ServiceDataDescription: "Menu Items" });
+                        ServiceDataDescription: "Menu Items" }, this.xCoreServices.AppSettings.HubRoute);
                     obs.subscribe(function (hb) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart, "HubDataRetrievedEvent");
                         //Update with the proper api scopes - hub should not be called again until total refresh

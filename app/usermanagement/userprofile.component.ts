@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
 import { IFormValidationResult } from '../shared/validation/validation.service';
+import { AsyncValidator } from '../shared/validation/async-validator.service';
 import { UserProfileValidationService } from './userprofile.validation';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { UserProfileService, IUserProfile } from '../usermanagement/userprofile.service';
 import { XCoreBaseComponent } from '../shared/component/base.component';
 import { HubService } from '../shared/hub/hub.service';
+import _ from 'lodash';
 
 @Component({
     templateUrl: 'app/usermanagement/userprofile.component.html',
@@ -32,11 +34,15 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         var trace = this.classTrace("initializeForm");
         trace(TraceMethodPosition.Entry);
 
+        var emailControl = new Control("", Validators.compose([Validators.required]));
+        var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userProfileService, this.userProfile.Id));
+            
         var buildReturn = this.validationService.buildControlGroup(builder, [
-            { controlName: "EMailControl", description: "EMail", control: new Control("", Validators.compose([Validators.required, UserProfileValidationService.emailValidator]))},
+            { controlName: "EMailControl", description: "EMail", control: emailControl},
             { controlName: "PasswordControl", description: "Password", control: new Control("", Validators.compose([Validators.required]))},
             { controlName: "ConfirmPasswordControl", description: "Confirm Password", control: new Control("", Validators.compose([Validators.required]))}
         ]);
+        
         
         this.form = buildReturn.controlGroup;
         this.controlDataDescriptions = buildReturn.controlDataDescriptions;
@@ -44,10 +50,13 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         this.form.valueChanges.subscribe(form => {
             trace(TraceMethodPosition.CallbackStart, "FormChangesEvent");
             var flv = Validators.compose([UserProfileValidationService.passwordCompare]);
-            this.validationMessages = this.validationService.getValidationResults(this.form, this.controlDataDescriptions, flv);
+            var flav = Validators.composeAsync([emailAsyncValidator]);
+            this.validationService.getValidationResults(this.form, this.controlDataDescriptions, flv, flav).then(results => {
+                this.validationMessages = results;
+            });
             trace(TraceMethodPosition.CallbackEnd, "FormChangesEvent");                                    
         });
-        
+                
         trace(TraceMethodPosition.Exit);
         
     }
@@ -59,13 +68,14 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         
         userProfileService.getUserProfile(this.hubService.HubData.UserId).subscribe(up => {
             trace(TraceMethodPosition.CallbackStart);
-            console.log(up);
-            // this.userProfile = {
-            //     UserName: up.UserName,
-            //     EmailAddress: up.EmailAddress,
-            //     Password: up.Password,
-            //     ConfirmPassword: up.ConfirmPassword      
-            // };            
+            var emailClaim = _.find(up.Claims, c => c.Definition && c.Definition.Name == "email");
+            this.userProfile = {
+                 Id: up.Id,
+                 Name: up.Name,
+                 EmailAddress: (emailClaim && emailClaim.Value) || "",
+                 Password: "",
+                 ConfirmPassword: ""      
+            };            
             this.active = true;
             this.initializeForm(this.builder);
             trace(TraceMethodPosition.CallbackEnd);            
@@ -89,8 +99,15 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
 }
 
 export interface IUserProfileViewModel {
-     UserName: string;
+     Name: string;
+     Id: string;
      EmailAddress: string;
      Password?: string;
-     ConfirmPassword?: string;
+     ConfirmPassword?: string;     
+}
+
+export interface IUserClaimViewModel {
+     Name: string;
+     Description: string;
+     Value: string;
 }
