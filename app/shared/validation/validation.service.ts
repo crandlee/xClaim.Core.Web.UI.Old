@@ -50,11 +50,15 @@ export class ValidationService {
         
         //Build form validation results from control-level validation/form-level validation
         var clp = flp.then(flv => {
-            return Promise.resolve(_.map(this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), ce => {
+            return new Promise(resolve => {
+                var ret = _.map(this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), ce => {
                     var res = <IFormValidationResult>{ control: ce.control, message: this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription, 
                         type: ValidationResultType.Error, getMessage: () => { return res.controlDescription + ": " + res.message; } }; 
                     return res;   
-                }).concat(flv));            
+                }).concat(flv);
+                resolve(ret);
+            });
+                        
         });
                                   
         trace(TraceMethodPosition.Exit);
@@ -95,22 +99,21 @@ export class ValidationService {
             var formLevelResults = [];
             if (formLevelValidation)
                 formLevelResults = formLevelResults.concat(this.buildValidationResultsFromValidatorResults(formLevelValidation(controlGroup))); 
-            
+                
             if (asyncFormLevelValidation) {
                 asyncFormLevelValidation(controlGroup).then(results => {
                     formLevelResults = formLevelResults.concat(this.buildValidationResultsFromValidatorResults(results));
+                    trace(TraceMethodPosition.Exit);
                     resolve(formLevelResults);
+                    return;
                 }, err => {
                     this.loggingService.error(err, "Unable to complete validation. An error occurred");
                     reject(err);
-                });                
+                });
             } else {
-                resolve(formLevelResults);
+                resolve(formLevelResults);                
             }
-
-        });
-            
-
+        });            
         trace(TraceMethodPosition.Exit);
         return formLevelResultsPromise;
         

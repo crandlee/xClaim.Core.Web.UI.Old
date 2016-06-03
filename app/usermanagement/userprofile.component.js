@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/async
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1, lodash_1;
+    var core_1, common_1, validation_component_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1, lodash_1;
     var UserProfileComponent;
     return {
         setters:[
@@ -24,6 +24,9 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/async
             },
             function (common_1_1) {
                 common_1 = common_1_1;
+            },
+            function (validation_component_1_1) {
+                validation_component_1 = validation_component_1_1;
             },
             function (async_validator_service_1_1) {
                 async_validator_service_1 = async_validator_service_1_1;
@@ -64,15 +67,18 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/async
                     var _this = this;
                     var trace = this.classTrace("initializeForm");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
+                    //Set up any async validators
                     var emailControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required]));
                     var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userProfileService, _this.userProfile.Id); });
+                    //Set up controls            
                     var buildReturn = this.validationService.buildControlGroup(builder, [
                         { controlName: "EMailControl", description: "EMail", control: emailControl },
-                        { controlName: "PasswordControl", description: "Password", control: new common_1.Control("", common_1.Validators.compose([common_1.Validators.required])) },
+                        { controlName: "PasswordControl", description: "Password", control: new common_1.Control("", common_1.Validators.compose([common_1.Validators.required, userprofile_validation_1.UserProfileValidationService.passwordStrength])) },
                         { controlName: "ConfirmPasswordControl", description: "Confirm Password", control: new common_1.Control("", common_1.Validators.compose([common_1.Validators.required])) }
                     ]);
                     this.form = buildReturn.controlGroup;
                     this.controlDataDescriptions = buildReturn.controlDataDescriptions;
+                    //Initialize all validation
                     this.form.valueChanges.subscribe(function (form) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart, "FormChangesEvent");
                         var flv = common_1.Validators.compose([userprofile_validation_1.UserProfileValidationService.passwordCompare]);
@@ -83,6 +89,8 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/async
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd, "FormChangesEvent");
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
+                };
+                UserProfileComponent.prototype.initializeControls = function (validationService) {
                 };
                 UserProfileComponent.prototype.getInitialData = function (userProfileService, hubService) {
                     var _this = this;
@@ -95,8 +103,8 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/async
                             Id: up.Id,
                             Name: up.Name,
                             EmailAddress: (emailClaim && emailClaim.Value) || "",
-                            Password: "",
-                            ConfirmPassword: ""
+                            Password: "Dummy@000",
+                            ConfirmPassword: "Dummy@000"
                         };
                         _this.active = true;
                         _this.initializeForm(_this.builder);
@@ -117,7 +125,8 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/async
                 UserProfileComponent = __decorate([
                     core_1.Component({
                         templateUrl: 'app/usermanagement/userprofile.component.html',
-                        providers: [userprofile_service_1.UserProfileService, userprofile_validation_1.UserProfileValidationService]
+                        providers: [userprofile_service_1.UserProfileService, userprofile_validation_1.UserProfileValidationService],
+                        directives: [validation_component_1.ValidationComponent]
                     }), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices, userprofile_service_1.UserProfileService, common_1.FormBuilder, userprofile_validation_1.UserProfileValidationService, hub_service_1.HubService])
                 ], UserProfileComponent);

@@ -47,6 +47,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.hubData = { ApiEndpoints: [], MenuItems: [], Scopes: "", UserId: "" };
                     this.menuItems = [];
                     this.menuItemIdGenerator = 0;
+                    this.hubDataLoaded = false;
                     this.initializeTrace("WelcomeComponent");
                 }
                 WelcomeComponent.prototype.loadMenuItems = function (hd) {
@@ -57,6 +58,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         .sortBy(function (mi) { return mi.Description; })
                         .value();
                     this.menuItems = this.flattenMenuItems();
+                    this.hubDataLoaded = true;
                     trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
                 };
                 WelcomeComponent.prototype.visibleMenuItems = function () {

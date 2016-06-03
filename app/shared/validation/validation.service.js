@@ -61,11 +61,14 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                     }
                     //Build form validation results from control-level validation/form-level validation
                     var clp = flp.then(function (flv) {
-                        return Promise.resolve(lodash_1.default.map(_this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), function (ce) {
-                            var res = { control: ce.control, message: _this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription,
-                                type: ValidationResultType.Error, getMessage: function () { return res.controlDescription + ": " + res.message; } };
-                            return res;
-                        }).concat(flv));
+                        return new Promise(function (resolve) {
+                            var ret = lodash_1.default.map(_this.processControlLevelValidation(controlGroup, controlDescriptions, dirtyOnly), function (ce) {
+                                var res = { control: ce.control, message: _this.getValidatorErrorMessage(ce.error), controlDescription: ce.controlDescription,
+                                    type: ValidationResultType.Error, getMessage: function () { return res.controlDescription + ": " + res.message; } };
+                                return res;
+                            }).concat(flv);
+                            resolve(ret);
+                        });
                     });
                     trace(logging_service_1.TraceMethodPosition.Exit);
                     return clp;
@@ -99,7 +102,9 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                         if (asyncFormLevelValidation) {
                             asyncFormLevelValidation(controlGroup).then(function (results) {
                                 formLevelResults = formLevelResults.concat(_this.buildValidationResultsFromValidatorResults(results));
+                                trace(logging_service_1.TraceMethodPosition.Exit);
                                 resolve(formLevelResults);
+                                return;
                             }, function (err) {
                                 _this.loggingService.error(err, "Unable to complete validation. An error occurred");
                                 reject(err);

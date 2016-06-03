@@ -16,6 +16,7 @@ export class WelcomeComponent extends XCoreBaseComponent implements OnInit {
     public hubData: IHubServiceData =  { ApiEndpoints: [], MenuItems: [], Scopes:"", UserId: "" };
     public menuItems: IMainMenuItem[] = [];
     public menuItemIdGenerator: number = 0;
+    public hubDataLoaded: boolean = false;
     
     constructor(protected xCoreServices: XCoreServices, private hubService: HubService) {
         super(xCoreServices);
@@ -31,6 +32,7 @@ export class WelcomeComponent extends XCoreBaseComponent implements OnInit {
             .sortBy(mi => mi.Description)
             .value();
         this.menuItems = this.flattenMenuItems();
+        this.hubDataLoaded = true;
         trace(TraceMethodPosition.CallbackEnd);                    
     }
     public visibleMenuItems() {

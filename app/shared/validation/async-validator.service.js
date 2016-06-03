@@ -22,7 +22,6 @@ System.register(['rxjs/Observable', 'rxjs/add/operator/debounceTime', 'rxjs/add/
                         _this._validate = function (control) { return observer.next(control); };
                     });
                     source.debounceTime(debounceTime)
-                        .distinctUntilChanged(null, function (x) { return x.control.value; })
                         .map(function (x) { return { control: x.control, promise: validator(x.control), resolver: x.promiseResolver }; })
                         .subscribe(function (x) {
                         return x.promise.then(function (resultValue) {

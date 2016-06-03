@@ -24,6 +24,14 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                     _super.call(this, loggingService);
                     this.classTrace = this.loggingService.getTraceFunction("UserProfileValidationService");
                 }
+                UserProfileValidationService.passwordStrength = function (passwordControl) {
+                    if (passwordControl.value.match(/(?=.{9,})(?=.*?[^\w\s])(?=.*?[0-9])(?=.*?[A-Z]).*?[a-z].*/)) {
+                        return null;
+                    }
+                    else {
+                        return { "passwordNotStrong": true };
+                    }
+                };
                 UserProfileValidationService.prototype.isEmailDuplicate = function (emailControl, userProfileService, id) {
                     var trace = this.classTrace("isEmailDuplicated");
                     if (!id || !emailControl.value)
@@ -49,6 +57,7 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                     var config = (_a = {},
                         _a[UserProfileValidationService.passwordsDoNotMatch] = "Passwords must match",
                         _a[UserProfileValidationService.emailNotUnique] = "This email address is already attached to another user",
+                        _a[UserProfileValidationService.passwordNotStrong] = "The password must be at least 9 characters containing one upper, lower, numeric, and symbol character",
                         _a
                     );
                     return config[code] || _super.prototype.getValidatorErrorMessage.call(this, code);
@@ -56,6 +65,7 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                 };
                 UserProfileValidationService.passwordsDoNotMatch = "passwordsDoNoMatch";
                 UserProfileValidationService.emailNotUnique = "emailNotUnique";
+                UserProfileValidationService.passwordNotStrong = "passwordNotStrong";
                 return UserProfileValidationService;
             }(validation_service_1.ValidationService));
             exports_1("UserProfileValidationService", UserProfileValidationService);

@@ -16,13 +16,7 @@
                 <label for="confirmPassword">Confirm Password</label>
                 <input type="password" placeholder="Confirm Password" name="confirmPassword" class="form-control" ngControl="ConfirmPasswordControl" [(ngModel)]="userProfile.ConfirmPassword" required />
             </div>
-            <div *ngIf="validationMessages.length > 0" class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span>Please correct the following errors:</span>
-                <ul>
-                    <li *ngFor="let msg of validationMessages">{{msg.getMessage()}}</li>                     
-                </ul>
-            </div>
+            <validation [validationMessages]='validationMessages'></validation>
             <div class="form-group clearfix">
                 <button type="submit" class="btn btn-default pull-right" [disabled]="validationMessages.length > 0">Save</button>
             </div>    

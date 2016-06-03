@@ -14,7 +14,7 @@ constructor(validator: (control: AbstractControl) => any, debounceTime = 1000) {
     });
 
     source.debounceTime(debounceTime)
-        .distinctUntilChanged(null, (x) => x.control.value)
+        //.distinctUntilChanged(null, (x) => x.control.value)
         .map(x => { return { control: x.control, promise: validator(x.control), resolver: x.promiseResolver }; })
         .subscribe(
             (x) => { return x.promise.then(resultValue =>  {

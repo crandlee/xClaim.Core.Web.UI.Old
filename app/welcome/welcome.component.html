@@ -1,5 +1,5 @@
 <div class="container main-menu">
-    <div class="jumbotron">
+    <div *ngIf="hubDataLoaded" class="jumbotron">
         <h3 class="menu-header">xClaim Web</h3>
         <div>
             <ul>
@@ -17,4 +17,8 @@
             </ul>
         </div>
     </div>
+    <div *ngIf="!hubDataLoaded" class="loading-message">
+        Loading Main Menu
+    </div>
+
 </div>

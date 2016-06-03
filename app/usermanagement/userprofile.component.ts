@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
 import { IFormValidationResult } from '../shared/validation/validation.service';
+import { ValidationComponent } from '../shared/validation/validation.component';
 import { AsyncValidator } from '../shared/validation/async-validator.service';
 import { UserProfileValidationService } from './userprofile.validation';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
@@ -11,7 +12,8 @@ import _ from 'lodash';
 
 @Component({
     templateUrl: 'app/usermanagement/userprofile.component.html',
-    providers: [UserProfileService, UserProfileValidationService]
+    providers: [UserProfileService, UserProfileValidationService],
+    directives: [ValidationComponent]
 })
 export class UserProfileComponent extends XCoreBaseComponent implements OnInit  {
 
@@ -33,20 +35,21 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
 
         var trace = this.classTrace("initializeForm");
         trace(TraceMethodPosition.Entry);
-
+        
+        //Set up any async validators
         var emailControl = new Control("", Validators.compose([Validators.required]));
         var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userProfileService, this.userProfile.Id));
-            
+
+        //Set up controls            
         var buildReturn = this.validationService.buildControlGroup(builder, [
             { controlName: "EMailControl", description: "EMail", control: emailControl},
-            { controlName: "PasswordControl", description: "Password", control: new Control("", Validators.compose([Validators.required]))},
+            { controlName: "PasswordControl", description: "Password", control: new Control("", Validators.compose([Validators.required, UserProfileValidationService.passwordStrength]))},
             { controlName: "ConfirmPasswordControl", description: "Confirm Password", control: new Control("", Validators.compose([Validators.required]))}
-        ]);
-        
-        
+        ]);                
         this.form = buildReturn.controlGroup;
         this.controlDataDescriptions = buildReturn.controlDataDescriptions;
         
+        //Initialize all validation
         this.form.valueChanges.subscribe(form => {
             trace(TraceMethodPosition.CallbackStart, "FormChangesEvent");
             var flv = Validators.compose([UserProfileValidationService.passwordCompare]);
@@ -61,6 +64,10 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         
     }
     
+    
+    private initializeControls(validationService: UserProfileValidationService) {
+        
+    }
     private getInitialData(userProfileService: UserProfileService, hubService: HubService): void {
         
         var trace = this.classTrace("getInitialData");
@@ -73,8 +80,8 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
                  Id: up.Id,
                  Name: up.Name,
                  EmailAddress: (emailClaim && emailClaim.Value) || "",
-                 Password: "",
-                 ConfirmPassword: ""      
+                 Password: "Dummy@000",
+                 ConfirmPassword: "Dummy@000"      
             };            
             this.active = true;
             this.initializeForm(this.builder);
