@@ -74,6 +74,9 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                     enumerable: true,
                     configurable: true
                 });
+                HubService.prototype.getLoggedInGivenName = function () {
+                    return this.xCoreServices.SecurityService.getUserName();
+                };
                 HubService.prototype.retrieveHubData = function () {
                     var _this = this;
                     var trace = this.classTrace("retrieveHubData");

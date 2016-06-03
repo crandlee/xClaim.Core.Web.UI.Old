@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, validation_component_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1, lodash_1;
+    var core_1, common_1, validation_component_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1;
     var UserProfileComponent;
     return {
         setters:[
@@ -45,9 +45,6 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
             },
             function (hub_service_1_1) {
                 hub_service_1 = hub_service_1_1;
-            },
-            function (lodash_1_1) {
-                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             UserProfileComponent = (function (_super) {
@@ -98,14 +95,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     userProfileService.getUserProfile(this.hubService.HubData.UserId).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        var emailClaim = lodash_1.default.find(up.Claims, function (c) { return c.Definition && c.Definition.Name == "email"; });
-                        _this.userProfile = {
-                            Id: up.Id,
-                            Name: up.Name,
-                            EmailAddress: (emailClaim && emailClaim.Value) || "",
-                            Password: "Dummy@000",
-                            ConfirmPassword: "Dummy@000"
-                        };
+                        _this.userProfile = _this.userProfileService.userProfileToViewModel(up);
                         _this.active = true;
                         _this.initializeForm(_this.builder);
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
@@ -115,12 +105,28 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                 UserProfileComponent.prototype.ngOnInit = function () {
                     var _this = this;
                     _super.prototype.NotifyLoaded.call(this, "UserProfile");
+                    var trace = this.classTrace("ngOnInit");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
                     if (this.hubService.HubDataLoaded)
                         this.getInitialData(this.userProfileService, this.hubService);
                     else
                         this.hubService.HubDataCompletedEvent.subscribe(function (hd) {
+                            trace(core_services_service_1.TraceMethodPosition.Callback);
                             _this.getInitialData(_this.userProfileService, _this.hubService);
                         });
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                };
+                UserProfileComponent.prototype.onSubmit = function () {
+                    var _this = this;
+                    var trace = this.classTrace("onSubmit");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    this.userProfileService.saveUserProfile(this.userProfile).subscribe(function (up) {
+                        trace(core_services_service_1.TraceMethodPosition.Callback);
+                        _this.userProfile = _this.userProfileService.userProfileToViewModel(up);
+                        _this.xCoreServices.LoggingService.success("User profile successfully updated");
+                        _this.xCoreServices.Router.navigate(["/"]);
+                    });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 UserProfileComponent = __decorate([
                     core_1.Component({

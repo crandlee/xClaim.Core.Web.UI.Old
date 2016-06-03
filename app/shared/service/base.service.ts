@@ -171,46 +171,50 @@ export class BaseService {
         return ret;
     }
     
-    protected postData(data: any, serviceOptions: IServiceOptions, routePath: string, 
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
+    protected postData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string, 
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TRet>) => void): Observable<TRet> {
         
         var trace = this.classTrace("postData");
         trace(TraceMethodPosition.Entry);
-        serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);        
+        serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
+        console.log(JSON.stringify(data));
         var baseObs = this.xCoreServices.Http
                 .post(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
-                    JSON.stringify(data), this.setHeaders(requestOptions)).share();
-        var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    JSON.stringify(data), this.setHeaders(requestOptions)).share()
+                    .map<TRet>( res => { return res.json(); });
+        var tailObs = this.getTailGetObservable<TRet>(baseObs, serviceOptions, onError);
         var ret =  this.executeObservable(tailObs);
         trace(TraceMethodPosition.Exit);
         return ret;
     }
 
-    protected putData(data: any, serviceOptions: IServiceOptions, routePath: string, 
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
+    protected putData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string, 
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TRet>) => void): Observable<TRet> {
         
         var trace = this.classTrace("putData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
                 .put(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
-                    JSON.stringify(data), this.setHeaders(requestOptions)).share();
-        var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    JSON.stringify(data), this.setHeaders(requestOptions)).share()
+                    .map<TRet>( res => { return res.json(); });
+        var tailObs = this.getTailGetObservable<TRet>(baseObs, serviceOptions, onError);
         var ret = this.executeObservable(tailObs);
         trace(TraceMethodPosition.Exit);
         return ret;
     }
 
-    protected deleteData(data: any, serviceOptions: IServiceOptions, routePath: string,  
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<Response>) => void): Observable<Response> {
+    protected deleteData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string,  
+        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TRet>) => void): Observable<TRet> {
         
         var trace = this.classTrace("deleteData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
                 .delete(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
-                    this.setHeaders(requestOptions)).share();
-        var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
+                    this.setHeaders(requestOptions)).share()
+                    .map<TRet>( res => { return res.json(); });
+        var tailObs = this.getTailGetObservable<TRet>(baseObs, serviceOptions, onError);
         var ret =  this.executeObservable(tailObs);
         trace(TraceMethodPosition.Exit);
         return ret;

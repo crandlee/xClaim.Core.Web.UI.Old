@@ -5,7 +5,7 @@ import { ValidationComponent } from '../shared/validation/validation.component';
 import { AsyncValidator } from '../shared/validation/async-validator.service';
 import { UserProfileValidationService } from './userprofile.validation';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
-import { UserProfileService, IUserProfile } from '../usermanagement/userprofile.service';
+import { UserProfileService, IUserProfile, IUserProfileViewModel } from '../usermanagement/userprofile.service';
 import { XCoreBaseComponent } from '../shared/component/base.component';
 import { HubService } from '../shared/hub/hub.service';
 import _ from 'lodash';
@@ -75,14 +75,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         
         userProfileService.getUserProfile(this.hubService.HubData.UserId).subscribe(up => {
             trace(TraceMethodPosition.CallbackStart);
-            var emailClaim = _.find(up.Claims, c => c.Definition && c.Definition.Name == "email");
-            this.userProfile = {
-                 Id: up.Id,
-                 Name: up.Name,
-                 EmailAddress: (emailClaim && emailClaim.Value) || "",
-                 Password: "Dummy@000",
-                 ConfirmPassword: "Dummy@000"      
-            };            
+            this.userProfile = this.userProfileService.userProfileToViewModel(up);
             this.active = true;
             this.initializeForm(this.builder);
             trace(TraceMethodPosition.CallbackEnd);            
@@ -93,28 +86,32 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
     
     ngOnInit() {        
         super.NotifyLoaded("UserProfile");        
-        
+        var trace = this.classTrace("ngOnInit");
+        trace(TraceMethodPosition.Entry);
+
         if (this.hubService.HubDataLoaded)
             this.getInitialData(this.userProfileService, this.hubService);
         else           
-            this.hubService.HubDataCompletedEvent.subscribe(hd => {                
+            this.hubService.HubDataCompletedEvent.subscribe(hd => {
+                trace(TraceMethodPosition.Callback);                
                 this.getInitialData(this.userProfileService, this.hubService);        
             });
         
+        trace(TraceMethodPosition.Entry);
     }
-                  
+                 
+    onSubmit() {
+        var trace = this.classTrace("onSubmit");
+        trace(TraceMethodPosition.Entry);
+        
+        this.userProfileService.saveUserProfile(this.userProfile).subscribe(up => {
+            trace(TraceMethodPosition.Callback);
+            this.userProfile = this.userProfileService.userProfileToViewModel(up);
+            this.xCoreServices.LoggingService.success("User profile successfully updated");
+            this.xCoreServices.Router.navigate(["/"]);
+        });
+        
+        trace(TraceMethodPosition.Exit);
+    }
 }
 
-export interface IUserProfileViewModel {
-     Name: string;
-     Id: string;
-     EmailAddress: string;
-     Password?: string;
-     ConfirmPassword?: string;     
-}
-
-export interface IUserClaimViewModel {
-     Name: string;
-     Description: string;
-     Value: string;
-}

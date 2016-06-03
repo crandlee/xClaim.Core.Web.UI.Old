@@ -45,10 +45,13 @@ export class HubService extends XCoreServiceBase {
         
     }
 
+    public getLoggedInGivenName(): string {        
+        return this.xCoreServices.SecurityService.getUserName();
+    }
+    
     public retrieveHubData(): void {
         
-        var trace = this.classTrace("retrieveHubData");
-                
+        var trace = this.classTrace("retrieveHubData");                
         trace(TraceMethodPosition.Entry);
         var obs = super.getObjectData<IHubServiceData>({
              ApiRoot: this.xCoreServices.AppSettings.HubApiEndpoint,

@@ -30,11 +30,23 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                     this.classTrace = this.loggingService.getTraceFunction("ValidationService");
                 }
                 ValidationService.prototype.getValidatorErrorMessage = function (code) {
-                    var config = {
-                        "required": "Required",
-                        "invalidEmailAddress": "Invalid email address",
-                    };
+                    var config = (_a = {},
+                        _a[ValidationService.required] = "Required",
+                        _a[ValidationService.invalidEmailAddress] = "Invalid email address",
+                        _a[ValidationService.passwordNotStrong] = "The password must be at least 9 characters containing one upper, lower, numeric, and symbol character",
+                        _a
+                    );
                     return config[code] || "Unknown Error (key = " + code + ")";
+                    var _a;
+                };
+                ValidationService.passwordStrength = function (passwordControl) {
+                    if (passwordControl.value.match(/(?=.{9,})(?=.*?[^\w\s])(?=.*?[0-9])(?=.*?[A-Z]).*?[a-z].*/)) {
+                        return null;
+                    }
+                    else {
+                        return (_a = {}, _a[ValidationService.passwordNotStrong] = true, _a);
+                    }
+                    var _a;
                 };
                 ValidationService.emailValidator = function (control) {
                     // RFC 2822 compliant regex
@@ -42,8 +54,9 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                         return null;
                     }
                     else {
-                        return { "invalidEmailAddress": true };
+                        return (_a = {}, _a[ValidationService.invalidEmailAddress] = true, _a);
                     }
+                    var _a;
                 };
                 ValidationService.prototype.getValidationResults = function (controlGroup, controlDescriptions, formLevelValidation, asyncFormLevelValidation, options) {
                     var _this = this;
@@ -149,6 +162,9 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                         controlDataDescriptions: descriptions
                     };
                 };
+                ValidationService.passwordNotStrong = "passwordNotStrong";
+                ValidationService.required = "required";
+                ValidationService.invalidEmailAddress = "invalidEmailAddress";
                 ValidationService = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [logging_service_1.LoggingService])

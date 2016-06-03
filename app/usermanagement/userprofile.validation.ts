@@ -9,22 +9,12 @@ export class UserProfileValidationService extends ValidationService {
     
     private static passwordsDoNotMatch: string = "passwordsDoNoMatch";
     private static emailNotUnique: string = "emailNotUnique";
-    private static passwordNotStrong: string = "passwordNotStrong";
     
     constructor(loggingService: LoggingService) {
         super(loggingService);
         this.classTrace = this.loggingService.getTraceFunction("UserProfileValidationService");
     }
     
-    public static passwordStrength(passwordControl: AbstractControl): IValidationResult {
-        
-        if (passwordControl.value.match(/(?=.{9,})(?=.*?[^\w\s])(?=.*?[0-9])(?=.*?[A-Z]).*?[a-z].*/)) {
-            return null;
-        } else {
-            return { "passwordNotStrong": true };
-        }
-        
-    }
     
     public isEmailDuplicate(emailControl: AbstractControl, userProfileService: UserProfileService, id: string): Promise<IValidationResult> {
         var trace = this.classTrace("isEmailDuplicated");
@@ -54,8 +44,7 @@ export class UserProfileValidationService extends ValidationService {
     public getValidatorErrorMessage(code: string): string {
         let config = {
             [UserProfileValidationService.passwordsDoNotMatch]: "Passwords must match",
-            [UserProfileValidationService.emailNotUnique]: "This email address is already attached to another user",
-            [UserProfileValidationService.passwordNotStrong]: "The password must be at least 9 characters containing one upper, lower, numeric, and symbol character"
+            [UserProfileValidationService.emailNotUnique]: "This email address is already attached to another user"
         };
         return config[code] ||  super.getValidatorErrorMessage(code);
     }

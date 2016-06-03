@@ -174,8 +174,10 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     var trace = this.classTrace("postData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
+                    console.log(JSON.stringify(data));
                     var baseObs = this.xCoreServices.Http
-                        .post("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions)).share();
+                        .post("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions)).share()
+                        .map(function (res) { return res.json(); });
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     var ret = this.executeObservable(tailObs);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -186,7 +188,8 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
                     var baseObs = this.xCoreServices.Http
-                        .put("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions)).share();
+                        .put("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions)).share()
+                        .map(function (res) { return res.json(); });
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     var ret = this.executeObservable(tailObs);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -197,7 +200,8 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
                     var baseObs = this.xCoreServices.Http
-                        .delete("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), this.setHeaders(requestOptions)).share();
+                        .delete("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), this.setHeaders(requestOptions)).share()
+                        .map(function (res) { return res.json(); });
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     var ret = this.executeObservable(tailObs);
                     trace(core_services_service_1.TraceMethodPosition.Exit);

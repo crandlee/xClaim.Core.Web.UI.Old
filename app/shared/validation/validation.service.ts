@@ -9,10 +9,15 @@ export class ValidationService {
     
     protected classTrace: (methodName: string) => (methodPosition: TraceMethodPosition, extraMessage?: string) => void;
 
+    private static passwordNotStrong: string = "passwordNotStrong";
+    private static required: string = "required";
+    private static invalidEmailAddress: string = "invalidEmailAddress";
+
     public getValidatorErrorMessage(code: string): string {
         let config = {
-            "required": "Required",
-            "invalidEmailAddress": "Invalid email address",
+            [ValidationService.required]: "Required",
+            [ValidationService.invalidEmailAddress]: "Invalid email address",
+            [ValidationService.passwordNotStrong]: "The password must be at least 9 characters containing one upper, lower, numeric, and symbol character"
         };
 
         return config[code] || `Unknown Error (key = ${code})`;
@@ -22,12 +27,22 @@ export class ValidationService {
         this.classTrace = this.loggingService.getTraceFunction("ValidationService");
     }
     
+    public static passwordStrength(passwordControl: AbstractControl): IValidationResult {
+        
+        if (passwordControl.value.match(/(?=.{9,})(?=.*?[^\w\s])(?=.*?[0-9])(?=.*?[A-Z]).*?[a-z].*/)) {
+            return null;
+        } else {
+            return { [ValidationService.passwordNotStrong]: true };
+        }
+        
+    }
+
     public static emailValidator(control): IValidationResult {
         // RFC 2822 compliant regex
         if (control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
             return null;
         } else {
-            return { "invalidEmailAddress": true };
+            return { [ValidationService.invalidEmailAddress]: true };
         }
     }
 

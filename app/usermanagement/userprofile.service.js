@@ -1,4 +1,4 @@
-System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service', '../shared/hub/hub.service'], function(exports_1, context_1) {
+System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1, hub_service_1;
+    var core_1, core_services_service_1, hub_service_1, lodash_1;
     var UserProfileService;
     return {
         setters:[
@@ -30,6 +30,9 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
             },
             function (hub_service_1_1) {
                 hub_service_1 = hub_service_1_1;
+            },
+            function (lodash_1_1) {
+                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             UserProfileService = (function (_super) {
@@ -38,15 +41,66 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     _super.call(this, xCoreServices);
                     this.hubService = hubService;
                     this.apiController = 'UserProfile';
+                    this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserProfileService");
                 }
                 UserProfileService.prototype.getEndpoint = function () {
-                    return { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot };
+                    var trace = this.classTrace("getEndpoint");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot };
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
                 };
                 UserProfileService.prototype.getUserProfile = function (userId) {
-                    return this.getObjectData(this.getEndpoint(), "userfromid/" + userId);
+                    var trace = this.classTrace("getUserProfile");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.getObjectData(this.getEndpoint(), "userfromid/" + userId);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
                 };
                 UserProfileService.prototype.isEmailDuplicate = function (email, userId) {
-                    return this.getObjectData(this.getEndpoint(), "userfromemail/" + email + "/isduplicated/" + userId);
+                    var trace = this.classTrace("getUserProfile");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.getObjectData(this.getEndpoint(), "userfromemail/" + email + "/isduplicated/" + userId);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
+                UserProfileService.prototype.userProfileToModel = function (vm) {
+                    var trace = this.classTrace("userProfileToModel");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var up = {
+                        Name: vm.Name,
+                        Id: vm.Id,
+                        SavePassword: vm.Password,
+                        ConfirmPassword: vm.ConfirmPassword,
+                        SaveGivenName: vm.GivenName,
+                        SaveEmailAddress: vm.EmailAddress,
+                        Claims: []
+                    };
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return up;
+                };
+                UserProfileService.prototype.userProfileToViewModel = function (model) {
+                    var trace = this.classTrace("userProfileToModel");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var emailClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "email"; });
+                    var givenNameClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "given_name"; });
+                    var vm = {
+                        Id: model.Id,
+                        Name: model.Name,
+                        GivenName: (givenNameClaim && givenNameClaim.Value) || "",
+                        EmailAddress: (emailClaim && emailClaim.Value) || "",
+                        Password: "Dummy@000",
+                        ConfirmPassword: "Dummy@000"
+                    };
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return vm;
+                };
+                UserProfileService.prototype.saveUserProfile = function (vm) {
+                    var trace = this.classTrace("saveUserProfile");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.postData(this.userProfileToModel(vm), this.getEndpoint(), 'user');
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
                 };
                 UserProfileService = __decorate([
                     core_1.Injectable(), 
