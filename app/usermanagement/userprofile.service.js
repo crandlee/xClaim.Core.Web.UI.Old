@@ -43,24 +43,24 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     this.apiController = 'UserProfile';
                     this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserProfileService");
                 }
-                UserProfileService.prototype.getEndpoint = function () {
+                UserProfileService.prototype.getOptions = function (serviceError) {
                     var trace = this.classTrace("getEndpoint");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot };
+                    var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot, ServiceError: serviceError };
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserProfileService.prototype.getUserProfile = function (userId) {
                     var trace = this.classTrace("getUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getEndpoint(), "userfromid/" + userId);
+                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the user profile"), "userfromid/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserProfileService.prototype.isEmailDuplicate = function (email, userId) {
                     var trace = this.classTrace("getUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getEndpoint(), "userfromemail/" + email + "/isduplicated/" + userId);
+                    var obs = this.getObjectData(this.getOptions("There was an error valdiating the email address"), "userfromemail/" + email + "/isduplicated/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
@@ -98,7 +98,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                 UserProfileService.prototype.saveUserProfile = function (vm) {
                     var trace = this.classTrace("saveUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.postData(this.userProfileToModel(vm), this.getEndpoint(), 'user');
+                    var obs = this.postData(this.userProfileToModel(vm), this.getOptions("There was an error saving the user profile"), 'user');
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };

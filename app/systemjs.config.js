@@ -7,7 +7,6 @@
         '@angular': 'node_modules/@angular',
         'angular2-cookie': 'node_modules/angular2-cookie',
         'lodash': 'node_modules/lodash/lodash.js',
-        'circularjson': 'node_modules/circular-json/build',
         'ng2-bootstrap': 'node_modules/ng2-bootstrap',
         'moment': 'node_modules/moment'
     };
@@ -17,9 +16,8 @@
         'app': { main: 'main.js', defaultExtension: 'js' },
         'rxjs': { defaultExtension: 'js' },
         'angular2-cookie': { main: 'core.js',  defaultExtension: 'js' },
-        'circularjson': { main: 'circular-json.js',  defaultExtension: 'js' },
         'ng2-bootstrap': { main: 'ng2-bootstrap.js', defaultExtension: 'js' },
-        'moment': { main: 'moment.js', defaultExtension: 'js'}        
+        'moment': { main: 'moment.js', defaultExtension: 'js'}
     };
 
     var packageNames = [

@@ -97,7 +97,7 @@ export class BaseService {
         }   
     }
 
-    protected getTextData(serviceOptions: IServiceOptions, routePath: string, requestOptions?: RequestOptions,  onError?: (error: any, caught: Observable<string>) => void): Observable<string> {
+    protected getTextData(serviceOptions: IServiceOptions, routePath: string, requestOptions?: RequestOptions,  onError?: (error: any, friendlyError: string, caught: Observable<string>) => void): Observable<string> {
         var trace = this.classTrace("getTextData");
         trace(TraceMethodPosition.Entry);
         var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, routePath)                                        
@@ -120,18 +120,20 @@ export class BaseService {
     }   
      
     private getTailGetObservable<TData>(currentObservable: Observable<TData>, serviceOptions?: IServiceOptions,
-            onError?:(error: any, caught: Observable<TData>) => void): Observable<TData> {
+            onError?:(error: any, friendlyError: string, caught: Observable<TData>) => void): Observable<TData> {
                 
         var trace = this.classTrace("getTailGetObservable");
         trace(TraceMethodPosition.Entry);
-        if (!onError) onError = (error: any, caught: any) => { this.xCoreServices.LoggingService.error(error); }
+        if (!onError) onError = (error: any, friendlyError: string,  caught: any) => { this.xCoreServices.LoggingService.error(error, friendlyError); }
         var swallowException = (!serviceOptions || !serviceOptions.PropogateException);
         var suppressDefaultException = (serviceOptions && serviceOptions.SuppressDefaultException); 
         currentObservable = currentObservable
-            .catch<TData>((err,caught) => {                
+            .catch<TData>((err,caught) => {
                 if (suppressDefaultException) throw err;
-                var newError = this.getGeneralErrorMessage("retrieving", serviceOptions);
-                onError(newError, caught);
+                var newError = err._body;
+                var friendlyError = this.getGeneralErrorMessage("retrieving", serviceOptions);                
+                if (!err.status || err.status === 200) newError = friendlyError;                                
+                onError(newError, friendlyError, caught);
                 if (swallowException) return Observable.empty<TData>();
                 throw newError;
             }).share();
@@ -159,7 +161,7 @@ export class BaseService {
     }   
      
     protected getObjectData<TData>(serviceOptions: IServiceOptions, routePath: string, 
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TData>) => void): Observable<TData> {
+        requestOptions?: RequestOptions, onError?: (error: any, friendlyError: string, caught: Observable<TData>) => void): Observable<TData> {
             
             var trace = this.classTrace("getObjectData");
             trace(TraceMethodPosition.Entry);
@@ -172,12 +174,11 @@ export class BaseService {
     }
     
     protected postData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string, 
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TRet>) => void): Observable<TRet> {
+        requestOptions?: RequestOptions, onError?: (error: any, friendlyError: string, caught: Observable<TRet>) => void): Observable<TRet> {
         
         var trace = this.classTrace("postData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
-        console.log(JSON.stringify(data));
         var baseObs = this.xCoreServices.Http
                 .post(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
                     JSON.stringify(data), this.setHeaders(requestOptions)).share()
@@ -189,7 +190,7 @@ export class BaseService {
     }
 
     protected putData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string, 
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TRet>) => void): Observable<TRet> {
+        requestOptions?: RequestOptions, onError?: (error: any, friendlyError: string, caught: Observable<TRet>) => void): Observable<TRet> {
         
         var trace = this.classTrace("putData");
         trace(TraceMethodPosition.Entry);
@@ -205,7 +206,7 @@ export class BaseService {
     }
 
     protected deleteData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string,  
-        requestOptions?: RequestOptions, onError?: (error: any, caught: Observable<TRet>) => void): Observable<TRet> {
+        requestOptions?: RequestOptions, onError?: (error: any, friendlyError: string, caught: Observable<TRet>) => void): Observable<TRet> {
         
         var trace = this.classTrace("deleteData");
         trace(TraceMethodPosition.Entry);

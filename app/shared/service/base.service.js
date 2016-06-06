@@ -129,15 +129,18 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     var trace = this.classTrace("getTailGetObservable");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     if (!onError)
-                        onError = function (error, caught) { _this.xCoreServices.LoggingService.error(error); };
+                        onError = function (error, friendlyError, caught) { _this.xCoreServices.LoggingService.error(error, friendlyError); };
                     var swallowException = (!serviceOptions || !serviceOptions.PropogateException);
                     var suppressDefaultException = (serviceOptions && serviceOptions.SuppressDefaultException);
                     currentObservable = currentObservable
                         .catch(function (err, caught) {
                         if (suppressDefaultException)
                             throw err;
-                        var newError = _this.getGeneralErrorMessage("retrieving", serviceOptions);
-                        onError(newError, caught);
+                        var newError = err._body;
+                        var friendlyError = _this.getGeneralErrorMessage("retrieving", serviceOptions);
+                        if (!err.status || err.status === 200)
+                            newError = friendlyError;
+                        onError(newError, friendlyError, caught);
                         if (swallowException)
                             return Observable_1.Observable.empty();
                         throw newError;
@@ -174,7 +177,6 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     var trace = this.classTrace("postData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
-                    console.log(JSON.stringify(data));
                     var baseObs = this.xCoreServices.Http
                         .post("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), JSON.stringify(data), this.setHeaders(requestOptions)).share()
                         .map(function (res) { return res.json(); });

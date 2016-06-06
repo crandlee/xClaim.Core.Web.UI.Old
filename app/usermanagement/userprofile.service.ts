@@ -9,6 +9,8 @@ import { HubService } from '../shared/hub/hub.service';
 import { IServiceOptions } from '../shared/service/base.service';
 import _ from 'lodash';
 
+declare var sha512;
+
 import { Subject } from 'rxjs/Subject';
 
 @Injectable()
@@ -22,18 +24,18 @@ export class UserProfileService extends XCoreServiceBase {
          this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserProfileService");
     }
             
-    private getEndpoint(): IServiceOptions {
+    private getOptions(serviceError: string): IServiceOptions {
         var trace = this.classTrace("getEndpoint");
         trace(TraceMethodPosition.Entry);
-        var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot };
+        var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot, ServiceError: serviceError };
         trace(TraceMethodPosition.Exit);
         return obs;
     }
     
-    public getUserProfile(userId: string): Observable<IUserProfile> {        
+    public getUserProfile(userId: string): Observable<IUserProfile> {  
         var trace = this.classTrace("getUserProfile");
         trace(TraceMethodPosition.Entry);
-        var obs = this.getObjectData<IUserProfile>(this.getEndpoint(), `userfromid/${userId}`);
+        var obs = this.getObjectData<IUserProfile>(this.getOptions("There was an error retrieving the user profile"), `userfromid/${userId}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -41,7 +43,7 @@ export class UserProfileService extends XCoreServiceBase {
     public isEmailDuplicate(email: string, userId: string): Observable<boolean> {
         var trace = this.classTrace("getUserProfile");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.getObjectData<boolean>(this.getEndpoint(), `userfromemail/${email}/isduplicated/${userId}`);
+        var obs = this.getObjectData<boolean>(this.getOptions("There was an error valdiating the email address"), `userfromemail/${email}/isduplicated/${userId}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -83,7 +85,7 @@ export class UserProfileService extends XCoreServiceBase {
     public saveUserProfile(vm: IUserProfileViewModel): Observable<IUserProfile> {
         var trace = this.classTrace("saveUserProfile");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.postData(this.userProfileToModel(vm), this.getEndpoint(), 'user')        
+        var obs = this.postData(this.userProfileToModel(vm), this.getOptions("There was an error saving the user profile"), 'user')        
         trace(TraceMethodPosition.Exit)
         return obs;
     }
