@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 import { SecurityComponent } from './shared/security/security.component';
 import { Routes, ROUTER_DIRECTIVES } from '@angular/router';
 import { ToastyService, ToastyConfig, Toasty, ToastOptions, ToastData} from './shared/ng2-toasty/ng2-toasty';

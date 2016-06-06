@@ -110,6 +110,18 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return ret;
                 };
+                HubService.prototype.callbackWhenLoaded = function (action) {
+                    var trace = this.classTrace("callbackWhenLoaded");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    if (this.HubDataLoaded)
+                        action();
+                    else
+                        this.HubDataCompletedEvent.subscribe(function (hd) {
+                            trace(core_services_service_1.TraceMethodPosition.Callback);
+                            action();
+                        });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                };
                 HubService = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices])

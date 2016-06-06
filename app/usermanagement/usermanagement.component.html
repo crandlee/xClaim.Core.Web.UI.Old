@@ -1,0 +1,19 @@
+<div class="container">
+    <div *ngIf="active" class="edit-panel user-list" >
+        <div class="navbar navbar-inverse center">
+            <h4>Users</h4>
+        </div>
+        <!--<input *ngIf="config.filtering" placeholder="Filter"
+            [ngTableFiltering]="config.filtering"
+            (tableChanged)="onChangeTable(users, config)"/>-->
+
+        <button class="btn btn-primary pull-right" (click)="addNew()" >New User</button>        
+        <ng-table [config]="config.sorting"
+                (tableChanged)="onChangeTable(users, config)"
+                [rows]="rows" [columns]="columns" (rowClicked)="editUser($event)">
+        </ng-table>
+    </div>
+    <div *ngIf="!active" class="loading-message">
+        Loading Users
+    </div>
+</div>

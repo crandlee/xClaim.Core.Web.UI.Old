@@ -9,6 +9,7 @@ export class UserProfileValidationService extends ValidationService {
     
     private static passwordsDoNotMatch: string = "passwordsDoNoMatch";
     private static emailNotUnique: string = "emailNotUnique";
+    private static userNameNotUnique: string = "userNameNotUnique";
     
     constructor(loggingService: LoggingService) {
         super(loggingService);
@@ -17,7 +18,7 @@ export class UserProfileValidationService extends ValidationService {
     
     
     public isEmailDuplicate(emailControl: AbstractControl, userProfileService: UserProfileService, id: string): Promise<IValidationResult> {
-        var trace = this.classTrace("isEmailDuplicated");
+        var trace = this.classTrace("isEmailDuplicate");
         
         if (!id || !emailControl.value) return Promise.resolve(null);
         
@@ -26,6 +27,23 @@ export class UserProfileValidationService extends ValidationService {
             svc.subscribe(isDuplicate => {
                 trace(TraceMethodPosition.Callback, "isEmailDuplicate");
                 resolve(isDuplicate ? {[UserProfileValidationService.emailNotUnique] : true}: null);                                
+            });            
+        });  
+        
+        trace(TraceMethodPosition.Exit);            
+        return p;
+    }
+
+    public isUserNameDuplicate(userNameControl: AbstractControl, userProfileService: UserProfileService, id: string): Promise<IValidationResult> {
+        var trace = this.classTrace("isUserNameDuplicate");
+        
+        if (!id || !userNameControl.value) return Promise.resolve(null);
+        
+        var svc = userProfileService.isUserNameDuplicate(userNameControl.value, id);                            
+        var p = new Promise<IValidationResult>(resolve => {
+            svc.subscribe(isDuplicate => {
+                trace(TraceMethodPosition.Callback, "isUserNameDuplicate");
+                resolve(isDuplicate ? {[UserProfileValidationService.userNameNotUnique] : true}: null);                                
             });            
         });  
         
@@ -44,7 +62,8 @@ export class UserProfileValidationService extends ValidationService {
     public getValidatorErrorMessage(code: string): string {
         let config = {
             [UserProfileValidationService.passwordsDoNotMatch]: "Passwords must match",
-            [UserProfileValidationService.emailNotUnique]: "This email address is already attached to another user"
+            [UserProfileValidationService.emailNotUnique]: "This email address is already attached to another user",
+            [UserProfileValidationService.userNameNotUnique]: "This user name is already in use"
         };
         return config[code] ||  super.getValidatorErrorMessage(code);
     }

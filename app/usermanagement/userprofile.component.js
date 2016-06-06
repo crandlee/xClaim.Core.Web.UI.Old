@@ -65,7 +65,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     var trace = this.classTrace("initializeForm");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     //Set up any async validators
-                    var emailControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required]));
+                    var emailControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required, this.validationService.emailValidator]));
                     var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userProfileService, _this.userProfile.Id); });
                     //Set up controls            
                     var buildReturn = this.validationService.buildControlGroup(builder, [
@@ -87,8 +87,6 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                UserProfileComponent.prototype.initializeControls = function (validationService) {
-                };
                 UserProfileComponent.prototype.getInitialData = function (userProfileService, hubService) {
                     var _this = this;
                     var trace = this.classTrace("getInitialData");
@@ -103,17 +101,10 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 UserProfileComponent.prototype.ngOnInit = function () {
-                    var _this = this;
                     _super.prototype.NotifyLoaded.call(this, "UserProfile");
                     var trace = this.classTrace("ngOnInit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    if (this.hubService.HubDataLoaded)
-                        this.getInitialData(this.userProfileService, this.hubService);
-                    else
-                        this.hubService.HubDataCompletedEvent.subscribe(function (hd) {
-                            trace(core_services_service_1.TraceMethodPosition.Callback);
-                            _this.getInitialData(_this.userProfileService, _this.hubService);
-                        });
+                    this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService, this.hubService));
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                 };
                 UserProfileComponent.prototype.onSubmit = function () {

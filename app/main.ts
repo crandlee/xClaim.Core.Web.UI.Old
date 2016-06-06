@@ -10,6 +10,7 @@ import { CookieService } from 'angular2-cookie/core';
 import { SecurityService } from './shared/security/security.service';
 import { BusyService } from './shared/service/busy.service';
 import { HubService } from './shared/hub/hub.service';
+import {MODAL_BROWSER_PROVIDERS} from 'angular2-modal/platform-browser/index';
 
 // Our main component
 import { AppComponent } from './app.component';
@@ -27,7 +28,7 @@ export class RootExceptionHandler  {
 
   
 bootstrap(AppComponent, [
-   ToastyService, ToastyConfig, HTTP_PROVIDERS, AppSettings, XCoreToastService, 
+   ...MODAL_BROWSER_PROVIDERS, ToastyService, ToastyConfig, HTTP_PROVIDERS, AppSettings, XCoreToastService, 
    LoggingService, SecurityService, CookieService, BusyService, HubService,
    ROUTER_PROVIDERS, provide(ExceptionHandler, { useClass: RootExceptionHandler})
 ]);

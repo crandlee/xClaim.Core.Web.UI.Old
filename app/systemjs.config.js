@@ -8,7 +8,10 @@
         'angular2-cookie': 'node_modules/angular2-cookie',
         'lodash': 'node_modules/lodash/lodash.js',
         'ng2-bootstrap': 'node_modules/ng2-bootstrap',
-        'moment': 'node_modules/moment'
+        'moment': 'node_modules/moment',
+        'ng2-table': 'app/shared/ng2-table',
+        'angular2-ui-switch': 'node_modules/angular2-ui-switch',
+        'angular2-modal': 'node_modules/angular2-modal'
     };
 
     // packages tells the System loader how to load when no filename and/or no extension
@@ -17,6 +20,9 @@
         'rxjs': { defaultExtension: 'js' },
         'angular2-cookie': { main: 'core.js',  defaultExtension: 'js' },
         'ng2-bootstrap': { main: 'ng2-bootstrap.js', defaultExtension: 'js' },
+        'ng2-table': { main: 'ng2-table.js', defaultExtension: 'js'},
+        'angular2-ui-switch': { main: 'index.js', defaultExtension: 'js'},
+        'angular2-modal': { main: 'index.js', defaultExtension: 'js'},
         'moment': { main: 'moment.js', defaultExtension: 'js'}
     };
 

@@ -16,10 +16,10 @@ export class DomainService {
             { path: '/Forbidden', component: ForbiddenComponent },
             { path: '/Unauthorized', component: UnauthorizedComponent },
             { path: '/Login', component: LoginComponent },
-            { path: '/Logout', component: LogoutComponent }
+            { path: '/Logout', component: LogoutComponent }            
         ];
         return baseRoutes
-            .concat(UserManagementRoutes).concat([{ path: '/', component: WelcomeComponent }]);
+            .concat(UserManagementRoutes).concat([{ path: '/', component: WelcomeComponent }, { path: '/**', component: WelcomeComponent }]);
     }
      
 }

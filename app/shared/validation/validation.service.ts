@@ -37,13 +37,12 @@ export class ValidationService {
         
     }
 
-    public static emailValidator(control): IValidationResult {
-        // RFC 2822 compliant regex
-        if (control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
-            return null;
-        } else {
-            return { [ValidationService.invalidEmailAddress]: true };
+    public emailValidator(control: AbstractControl): IValidationResult {
+        var ret = null;
+        if (!control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
+            ret = { [ValidationService.invalidEmailAddress]: true };
         }
+        return ret;
     }
 
     public getValidationResults(controlGroup: ControlGroup, controlDescriptions: string[], 

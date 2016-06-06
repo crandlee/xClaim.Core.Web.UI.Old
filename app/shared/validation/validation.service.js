@@ -48,14 +48,12 @@ System.register(['lodash', '@angular/core', '../logging/logging.service'], funct
                     }
                     var _a;
                 };
-                ValidationService.emailValidator = function (control) {
-                    // RFC 2822 compliant regex
-                    if (control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
-                        return null;
+                ValidationService.prototype.emailValidator = function (control) {
+                    var ret = null;
+                    if (!control.value.match(/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)) {
+                        ret = (_a = {}, _a[ValidationService.invalidEmailAddress] = true, _a);
                     }
-                    else {
-                        return (_a = {}, _a[ValidationService.invalidEmailAddress] = true, _a);
-                    }
+                    return ret;
                     var _a;
                 };
                 ValidationService.prototype.getValidationResults = function (controlGroup, controlDescriptions, formLevelValidation, asyncFormLevelValidation, options) {

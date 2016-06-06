@@ -50,6 +50,20 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
+                UserProfileService.prototype.getUsers = function () {
+                    var trace = this.classTrace("getUsers");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), "users");
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
+                UserProfileService.prototype.getNewUser = function () {
+                    var trace = this.classTrace("getNewUser");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.getObjectData(this.getOptions("There was an error starting a new user"), "user/new");
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
                 UserProfileService.prototype.getUserProfile = function (userId) {
                     var trace = this.classTrace("getUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
@@ -58,9 +72,16 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     return obs;
                 };
                 UserProfileService.prototype.isEmailDuplicate = function (email, userId) {
-                    var trace = this.classTrace("getUserProfile");
+                    var trace = this.classTrace("isEmailDuplicate");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = this.getObjectData(this.getOptions("There was an error valdiating the email address"), "userfromemail/" + email + "/isduplicated/" + userId);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
+                UserProfileService.prototype.isUserNameDuplicate = function (userName, userId) {
+                    var trace = this.classTrace("isUserNameDuplicate");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.getObjectData(this.getOptions("There was an error valdiating the user name"), "userfromusername/" + userName + "/isduplicated/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
@@ -74,6 +95,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                         ConfirmPassword: vm.ConfirmPassword,
                         SaveGivenName: vm.GivenName,
                         SaveEmailAddress: vm.EmailAddress,
+                        Enabled: vm.Enabled,
                         Claims: []
                     };
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -90,7 +112,8 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                         GivenName: (givenNameClaim && givenNameClaim.Value) || "",
                         EmailAddress: (emailClaim && emailClaim.Value) || "",
                         Password: "Dummy@000",
-                        ConfirmPassword: "Dummy@000"
+                        ConfirmPassword: "Dummy@000",
+                        Enabled: model.Enabled
                     };
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return vm;

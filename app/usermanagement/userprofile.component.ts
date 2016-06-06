@@ -37,7 +37,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         trace(TraceMethodPosition.Entry);
         
         //Set up any async validators
-        var emailControl = new Control("", Validators.compose([Validators.required]));
+        var emailControl = new Control("", Validators.compose([Validators.required, this.validationService.emailValidator]));
         var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userProfileService, this.userProfile.Id));
 
         //Set up controls            
@@ -65,9 +65,6 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
     }
     
     
-    private initializeControls(validationService: UserProfileValidationService) {
-        
-    }
     private getInitialData(userProfileService: UserProfileService, hubService: HubService): void {
         
         var trace = this.classTrace("getInitialData");
@@ -88,15 +85,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         super.NotifyLoaded("UserProfile");        
         var trace = this.classTrace("ngOnInit");
         trace(TraceMethodPosition.Entry);
-
-        if (this.hubService.HubDataLoaded)
-            this.getInitialData(this.userProfileService, this.hubService);
-        else           
-            this.hubService.HubDataCompletedEvent.subscribe(hd => {
-                trace(TraceMethodPosition.Callback);                
-                this.getInitialData(this.userProfileService, this.hubService);        
-            });
-        
+        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService, this.hubService));        
         trace(TraceMethodPosition.Entry);
     }
                  

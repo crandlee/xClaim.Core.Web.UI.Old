@@ -25,7 +25,7 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                     this.classTrace = this.loggingService.getTraceFunction("UserProfileValidationService");
                 }
                 UserProfileValidationService.prototype.isEmailDuplicate = function (emailControl, userProfileService, id) {
-                    var trace = this.classTrace("isEmailDuplicated");
+                    var trace = this.classTrace("isEmailDuplicate");
                     if (!id || !emailControl.value)
                         return Promise.resolve(null);
                     var svc = userProfileService.isEmailDuplicate(emailControl.value, id);
@@ -33,6 +33,21 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                         svc.subscribe(function (isDuplicate) {
                             trace(logging_service_1.TraceMethodPosition.Callback, "isEmailDuplicate");
                             resolve(isDuplicate ? (_a = {}, _a[UserProfileValidationService.emailNotUnique] = true, _a) : null);
+                            var _a;
+                        });
+                    });
+                    trace(logging_service_1.TraceMethodPosition.Exit);
+                    return p;
+                };
+                UserProfileValidationService.prototype.isUserNameDuplicate = function (userNameControl, userProfileService, id) {
+                    var trace = this.classTrace("isUserNameDuplicate");
+                    if (!id || !userNameControl.value)
+                        return Promise.resolve(null);
+                    var svc = userProfileService.isUserNameDuplicate(userNameControl.value, id);
+                    var p = new Promise(function (resolve) {
+                        svc.subscribe(function (isDuplicate) {
+                            trace(logging_service_1.TraceMethodPosition.Callback, "isUserNameDuplicate");
+                            resolve(isDuplicate ? (_a = {}, _a[UserProfileValidationService.userNameNotUnique] = true, _a) : null);
                             var _a;
                         });
                     });
@@ -49,6 +64,7 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                     var config = (_a = {},
                         _a[UserProfileValidationService.passwordsDoNotMatch] = "Passwords must match",
                         _a[UserProfileValidationService.emailNotUnique] = "This email address is already attached to another user",
+                        _a[UserProfileValidationService.userNameNotUnique] = "This user name is already in use",
                         _a
                     );
                     return config[code] || _super.prototype.getValidatorErrorMessage.call(this, code);
@@ -56,6 +72,7 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                 };
                 UserProfileValidationService.passwordsDoNotMatch = "passwordsDoNoMatch";
                 UserProfileValidationService.emailNotUnique = "emailNotUnique";
+                UserProfileValidationService.userNameNotUnique = "userNameNotUnique";
                 return UserProfileValidationService;
             }(validation_service_1.ValidationService));
             exports_1("UserProfileValidationService", UserProfileValidationService);

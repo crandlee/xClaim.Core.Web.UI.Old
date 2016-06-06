@@ -31,6 +31,22 @@ export class UserProfileService extends XCoreServiceBase {
         trace(TraceMethodPosition.Exit);
         return obs;
     }
+
+    public getUsers(): Observable<IUserProfile[]> {  
+        var trace = this.classTrace("getUsers");
+        trace(TraceMethodPosition.Entry);
+        var obs = this.getObjectData<IUserProfile[]>(this.getOptions("There was an error retrieving the users"), `users`);
+        trace(TraceMethodPosition.Exit);
+        return obs;
+    }
+
+    public getNewUser(): Observable<IUserProfile> {          
+        var trace = this.classTrace("getNewUser");
+        trace(TraceMethodPosition.Entry);
+        var obs = this.getObjectData<IUserProfile>(this.getOptions("There was an error starting a new user"), `user/new`);
+        trace(TraceMethodPosition.Exit);
+        return obs;
+    }
     
     public getUserProfile(userId: string): Observable<IUserProfile> {  
         var trace = this.classTrace("getUserProfile");
@@ -41,9 +57,17 @@ export class UserProfileService extends XCoreServiceBase {
     }
     
     public isEmailDuplicate(email: string, userId: string): Observable<boolean> {
-        var trace = this.classTrace("getUserProfile");
+        var trace = this.classTrace("isEmailDuplicate");
         trace(TraceMethodPosition.Entry);                
         var obs = this.getObjectData<boolean>(this.getOptions("There was an error valdiating the email address"), `userfromemail/${email}/isduplicated/${userId}`);
+        trace(TraceMethodPosition.Exit);
+        return obs;
+    }
+
+    public isUserNameDuplicate(userName: string, userId: string): Observable<boolean> {
+        var trace = this.classTrace("isUserNameDuplicate");
+        trace(TraceMethodPosition.Entry);                
+        var obs = this.getObjectData<boolean>(this.getOptions("There was an error valdiating the user name"), `userfromusername/${userName}/isduplicated/${userId}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -58,6 +82,7 @@ export class UserProfileService extends XCoreServiceBase {
             ConfirmPassword: vm.ConfirmPassword,
             SaveGivenName: vm.GivenName,
             SaveEmailAddress: vm.EmailAddress,
+            Enabled: vm.Enabled,
             Claims: []
         };        
         trace(TraceMethodPosition.Exit);
@@ -75,7 +100,8 @@ export class UserProfileService extends XCoreServiceBase {
                  GivenName: (givenNameClaim && givenNameClaim.Value) || "",
                  EmailAddress: (emailClaim && emailClaim.Value) || "",
                  Password: "Dummy@000",
-                 ConfirmPassword: "Dummy@000"      
+                 ConfirmPassword: "Dummy@000",
+                 Enabled: model.Enabled      
             };            
         
         trace(TraceMethodPosition.Exit);
@@ -98,7 +124,8 @@ export interface IUserProfileViewModel {
      EmailAddress: string;
      GivenName: string;
      Password?: string;
-     ConfirmPassword?: string;          
+     ConfirmPassword?: string;
+     Enabled: boolean;     
 }
 
 export interface IUserClaimViewModel {
@@ -113,7 +140,8 @@ export interface IUserProfile {
      SavePassword: string;
      ConfirmPassword: string;
      SaveGivenName: string;
-     SaveEmailAddress: string;    
+     SaveEmailAddress: string;  
+     Enabled: boolean;  
      Claims: IUserClaim[]
 }
 

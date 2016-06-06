@@ -88,6 +88,19 @@ export class HubService extends XCoreServiceBase {
         return ret; 
     }
     
+    public callbackWhenLoaded(action: Function) {
+        var trace = this.classTrace("callbackWhenLoaded");        
+        trace(TraceMethodPosition.Entry);
+        if (this.HubDataLoaded)
+            action();
+        else           
+            this.HubDataCompletedEvent.subscribe(hd => {
+                trace(TraceMethodPosition.Callback);                
+                action();        
+            });
+        trace(TraceMethodPosition.Exit);
+    }
+    
 }
 
 export interface IHubServiceData {

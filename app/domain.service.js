@@ -47,7 +47,7 @@ System.register(['@angular/core', './usermanagement/routes', './shared/security/
                         { path: '/Logout', component: logout_component_1.LogoutComponent }
                     ];
                     return baseRoutes
-                        .concat(routes_1.UserManagementRoutes).concat([{ path: '/', component: welcome_component_1.WelcomeComponent }]);
+                        .concat(routes_1.UserManagementRoutes).concat([{ path: '/', component: welcome_component_1.WelcomeComponent }, { path: '/**', component: welcome_component_1.WelcomeComponent }]);
                 };
                 DomainService = __decorate([
                     core_1.Injectable(), 
