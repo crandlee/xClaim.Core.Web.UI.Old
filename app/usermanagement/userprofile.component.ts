@@ -89,7 +89,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         trace(TraceMethodPosition.Entry);
     }
                  
-    onSubmit() {
+    public onSubmit(): void {
         var trace = this.classTrace("onSubmit");
         trace(TraceMethodPosition.Entry);
         
@@ -101,6 +101,10 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         });
         
         trace(TraceMethodPosition.Exit);
+    }
+    
+    public cancel(): void {
+        this.xCoreServices.Router.navigate(['/']);
     }
 }
 

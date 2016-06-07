@@ -142,6 +142,9 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
+                UserComponent.prototype.cancel = function () {
+                    this.xCoreServices.Router.navigate(["/UserManagement"]);
+                };
                 UserComponent = __decorate([
                     core_1.Component({
                         templateUrl: 'app/usermanagement/user.component.html',

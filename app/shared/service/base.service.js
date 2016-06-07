@@ -197,13 +197,13 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return ret;
                 };
-                BaseService.prototype.deleteData = function (data, serviceOptions, routePath, requestOptions, onError) {
+                BaseService.prototype.deleteData = function (serviceOptions, routePath, requestOptions, onError) {
                     var trace = this.classTrace("deleteData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);
                     var baseObs = this.xCoreServices.Http
                         .delete("" + serviceOptions.ApiRoot + this.getCleanRoutePath(routePath), this.setHeaders(requestOptions)).share()
-                        .map(function (res) { return res.json(); });
+                        .map(function (res) { return true; });
                     var tailObs = this.getTailGetObservable(baseObs, serviceOptions, onError);
                     var ret = this.executeObservable(tailObs);
                     trace(core_services_service_1.TraceMethodPosition.Exit);

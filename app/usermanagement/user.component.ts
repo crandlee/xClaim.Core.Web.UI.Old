@@ -129,5 +129,9 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         
         trace(TraceMethodPosition.Exit);
     }
+    
+    cancel(): void {
+        this.xCoreServices.Router.navigate(["/UserManagement"]);
+    }
 }
 

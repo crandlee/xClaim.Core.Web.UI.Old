@@ -119,6 +119,9 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
+                UserProfileComponent.prototype.cancel = function () {
+                    this.xCoreServices.Router.navigate(['/']);
+                };
                 UserProfileComponent = __decorate([
                     core_1.Component({
                         templateUrl: 'app/usermanagement/userprofile.component.html',

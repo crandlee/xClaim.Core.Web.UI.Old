@@ -101,11 +101,35 @@ export class UserProfileService extends XCoreServiceBase {
                  EmailAddress: (emailClaim && emailClaim.Value) || "",
                  Password: "Dummy@000",
                  ConfirmPassword: "Dummy@000",
-                 Enabled: model.Enabled      
+                 Enabled: model.Enabled,
+                 TooltipMessage: `<table>
+                                    <tr>
+                                        <td>User Name:</td><td style="padding-left: 5px">${model.Name}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Full Name:</td><td style="padding-left: 5px">${(givenNameClaim && givenNameClaim.Value) || ""}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Email:</td><td style="padding-left: 5px">${(emailClaim && emailClaim.Value) || ""}</td>
+                                    </tr>
+                                    <tr>                                        
+                                        <td>Id:</td><td style="padding-left: 5px">${model.Id}</td>
+                                    </tr>
+                                  </table>
+                 `  
             };            
         
         trace(TraceMethodPosition.Exit);
         return vm;
+    }
+    
+    public deleteUser(id: string): Observable<boolean> {
+        var trace = this.classTrace("deleteUserProfile");
+        trace(TraceMethodPosition.Entry);                
+        var obs = this.deleteData(this.getOptions("There was an error deleting the user"), `user/${id}`);        
+        trace(TraceMethodPosition.Exit)
+        return obs;
+        
     }
     
     public saveUserProfile(vm: IUserProfileViewModel): Observable<IUserProfile> {
@@ -125,7 +149,8 @@ export interface IUserProfileViewModel {
      GivenName: string;
      Password?: string;
      ConfirmPassword?: string;
-     Enabled: boolean;     
+     Enabled: boolean;
+     TooltipMessage: string;  
 }
 
 export interface IUserClaimViewModel {

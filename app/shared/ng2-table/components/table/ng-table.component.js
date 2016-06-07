@@ -33,10 +33,12 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     // Table values
                     this.rows = [];
                     this.config = {};
+                    this.rowTemplate = "";
                     // Outputs (Events)
                     this.tableChanged = new core_1.EventEmitter();
                     this.rowClicked = new core_1.EventEmitter();
                     this.deleteClicked = new core_1.EventEmitter();
+                    this.editClicked = new core_1.EventEmitter();
                     this._columns = [];
                     modal.defaultViewContainer = viewContainer;
                 }
@@ -59,10 +61,30 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     enumerable: true,
                     configurable: true
                 });
+                NgTableComponent.prototype.getRowTooltip = function (row) {
+                    var id = "R" + row.Id;
+                    $('#' + id).tooltip({
+                        delay: { show: 500, hide: 10 },
+                        placement: 'top',
+                        html: true,
+                        template: "<div class=\"tooltip\" style=\"display:inline-block; text-align:left;\"><div class=\"tooltip-arrow\" style=\"display:inline-block\"></div>\n        <div class=\"tooltip-inner\" style=\"display:inline-block; max-width: 600px; text-align:left;color: #FFFFFF; background-color: #647299;\"></div></div>",
+                        title: (row && row.TooltipMessage) ? row.TooltipMessage : ""
+                    });
+                    return id;
+                };
+                NgTableComponent.prototype.getColumnClass = function (column) {
+                    return "col-xs-" + column.colWidth;
+                };
                 NgTableComponent.prototype.onRowClick = function (row) {
                     this.rowClicked.emit(row);
                 };
+                NgTableComponent.prototype.onEditClick = function (event, row, column) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.editClicked.emit(row);
+                };
                 NgTableComponent.prototype.onDeleteClick = function (event, row, column) {
+                    var _this = this;
                     event.preventDefault();
                     event.stopPropagation();
                     var msg = "Do you really want to delete this item?";
@@ -71,10 +93,9 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     var box = this.modal.confirm().isBlocking(true).size('sm').message(msg).open();
                     box.then(function (resultPromise) {
                         return resultPromise.result.then(function (result) {
-                            console.log("better");
-                        }, function () { return console.log("fail"); });
+                            _this.deleteClicked.emit(row);
+                        });
                     });
-                    this.deleteClicked.emit(row);
                 };
                 Object.defineProperty(NgTableComponent.prototype, "configColumns", {
                     get: function () {
@@ -114,6 +135,10 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     __metadata('design:type', Object)
                 ], NgTableComponent.prototype, "config", void 0);
                 __decorate([
+                    core_1.Input(), 
+                    __metadata('design:type', String)
+                ], NgTableComponent.prototype, "rowTemplate", void 0);
+                __decorate([
                     core_1.Output(), 
                     __metadata('design:type', core_1.EventEmitter)
                 ], NgTableComponent.prototype, "tableChanged", void 0);
@@ -126,6 +151,10 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     __metadata('design:type', core_1.EventEmitter)
                 ], NgTableComponent.prototype, "deleteClicked", void 0);
                 __decorate([
+                    core_1.Output(), 
+                    __metadata('design:type', core_1.EventEmitter)
+                ], NgTableComponent.prototype, "editClicked", void 0);
+                __decorate([
                     core_1.Input(), 
                     __metadata('design:type', Array), 
                     __metadata('design:paramtypes', [Array])
@@ -133,7 +162,8 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                 NgTableComponent = __decorate([
                     core_1.Component({
                         selector: 'ng-table',
-                        template: "\n    <table class=\"table table-striped table-bordered dataTable\"\n           role=\"grid\" style=\"width: 100%;\">\n      <thead>\n      <tr role=\"row\">\n        <th *ngFor=\"let column of columns\" [ngTableSorting]=\"config\" [column]=\"column\" (sortChanged)=\"onChangeTable($event)\">\n          {{column.title}}\n          <i *ngIf=\"config && column.sort\" class=\"pull-right fa\"\n            [ngClass]=\"{'fa-chevron-down': column.sort === 'desc', 'fa-chevron-up': column.sort === 'asc'}\"></i>\n        </th>\n      </tr>\n      </thead>\n      <tbody>\n      <tr (click)=\"onRowClick(row)\" *ngFor=\"let row of rows\">\n        <td *ngFor=\"let column of columns\">\n          <span *ngIf=\"!column.deleteRow\">{{getData(row, column.name)}}</span>\n          <span *ngIf=\"column.deleteRow\"><i class=\"fa fa-remove\" (click)=\"onDeleteClick($event, row, column)\"></i></span>\n        </td>\n      </tr>\n      </tbody>\n    </table>\n",
+                        template: "\n    <table class=\"table table-striped table-bordered table-hover dataTable\"\n           role=\"grid\" style=\"width: 100%;\">\n      <thead>\n      <tr role=\"row\">\n        <th *ngFor=\"let column of columns\" data-html=\"true\" [class]=\"getColumnClass(column)\" [ngTableSorting]=\"config\" [column]=\"column\" (sortChanged)=\"onChangeTable($event)\">\n          {{column.title}}\n          <i *ngIf=\"config && column.sort\" class=\"pull-right fa\"\n            [ngClass]=\"{'fa-chevron-down': column.sort === 'desc', 'fa-chevron-up': column.sort === 'asc'}\"></i>\n        </th>\n      </tr>\n      </thead>\n      <tbody>      \n      <tr [attr.id]=\"getRowTooltip(row)\" *ngFor=\"let row of rows\">\n        <td *ngFor=\"let column of columns\">\n          <span style=\"display:inline-block; width:100%\" *ngIf=\"!column.deleteRow && !column.editRow\">{{getData(row, column.name)}}</span>\n          <span style=\"display:inline-block; width:100%\" *ngIf=\"column.editRow\" (click)=\"onEditClick($event, row, column)\"><i class=\"fa fa-edit\"></i></span>\n          <span style=\"display:inline-block; width:100%\" *ngIf=\"column.deleteRow\" (click)=\"onDeleteClick($event, row, column)\"><i class=\"fa fa-remove\"></i></span>          \n        </td>\n      </tr>\n      </tbody>\n    </table>\n",
+                        styles: ['.table-hover tbody tr:hover td, .table-hover tbody tr:hover th { color: #FFFFFF; background-color: #647299;}'],
                         directives: [ng_table_sorting_directive_1.NgTableSortingDirective, common_1.NgClass, common_1.CORE_DIRECTIVES],
                         viewProviders: index_1.BS_MODAL_PROVIDERS.slice()
                     }), 

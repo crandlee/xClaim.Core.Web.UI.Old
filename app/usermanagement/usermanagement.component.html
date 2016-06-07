@@ -1,16 +1,22 @@
 <div class="container">
-    <div *ngIf="active" class="edit-panel user-list" >
+    <div *ngIf="active" class="edit-panel" >
         <div class="navbar navbar-inverse center">
-            <h4>Users</h4>
+            <div class="list-header">Users</div>
+            <ul class="nav navbar-nav pull-right list-header-button-bar">
+                <li>
+                    <p class="navbar-btn">
+                        <a href="#" (click)="addNew($event)" class="btn btn-primary">New User</a>
+                    </p>
+                </li>
+            </ul>            
         </div>
         <!--<input *ngIf="config.filtering" placeholder="Filter"
             [ngTableFiltering]="config.filtering"
             (tableChanged)="onChangeTable(users, config)"/>-->
 
-        <button class="btn btn-primary pull-right" (click)="addNew()" >New User</button>        
         <ng-table [config]="config.sorting"
                 (tableChanged)="onChangeTable(users, config)"
-                [rows]="rows" [columns]="columns" (rowClicked)="editUser($event)">
+                [rows]="rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
         </ng-table>
     </div>
     <div *ngIf="!active" class="loading-message">

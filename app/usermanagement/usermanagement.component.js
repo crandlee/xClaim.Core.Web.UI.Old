@@ -51,11 +51,12 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.active = false;
                     this.rows = [];
                     this.columns = [
-                        { title: "Name", name: "Name" },
-                        { title: "Full Name", name: "GivenName" },
-                        { title: "EMail Address", name: "EmailAddress" },
-                        { title: "Enabled", name: "Enabled", transform: function (val) { return val ? "Yes" : "No"; } },
-                        { title: "Delete", name: "Delete", deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
+                        { title: "Name", name: "Name", colWidth: 3 },
+                        { title: "Full Name", name: "GivenName", colWidth: 3 },
+                        { title: "EMail Address", name: "EmailAddress", colWidth: 3 },
+                        { title: "Enabled", name: "Enabled", colWidth: 1, transform: function (val) { return val ? "Yes" : "No"; } },
+                        { title: "Edit", name: "Edit", colWidth: 1, editRow: true },
+                        { title: "Delete", name: "Delete", colWidth: 1, deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
                     ];
                     this.page = 1;
                     this.itemsPerPage = 10;
@@ -69,7 +70,8 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     };
                     this.initializeTrace("UserManagementComponent");
                 }
-                UserManagementComponent.prototype.addNew = function () {
+                UserManagementComponent.prototype.addNew = function (event) {
+                    event.preventDefault();
                     var trace = this.classTrace("addNew");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     this.xCoreServices.Router.navigate(['/NewUser']);
@@ -156,6 +158,21 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         throw Error("Invalid row");
                     var url = "/User/" + row.Id;
                     this.xCoreServices.Router.navigate([url]);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                };
+                UserManagementComponent.prototype.deleteUser = function (row) {
+                    var _this = this;
+                    var trace = this.classTrace("deleteUser");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    if (!row || !row.Id)
+                        throw Error("Invalid row");
+                    this.userProfileService.deleteUser(row.Id).subscribe(function (d) {
+                        if (d) {
+                            _this.xCoreServices.LoggingService.success("Used deleted successfully");
+                            lodash_1.default.remove(_this.users, function (u) { return u.Id === row.Id; });
+                            _this.onChangeTable(_this.users, _this.config);
+                        }
+                    });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 UserManagementComponent.prototype.onChangeTable = function (data, config, page) {

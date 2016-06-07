@@ -19,11 +19,12 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
 
     public rows: Array<any> = [];
     public columns: Array<any> = [
-        { title: "Name", name: "Name" },
-        { title: "Full Name", name: "GivenName" },
-        { title: "EMail Address", name: "EmailAddress" },
-        { title: "Enabled", name: "Enabled", transform: (val: boolean) => { return val ? "Yes": "No"; } },
-        { title: "Delete", name: "Delete", deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
+        { title: "Name", name: "Name", colWidth: 3 },
+        { title: "Full Name", name: "GivenName", colWidth: 3 },
+        { title: "EMail Address", name: "EmailAddress", colWidth: 3 },
+        { title: "Enabled", name: "Enabled", colWidth: 1, transform: (val: boolean) => { return val ? "Yes": "No"; } },
+        { title: "Edit", name: "Edit", colWidth: 1, editRow: true },        
+        { title: "Delete", name: "Delete", colWidth: 1, deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
     ];
     
     
@@ -44,7 +45,8 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         this.initializeTrace("UserManagementComponent");
     }
 
-    public addNew() {
+    public addNew(event) {
+        event.preventDefault();
         var trace = this.classTrace("addNew");
         trace(TraceMethodPosition.Entry);
         this.xCoreServices.Router.navigate(['/NewUser'])
@@ -148,6 +150,21 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         trace(TraceMethodPosition.Exit);            
 
     }
+    
+    public deleteUser(row: any): void {
+        var trace = this.classTrace("deleteUser");
+        trace(TraceMethodPosition.Entry);
+        if (!row || !row.Id) throw Error("Invalid row");
+        this.userProfileService.deleteUser(row.Id).subscribe(d => {
+           if (d) {
+             this.xCoreServices.LoggingService.success("Used deleted successfully");
+             _.remove(this.users, u => u.Id === row.Id);  
+             this.onChangeTable(this.users, this.config);
+           } 
+        });
+        trace(TraceMethodPosition.Exit);                        
+    }
+    
     public onChangeTable(data: any, config: any, page: any = { page: this.page, itemsPerPage: this.itemsPerPage }): void {
         
         var trace = this.classTrace("onChangeTable");

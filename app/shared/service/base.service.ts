@@ -205,17 +205,17 @@ export class BaseService {
         return ret;
     }
 
-    protected deleteData<T, TRet>(data: T, serviceOptions: IServiceOptions, routePath: string,  
-        requestOptions?: RequestOptions, onError?: (error: any, friendlyError: string, caught: Observable<TRet>) => void): Observable<TRet> {
+    protected deleteData(serviceOptions: IServiceOptions, routePath: string,  
+        requestOptions?: RequestOptions, onError?: (error: any, friendlyError: string, caught: Observable<boolean>) => void): Observable<boolean> {
         
         var trace = this.classTrace("deleteData");
         trace(TraceMethodPosition.Entry);
         serviceOptions.ApiRoot = this.getCleanApiRoot(serviceOptions.ApiRoot);                
         var baseObs = this.xCoreServices.Http
                 .delete(`${serviceOptions.ApiRoot}${this.getCleanRoutePath(routePath)}`, 
-                    this.setHeaders(requestOptions)).share()
-                    .map<TRet>( res => { return res.json(); });
-        var tailObs = this.getTailGetObservable<TRet>(baseObs, serviceOptions, onError);
+                     this.setHeaders(requestOptions)).share()
+                    .map<boolean>( res => { return true; });
+        var tailObs = this.getTailGetObservable<boolean>(baseObs, serviceOptions, onError);
         var ret =  this.executeObservable(tailObs);
         trace(TraceMethodPosition.Exit);
         return ret;

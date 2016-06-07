@@ -3,30 +3,34 @@ import {CORE_DIRECTIVES, NgClass} from '@angular/common';
 import {NgTableSortingDirective} from './ng-table-sorting.directive';
 import {Modal, BS_MODAL_PROVIDERS} from 'angular2-modal/plugins/bootstrap/index';
 
+declare var $:any;
+
 @Component({
   selector: 'ng-table',
   template: `
-    <table class="table table-striped table-bordered dataTable"
+    <table class="table table-striped table-bordered table-hover dataTable"
            role="grid" style="width: 100%;">
       <thead>
       <tr role="row">
-        <th *ngFor="let column of columns" [ngTableSorting]="config" [column]="column" (sortChanged)="onChangeTable($event)">
+        <th *ngFor="let column of columns" data-html="true" [class]="getColumnClass(column)" [ngTableSorting]="config" [column]="column" (sortChanged)="onChangeTable($event)">
           {{column.title}}
           <i *ngIf="config && column.sort" class="pull-right fa"
             [ngClass]="{'fa-chevron-down': column.sort === 'desc', 'fa-chevron-up': column.sort === 'asc'}"></i>
         </th>
       </tr>
       </thead>
-      <tbody>
-      <tr (click)="onRowClick(row)" *ngFor="let row of rows">
+      <tbody>      
+      <tr [attr.id]="getRowTooltip(row)" *ngFor="let row of rows">
         <td *ngFor="let column of columns">
-          <span *ngIf="!column.deleteRow">{{getData(row, column.name)}}</span>
-          <span *ngIf="column.deleteRow"><i class="fa fa-remove" (click)="onDeleteClick($event, row, column)"></i></span>
+          <span style="display:inline-block; width:100%" *ngIf="!column.deleteRow && !column.editRow">{{getData(row, column.name)}}</span>
+          <span style="display:inline-block; width:100%" *ngIf="column.editRow" (click)="onEditClick($event, row, column)"><i class="fa fa-edit"></i></span>
+          <span style="display:inline-block; width:100%" *ngIf="column.deleteRow" (click)="onDeleteClick($event, row, column)"><i class="fa fa-remove"></i></span>          
         </td>
       </tr>
       </tbody>
     </table>
 `,
+  styles: ['.table-hover tbody tr:hover td, .table-hover tbody tr:hover th { color: #FFFFFF; background-color: #647299;}'],
   directives: [NgTableSortingDirective, NgClass, CORE_DIRECTIVES],
   viewProviders: [...BS_MODAL_PROVIDERS]
 })
@@ -35,15 +39,17 @@ export class NgTableComponent {
   constructor(public modal: Modal, viewContainer: ViewContainerRef) {
       modal.defaultViewContainer = viewContainer;
   }
-  
+    
   // Table values
   @Input() public rows:Array<any> = [];
   @Input() public config:any = {};
+  @Input() public rowTemplate: string = "";
   
   // Outputs (Events)
   @Output() public tableChanged:EventEmitter<any> = new EventEmitter();
   @Output() public rowClicked:EventEmitter<any> = new EventEmitter();
   @Output() public deleteClicked:EventEmitter<any> = new EventEmitter();
+  @Output() public editClicked:EventEmitter<any> = new EventEmitter();
 
   @Input()
   public set columns(values:Array<any>) {
@@ -58,25 +64,45 @@ export class NgTableComponent {
     });
   }
 
+  public getRowTooltip(row: any): string {
+    var id = "R" + row.Id;
+    $('#' + id).tooltip({
+      delay: {show: 500, hide: 10} ,
+      placement: 'top',
+      html: true,
+      template: `<div class="tooltip" style="display:inline-block; text-align:left;"><div class="tooltip-arrow" style="display:inline-block"></div>
+        <div class="tooltip-inner" style="display:inline-block; max-width: 600px; text-align:left;color: #FFFFFF; background-color: #647299;"></div></div>`,
+      title:(row && row.TooltipMessage) ? row.TooltipMessage : "" 
+    });
+    return id;
+  }
+  
+  public getColumnClass(column) {
+    return `col-xs-${column.colWidth}`;
+  }
   
   public onRowClick(row) {
     this.rowClicked.emit(row);
   }
 
+  public onEditClick(event, row, column) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.editClicked.emit(row);
+  }
+  
   public onDeleteClick(event, row, column) {
     event.preventDefault();
     event.stopPropagation();
     var msg = "Do you really want to delete this item?";
     if (column.deleteMessage) msg = column.deleteMessage;
-    var box = this.modal.confirm().isBlocking(true).size('sm').message(msg).open();
-    
+    var box = this.modal.confirm().isBlocking(true).size('sm').message(msg).open();    
     box.then(resultPromise => {
       return resultPromise.result.then((result) => {
-          console.log("better");
-      }, () => console.log("fail"));
+          this.deleteClicked.emit(row);
+      });
     });
-    
-    this.deleteClicked.emit(row);
+        
   }
   
   public get columns():Array<any> {

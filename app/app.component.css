@@ -58,3 +58,18 @@ div.panel-heading {
 .ng-invalid {
   border-left: 5px solid #a94442; /* red */
 }
+
+/* List styles */
+.list-header {
+    float: left;
+    padding: 19.5px 15px;
+    font-size: 19px;
+    height: 60px;
+    line-height: 1;
+    color: #FFFFFF;
+}
+
+
+.list-header-button-bar {
+    margin-right:10px;
+}

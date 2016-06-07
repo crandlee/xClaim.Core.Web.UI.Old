@@ -113,10 +113,18 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                         EmailAddress: (emailClaim && emailClaim.Value) || "",
                         Password: "Dummy@000",
                         ConfirmPassword: "Dummy@000",
-                        Enabled: model.Enabled
+                        Enabled: model.Enabled,
+                        TooltipMessage: "<table>\n                                    <tr>\n                                        <td>User Name:</td><td style=\"padding-left: 5px\">" + model.Name + "</td>\n                                    </tr>\n                                    <tr>\n                                        <td>Full Name:</td><td style=\"padding-left: 5px\">" + ((givenNameClaim && givenNameClaim.Value) || "") + "</td>\n                                    </tr>\n                                    <tr>\n                                        <td>Email:</td><td style=\"padding-left: 5px\">" + ((emailClaim && emailClaim.Value) || "") + "</td>\n                                    </tr>\n                                    <tr>                                        \n                                        <td>Id:</td><td style=\"padding-left: 5px\">" + model.Id + "</td>\n                                    </tr>\n                                  </table>\n                 "
                     };
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return vm;
+                };
+                UserProfileService.prototype.deleteUser = function (id) {
+                    var trace = this.classTrace("deleteUserProfile");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.deleteData(this.getOptions("There was an error deleting the user"), "user/" + id);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
                 };
                 UserProfileService.prototype.saveUserProfile = function (vm) {
                     var trace = this.classTrace("saveUserProfile");
