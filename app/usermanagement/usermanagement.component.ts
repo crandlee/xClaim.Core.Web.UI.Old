@@ -5,6 +5,7 @@ import { XCoreBaseComponent } from '../shared/component/base.component';
 import { HubService } from '../shared/hub/hub.service';
 import { NG_TABLE_DIRECTIVES }  from 'ng2-table/ng2-table';
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 
 @Component({
     styleUrls: ['app/usermanagement/usermanagement.component.css'],
@@ -16,23 +17,19 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
 
     public users: IUserProfileViewModel[];
     public active: boolean = false;
+    public totalRows: number = 0;
+    private userServiceSubscription: Subscription = null;
 
     public rows: Array<any> = [];
     public columns: Array<any> = [
-        { title: "Name", name: "Name", colWidth: 3 },
-        { title: "Full Name", name: "GivenName", colWidth: 3 },
-        { title: "EMail Address", name: "EmailAddress", colWidth: 3 },
+        { title: "User Name", name: "Name", colWidth: 3, sort: "asc" },
+        { title: "Full Name", name: "GivenName", colWidth: 6 },
         { title: "Enabled", name: "Enabled", colWidth: 1, transform: (val: boolean) => { return val ? "Yes": "No"; } },
         { title: "Edit", name: "Edit", colWidth: 1, editRow: true },        
         { title: "Delete", name: "Delete", colWidth: 1, deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
     ];
     
     
-    public page: number = 1;
-    public itemsPerPage: number = 10;
-    public maxSize: number = 5;
-    public numPages: number = 1;
-    public length: number = 0;
     public config: any = {
         paging: false,
         sorting: { columns: this.columns },
@@ -43,6 +40,15 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         super(xCoreServices);
 
         this.initializeTrace("UserManagementComponent");
+
+        //Unsubscribe from the infinite stream when when change routes
+        this.xCoreServices.Router.changes.subscribe(val => {            
+            if (this.userServiceSubscription) {
+                this.userServiceSubscription.unsubscribe();
+                this.userServiceSubscription = null;
+            }
+        });
+
     }
 
     public addNew(event) {
@@ -53,17 +59,30 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         trace(TraceMethodPosition.Exit);            
     }
     
+    private onRouteChange():void {
+    }
+
     private getInitialData(userProfileService: UserProfileService): void {
 
         var trace = this.classTrace("getInitialData");
         trace(TraceMethodPosition.Entry);
 
-        userProfileService.getUsers().subscribe(up => {
+        userProfileService.getUsers(0, this.xCoreServices.AppSettings.DefaultPageSize).subscribe(up => {
             trace(TraceMethodPosition.CallbackStart);
-            this.users = _.map(up, u => this.userProfileService.userProfileToViewModel(u));
-            this.length = this.users.length;
+            this.users = _.map(up.Rows, u => this.userProfileService.userProfileToViewModel(u));
+            this.totalRows = up.RowCount;
             this.active = true;
             this.onChangeTable(this.users, this.config);
+            this.userServiceSubscription = this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(si => {
+                if (this.users.length >= this.totalRows) return;
+                userProfileService.getUsers(this.users.length, this.xCoreServices.AppSettings.DefaultPageSize).subscribe(up => {
+                    this.users = this.users.concat(_.map(up.Rows, u => this.userProfileService.userProfileToViewModel(u)));
+                    this.totalRows = up.RowCount;
+                    this.onChangeTable(this.users, this.config);
+                    this.xCoreServices.ScrollService.checkNearBottom();
+                });
+            });
+            this.xCoreServices.ScrollService.checkNearBottom();
             trace(TraceMethodPosition.CallbackEnd);
         });
 
@@ -90,24 +109,11 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         return filteredData;
     }
 
-        
-    // public changePage(page: any, data: Array<any>): Array<any> {
-
-    //     var trace = this.classTrace("changePage");
-    //     trace(TraceMethodPosition.Entry);
-
-    //     let start = (page.page - 1) * page.itemsPerPage;
-    //     let end = page.itemsPerPage > -1 ? (start + page.itemsPerPage) : data.length;
-    //     var ret = data.slice(start, end);
-    //     trace(TraceMethodPosition.Exit);
-    //     return ret;
-    // }
-
     public changeSort(data: any, config: any): any {
 
         var trace = this.classTrace("changeSort");
         trace(TraceMethodPosition.Entry);
-
+        
         if (!config.sorting) {
             return data;
         }
@@ -115,9 +121,8 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         let columns = this.config.sorting.columns || [];
         let columnName: string = void 0;
         let sort: string = void 0;
-
         for (let i = 0; i < columns.length; i++) {
-            if (columns[i].sort !== '') {
+            if (columns[i].sort) {
                 columnName = columns[i].name;
                 sort = columns[i].sort;
             }
@@ -129,9 +134,14 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
 
         // simple sorting
         var ret = data.sort((previous: any, current: any) => {
-            if (previous[columnName] > current[columnName]) {
+            if (!previous[columnName] || !current[columnName]) return 0;
+            var prev = previous[columnName];
+            var current = current[columnName];
+            if (typeof prev === 'string') prev = prev.toLowerCase();
+            if (typeof current === 'string') current = current.toLowerCase();
+            if (prev > current) {
                 return sort === 'desc' ? -1 : 1;
-            } else if (previous[columnName] < current[columnName]) {
+            } else if (prev < current) {
                 return sort === 'asc' ? -1 : 1;
             }
             return 0;
@@ -165,7 +175,7 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         trace(TraceMethodPosition.Exit);                        
     }
     
-    public onChangeTable(data: any, config: any, page: any = { page: this.page, itemsPerPage: this.itemsPerPage }): void {
+    public onChangeTable(data: any, config: any): void {
         
         var trace = this.classTrace("onChangeTable");
         trace(TraceMethodPosition.Entry);
@@ -179,7 +189,6 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         let filteredData = this.changeFilter(data, this.config);
         let sortedData = this.changeSort(filteredData, this.config);
         this.rows = sortedData;
-        this.length = sortedData.length;
         
         trace(TraceMethodPosition.Exit);
         

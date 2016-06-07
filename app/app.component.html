@@ -3,7 +3,7 @@
         <xcore-security></xcore-security> 
     </nav>
 </div>
-<div class="container-fluid">
+<div class="container-fluid" id="main-app-body" (window:scroll)="onScroll($event)">
     <router-outlet></router-outlet>
 </div>
 <ng2-toasty></ng2-toasty>

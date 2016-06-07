@@ -44,31 +44,35 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
             UserManagementComponent = (function (_super) {
                 __extends(UserManagementComponent, _super);
                 function UserManagementComponent(xCoreServices, userProfileService, hubService) {
+                    var _this = this;
                     _super.call(this, xCoreServices);
                     this.xCoreServices = xCoreServices;
                     this.userProfileService = userProfileService;
                     this.hubService = hubService;
                     this.active = false;
+                    this.totalRows = 0;
+                    this.userServiceSubscription = null;
                     this.rows = [];
                     this.columns = [
-                        { title: "Name", name: "Name", colWidth: 3 },
-                        { title: "Full Name", name: "GivenName", colWidth: 3 },
-                        { title: "EMail Address", name: "EmailAddress", colWidth: 3 },
+                        { title: "User Name", name: "Name", colWidth: 3, sort: "asc" },
+                        { title: "Full Name", name: "GivenName", colWidth: 6 },
                         { title: "Enabled", name: "Enabled", colWidth: 1, transform: function (val) { return val ? "Yes" : "No"; } },
                         { title: "Edit", name: "Edit", colWidth: 1, editRow: true },
                         { title: "Delete", name: "Delete", colWidth: 1, deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
                     ];
-                    this.page = 1;
-                    this.itemsPerPage = 10;
-                    this.maxSize = 5;
-                    this.numPages = 1;
-                    this.length = 0;
                     this.config = {
                         paging: false,
                         sorting: { columns: this.columns },
                         filtering: { filterString: '', columnName: 'Name' }
                     };
                     this.initializeTrace("UserManagementComponent");
+                    //Unsubscribe from the infinite stream when when change routes
+                    this.xCoreServices.Router.changes.subscribe(function (val) {
+                        if (_this.userServiceSubscription) {
+                            _this.userServiceSubscription.unsubscribe();
+                            _this.userServiceSubscription = null;
+                        }
+                    });
                 }
                 UserManagementComponent.prototype.addNew = function (event) {
                     event.preventDefault();
@@ -77,16 +81,29 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.xCoreServices.Router.navigate(['/NewUser']);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
+                UserManagementComponent.prototype.onRouteChange = function () {
+                };
                 UserManagementComponent.prototype.getInitialData = function (userProfileService) {
                     var _this = this;
                     var trace = this.classTrace("getInitialData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    userProfileService.getUsers().subscribe(function (up) {
+                    userProfileService.getUsers(0, this.xCoreServices.AppSettings.DefaultPageSize).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        _this.users = lodash_1.default.map(up, function (u) { return _this.userProfileService.userProfileToViewModel(u); });
-                        _this.length = _this.users.length;
+                        _this.users = lodash_1.default.map(up.Rows, function (u) { return _this.userProfileService.userProfileToViewModel(u); });
+                        _this.totalRows = up.RowCount;
                         _this.active = true;
                         _this.onChangeTable(_this.users, _this.config);
+                        _this.userServiceSubscription = _this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(function (si) {
+                            if (_this.users.length >= _this.totalRows)
+                                return;
+                            userProfileService.getUsers(_this.users.length, _this.xCoreServices.AppSettings.DefaultPageSize).subscribe(function (up) {
+                                _this.users = _this.users.concat(lodash_1.default.map(up.Rows, function (u) { return _this.userProfileService.userProfileToViewModel(u); }));
+                                _this.totalRows = up.RowCount;
+                                _this.onChangeTable(_this.users, _this.config);
+                                _this.xCoreServices.ScrollService.checkNearBottom();
+                            });
+                        });
+                        _this.xCoreServices.ScrollService.checkNearBottom();
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -111,15 +128,6 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     });
                     return filteredData;
                 };
-                // public changePage(page: any, data: Array<any>): Array<any> {
-                //     var trace = this.classTrace("changePage");
-                //     trace(TraceMethodPosition.Entry);
-                //     let start = (page.page - 1) * page.itemsPerPage;
-                //     let end = page.itemsPerPage > -1 ? (start + page.itemsPerPage) : data.length;
-                //     var ret = data.slice(start, end);
-                //     trace(TraceMethodPosition.Exit);
-                //     return ret;
-                // }
                 UserManagementComponent.prototype.changeSort = function (data, config) {
                     var trace = this.classTrace("changeSort");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
@@ -130,7 +138,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     var columnName = void 0;
                     var sort = void 0;
                     for (var i = 0; i < columns.length; i++) {
-                        if (columns[i].sort !== '') {
+                        if (columns[i].sort) {
                             columnName = columns[i].name;
                             sort = columns[i].sort;
                         }
@@ -140,10 +148,18 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     }
                     // simple sorting
                     var ret = data.sort(function (previous, current) {
-                        if (previous[columnName] > current[columnName]) {
+                        if (!previous[columnName] || !current[columnName])
+                            return 0;
+                        var prev = previous[columnName];
+                        var current = current[columnName];
+                        if (typeof prev === 'string')
+                            prev = prev.toLowerCase();
+                        if (typeof current === 'string')
+                            current = current.toLowerCase();
+                        if (prev > current) {
                             return sort === 'desc' ? -1 : 1;
                         }
-                        else if (previous[columnName] < current[columnName]) {
+                        else if (prev < current) {
                             return sort === 'asc' ? -1 : 1;
                         }
                         return 0;
@@ -175,8 +191,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                UserManagementComponent.prototype.onChangeTable = function (data, config, page) {
-                    if (page === void 0) { page = { page: this.page, itemsPerPage: this.itemsPerPage }; }
+                UserManagementComponent.prototype.onChangeTable = function (data, config) {
                     var trace = this.classTrace("onChangeTable");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     if (config && config.filtering) {
@@ -188,7 +203,6 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     var filteredData = this.changeFilter(data, this.config);
                     var sortedData = this.changeSort(filteredData, this.config);
                     this.rows = sortedData;
-                    this.length = sortedData.length;
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 UserManagementComponent = __decorate([

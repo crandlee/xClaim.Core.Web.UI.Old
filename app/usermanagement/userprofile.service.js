@@ -50,10 +50,10 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.getUsers = function () {
+                UserProfileService.prototype.getUsers = function (skip, take) {
                     var trace = this.classTrace("getUsers");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), "users");
+                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), "users/" + skip + "/" + take);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };

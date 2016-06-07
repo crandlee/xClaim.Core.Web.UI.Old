@@ -166,7 +166,7 @@ export class BaseService {
             var trace = this.classTrace("getObjectData");
             trace(TraceMethodPosition.Entry);
             var baseObs = this.getBaseGetObservable(serviceOptions.ApiRoot, routePath, requestOptions)
-                .map<TData>(res => { return res.json(); });                
+                .map<TData>(res => res.json());                
             var tailObs = this.getTailGetObservable<TData>(baseObs, serviceOptions, onError);   
         var ret =  this.executeObservable(tailObs);
         trace(TraceMethodPosition.Exit);

@@ -16,6 +16,8 @@ export class AppSettings {
     public get ResponseType(): string { return 'id_token token'};
     public get LoginRoute(): string { return '/Login'};
     public get LogoutRoute(): string { return '/Logout'};
+    public get DefaultPageSize(): number { return 10; }
+    public get DefaultNearBottomPixels(): number { return 50; }
     public get CookieKeys(): ICookieKeys { return { 
         RouteAfterLoginKey: 'xc.routeAfterLogin'
     }};

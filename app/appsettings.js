@@ -82,6 +82,16 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     configurable: true
                 });
                 ;
+                Object.defineProperty(AppSettings.prototype, "DefaultPageSize", {
+                    get: function () { return 10; },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(AppSettings.prototype, "DefaultNearBottomPixels", {
+                    get: function () { return 50; },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(AppSettings.prototype, "CookieKeys", {
                     get: function () {
                         return {

@@ -19,6 +19,7 @@
                 [rows]="rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
         </ng-table>
     </div>
+    <div class="row-count-tag">{{(users && users.length) || 0}} of {{totalRows}}</div>
     <div *ngIf="!active" class="loading-message">
         Loading Users
     </div>

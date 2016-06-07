@@ -32,10 +32,10 @@ export class UserProfileService extends XCoreServiceBase {
         return obs;
     }
 
-    public getUsers(): Observable<IUserProfile[]> {  
+    public getUsers(skip: number, take: number): Observable<IUserProfileReturn> {  
         var trace = this.classTrace("getUsers");
         trace(TraceMethodPosition.Entry);
-        var obs = this.getObjectData<IUserProfile[]>(this.getOptions("There was an error retrieving the users"), `users`);
+        var obs = this.getObjectData<IUserProfileReturn>(this.getOptions("There was an error retrieving the users"), `users/${skip}/${take}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -180,4 +180,9 @@ export interface IClaimDefinition {
      Id: string;
      Name: string;
      Description?: string;
+}
+
+export interface IUserProfileReturn {
+    RowCount: number;
+    Rows: IUserProfile[];
 }

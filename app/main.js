@@ -85,7 +85,8 @@ System.register(['@angular/platform-browser-dynamic', './shared/ng2-toasty/ng2-t
                 busy_service_1.BusyService,
                 hub_service_1.HubService,
                 router_1.ROUTER_PROVIDERS,
-                core_1.provide(core_1.ExceptionHandler, { useClass: RootExceptionHandler })
+                core_1.provide(core_1.ExceptionHandler, { useClass: RootExceptionHandler }),
+                core_1.provide(Window, { useValue: window })
             ]));
         }
     }

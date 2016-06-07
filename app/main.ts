@@ -30,7 +30,7 @@ export class RootExceptionHandler  {
 bootstrap(AppComponent, [
    ...MODAL_BROWSER_PROVIDERS, ToastyService, ToastyConfig, HTTP_PROVIDERS, AppSettings, XCoreToastService, 
    LoggingService, SecurityService, CookieService, BusyService, HubService,
-   ROUTER_PROVIDERS, provide(ExceptionHandler, { useClass: RootExceptionHandler})
+   ROUTER_PROVIDERS, provide(ExceptionHandler, { useClass: RootExceptionHandler}), provide(Window, { useValue: window })
 ]);
 
 

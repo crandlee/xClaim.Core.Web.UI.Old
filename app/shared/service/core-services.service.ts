@@ -7,6 +7,7 @@ import { Http } from '@angular/http';
 import { Router } from '@angular/router';
 import {CookieService} from 'angular2-cookie/core';
 import { BusyService } from './busy.service';
+import { ScrollService } from '../scroll/scroll.service';
 
 @Injectable()
 export class XCoreServices {
@@ -17,7 +18,8 @@ export class XCoreServices {
                 public Http: Http, 
                 public Router: Router,
                 public CookieService: CookieService,
-                public BusyService: BusyService) {                    
+                public BusyService: BusyService,
+                public ScrollService: ScrollService) {                    
     }    
 }
 
