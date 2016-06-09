@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../shared/filtering/filter.component', './user.filter.service', '../shared/service/core-services.service', 'ng2-bootstrap/ng2-bootstrap'], function(exports_1, context_1) {
+System.register(['@angular/core', '../shared/filtering/filter.component', './user.filter.service', '../shared/service/core-services.service', 'ng2-bootstrap/ng2-bootstrap', '../shared/off-click/off-click.directive'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '../shared/filtering/filter.component', './use
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, filter_component_1, user_filter_service_1, core_services_service_1, ng2_bootstrap_1;
+    var core_1, filter_component_1, user_filter_service_1, core_services_service_1, ng2_bootstrap_1, off_click_directive_1;
     var UserFilterComponent;
     return {
         setters:[
@@ -33,6 +33,9 @@ System.register(['@angular/core', '../shared/filtering/filter.component', './use
             },
             function (ng2_bootstrap_1_1) {
                 ng2_bootstrap_1 = ng2_bootstrap_1_1;
+            },
+            function (off_click_directive_1_1) {
+                off_click_directive_1 = off_click_directive_1_1;
             }],
         execute: function() {
             UserFilterComponent = (function (_super) {
@@ -42,24 +45,21 @@ System.register(['@angular/core', '../shared/filtering/filter.component', './use
                     this.xCoreServices = xCoreServices;
                     this.userFilterService = userFilterService;
                     this.renderer = renderer;
+                    this.self = this;
                 }
-                UserFilterComponent.prototype.onFilterClick = function () {
-                    this.filterVisible = !this.filterVisible;
-                    //Focus on user name
-                    if (this.filterVisible)
-                        this.renderer.invokeElementMethod(this.userNameRef.nativeElement, 'focus', []);
+                UserFilterComponent.prototype.ngOnInit = function () {
                 };
                 __decorate([
                     core_1.ViewChild('userName'), 
                     __metadata('design:type', Object)
-                ], UserFilterComponent.prototype, "userNameRef", void 0);
+                ], UserFilterComponent.prototype, "focusRef", void 0);
                 UserFilterComponent = __decorate([
                     core_1.Component({
                         selector: "userfilter",
                         styleUrls: ['app/usermanagement/user.filter.component.css'],
                         templateUrl: 'app/usermanagement/user.filter.component.html',
                         providers: [],
-                        directives: [ng2_bootstrap_1.ACCORDION_DIRECTIVES]
+                        directives: [ng2_bootstrap_1.ACCORDION_DIRECTIVES, off_click_directive_1.OffClickDirective]
                     }), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices, user_filter_service_1.UserFilterService, core_1.Renderer])
                 ], UserFilterComponent);

@@ -7,6 +7,7 @@ import { XCoreServices } from './shared/service/core-services.service';
 import { HubService } from './shared/hub/hub.service';
 import { TimerWrapper } from '@angular/core/src/facade/async';
 import { ScrollService } from './shared/scroll/scroll.service';
+import { OffClickDirective } from "./shared/off-click/off-click.directive";
 
 declare var $:any;
 
@@ -14,7 +15,7 @@ declare var $:any;
     selector: 'xcore-app',
     templateUrl: 'app/app.component.html',
     styles: ['app/app.component.css'],
-    directives: [SecurityComponent, Toasty, ROUTER_DIRECTIVES],
+    directives: [SecurityComponent, Toasty, ROUTER_DIRECTIVES, OffClickDirective],
     providers: [XCoreServices, HubService, ScrollService]
 })
 @Routes([].concat(DomainService.getRoutes()))

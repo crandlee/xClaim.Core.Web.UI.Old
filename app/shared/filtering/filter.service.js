@@ -140,6 +140,22 @@ System.register(['@angular/core', '../service/core-services.service', 'rxjs/Subj
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
+                //*****Some helper functions for building filter summary descriptions******
+                FilterService.prototype.aggregateDescription = function (items, nameProperty, header, anded) {
+                    var aggregate = "";
+                    if (items.length > 0) {
+                        items.forEach(function (item) { aggregate += (aggregate === "" ? "" : " OR ") + item[nameProperty]; });
+                        return anded + header + "(" + aggregate + ")";
+                    }
+                    return "";
+                };
+                FilterService.prototype.selectedItems = function (arrList, idList, idProperty) {
+                    idProperty = idProperty || "Id";
+                    return (arrList && arrList.filter(function (item) { return item && idList && (idList.indexOf(item[idProperty]) > -1); })) || [];
+                };
+                FilterService.prototype.addAnd = function (summary) {
+                    return (summary === "") ? "" : " AND ";
+                };
                 FilterService = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices])

@@ -1,11 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer } from '@angular/core';
 import { XCoreServices, TraceMethodPosition } from '../service/core-services.service';
 import _ from 'lodash';
 import { FilterService, IComponentOptions, IFilterDefinition } from './filter.service';
 import { XCoreBaseComponent } from '../component/base.component';
 import { Subscription, Observable } from 'rxjs';
 import { ACCORDION_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
-
 
 @Component({
     styleUrls: ['app/shared/filtering/filter.component.css'],
@@ -19,10 +18,11 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
     private mergedServiceOptions = false;
     private updateSubscription: Subscription;
 
-    public filterVisible: boolean = false;
+    public filterOptions: { filterVisible: boolean };
     public workingArea: IWorkingArea;
     public summaryText: string = "No filter set";
-    public get toServerFilter(): TFilterToServer { return this.filterService.currentFilter.toServerFilter }
+    public get toServerFilter(): TFilterToServer { return this.filterService && this.filterService.currentFilter && this.filterService.currentFilter.toServerFilter }
+    public get toClientFilter(): TFilterToClient { return this.filterService && this.filterService.currentFilter && this.filterService.currentFilter.toClientFilter }
 
     public get componentOptions(): IComponentOptions { return this.filterService.componentOptions;}
     public set componentOptions(componentOptions: IComponentOptions) { this.filterService.componentOptions = _.merge(this.filterService.componentOptions, componentOptions);}
@@ -34,6 +34,7 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
         trace(TraceMethodPosition.Entry);
         this.watchForServiceSetupCalled();
         trace(TraceMethodPosition.Exit);
+        this.filterOptions = { filterVisible: false };
     }
 
 
@@ -104,7 +105,7 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
         if (this.filterService.componentOptions.autoApplyFilter) {
             timeout = (this.filterService.componentOptions && this.filterService.componentOptions.applyDelayOnAutoFilter) || 2000;            
         } else {
-            this.filterVisible = false;
+            this.filterOptions.filterVisible = false;
         }
         var obs = this.updateFilter(this.filterService.applyFilter, timeout);
         trace(TraceMethodPosition.Exit);
@@ -117,7 +118,7 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
             event.preventDefault();
             event.stopPropagation();
         }
-        this.filterVisible = false;
+        this.filterOptions.filterVisible = false;
         var obs = this.updateFilter(this.filterService.resetFilter, 0);
         obs.subscribe(() => {
             this.summaryText = this.filterService.getFilterSummary();
@@ -126,6 +127,22 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
         return obs;
     }
 
+    public onOutsideClick(comp: FilterComponent<TFilterToServer, TFilterToClient>): () => void {
+        return function() {
+            this.filterOptions.filterVisible = false;
+        }.bind(comp);
+    }
+
+
+    public onFilterClick(comp: FilterComponent<TFilterToServer, TFilterToClient>): () => void {
+        console.log('yeah');
+        return function() {
+            console.log('what?');
+            //Sets up toggling filter display/setting default focus element
+            this.filterOptions.filterVisible = !this.filterOptions.filterVisible;
+            if (this.filterOptions.filterVisible && this.focusRef) this.renderer.invokeElementMethod(this.focusRef.nativeElement, 'focus', []);
+        }.bind(comp);
+    }
 
     public setIdList(idType: string, id: any): void {
         var trace = this.classTrace("setIdList");
@@ -142,25 +159,6 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
         this.toServerFilterChanged();
         trace(TraceMethodPosition.Exit);
     }
-
-    //*****Some helper functions for building filter summary descriptions******
-    protected static aggregateDescription(items, nameProperty, header, anded) {
-        var aggregate = "";
-        if (items.length > 0) {
-            items.forEach(function (item) { aggregate += (aggregate === "" ? "" : " OR ") + item[nameProperty] });
-            return anded + header + "(" + aggregate + ")";
-        }
-        return "";
-    }
-
-    protected static selectedItems(arrList, idList, idProperty) {
-        idProperty = idProperty || "Id";
-        return (arrList && arrList.filter(function(item) { return item && idList && (idList.indexOf(item[idProperty]) > -1); })) || [];
-    }
-    protected static addAnd(summary) {
-        return (summary === "") ? "" : " AND ";
-    }
-    //*********************************************************************
 
 }
 

@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
-import { XCoreServiceBase, XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
+import { XCoreServiceBase, XCoreServices, TraceMethodPosition, INameValue } from '../shared/service/core-services.service';
 import { HubService } from '../shared/hub/hub.service';
 import { IServiceOptions } from '../shared/service/base.service';
 import _ from 'lodash';
@@ -33,6 +33,8 @@ export class UserProfileService extends XCoreServiceBase {
         return obs;
     }
 
+    public defaultStatuses: INameValue<string>[] = [{ Name: "All", Value:"All"}, {Name: "Enabled", Value: "Enabled"}, {Name: "Disabled", Value: "Disabled"}]
+
     public getUsers(skip?: number, take?: number, toServerFilter?: IUsersToServerFilter): Observable<IUserProfileReturn> {
 
         var trace = this.classTrace("getUsers");
@@ -41,7 +43,10 @@ export class UserProfileService extends XCoreServiceBase {
         if (!take) take = this.xCoreServices.AppSettings.DefaultPageSize;
         var url = `users?skip=${skip}&take=${take}`;
         if (toServerFilter && toServerFilter.UserName) url +=`&userName=${toServerFilter.UserName}`;
-        var obs = this.getObjectData<IUserProfileReturn>(this.getOptions("There was an error retrieving the users"), url);
+        if (toServerFilter && toServerFilter.FullName) url +=`&fullName=${toServerFilter.FullName}`;
+        if (toServerFilter && toServerFilter.Email) url +=`&email=${toServerFilter.Email}`;
+        if (toServerFilter && toServerFilter.Status && toServerFilter.Status !== "All") url +=`&enabled=${toServerFilter.Status === "Enabled"? true : false}`;
+        var obs = this.getObjectData<IUserProfileReturn>(this.getOptions("There was an error retrieving the users"), url).map(cf => { cf.Statuses = this.defaultStatuses; return cf;})
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -191,4 +196,5 @@ export interface IClaimDefinition {
 export interface IUserProfileReturn {
     RowCount: number;
     Rows: IUserProfile[];
+    Statuses: INameValue<string>[];
 }

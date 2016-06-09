@@ -118,6 +118,25 @@ export abstract class FilterService<TFilterToServer, TFilterToClient> extends XC
         return obs;
     }
 
+    //*****Some helper functions for building filter summary descriptions******
+    protected aggregateDescription(items, nameProperty, header, anded) {
+        var aggregate = "";
+        if (items.length > 0) {
+            items.forEach(function (item) { aggregate += (aggregate === "" ? "" : " OR ") + item[nameProperty] });
+            return anded + header + "(" + aggregate + ")";
+        }
+        return "";
+    }
+
+    protected selectedItems(arrList, idList, idProperty) {
+        idProperty = idProperty || "Id";
+        return (arrList && arrList.filter(function(item) { return item && idList && (idList.indexOf(item[idProperty]) > -1); })) || [];
+    }
+    protected addAnd(summary) {
+        return (summary === "") ? "" : " AND ";
+    }
+    //*********************************************************************
+
     protected abstract emptyFilterDefinition(): IFilterDefinition<TFilterToServer, TFilterToClient>;
     protected abstract filterSummaryFunction(filter: IFilterDefinition<TFilterToServer, TFilterToClient>): string;
     protected abstract initializeFilterFunction() : Observable<TFilterToClient>;

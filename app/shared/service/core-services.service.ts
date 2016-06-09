@@ -38,3 +38,8 @@ export enum TraceMethodPosition {
     CallbackStart,
     CallbackEnd
 }
+
+export interface INameValue<T> {
+    Name: string,
+    Value: T
+}

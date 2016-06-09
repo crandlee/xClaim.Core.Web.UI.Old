@@ -47,7 +47,6 @@ export class NgTableComponent {
   
   // Outputs (Events)
   @Output() public tableChanged:EventEmitter<any> = new EventEmitter();
-  @Output() public rowClicked:EventEmitter<any> = new EventEmitter();
   @Output() public deleteClicked:EventEmitter<any> = new EventEmitter();
   @Output() public editClicked:EventEmitter<any> = new EventEmitter();
 
@@ -81,10 +80,7 @@ export class NgTableComponent {
     return `col-xs-${column.colWidth}`;
   }
   
-  public onRowClick(row) {
-    this.rowClicked.emit(row);
-  }
-
+  
   public onEditClick(event, row, column) {
     event.preventDefault();
     event.stopPropagation();

@@ -16,7 +16,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
     var filter_service_1, core_services_service_1, userprofile_service_1, core_1;
-    var UserFilterService, IUsersToServerFilter;
+    var UserFilterService;
     return {
         setters:[
             function (filter_service_1_1) {
@@ -41,7 +41,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                     this.initialComponentOptions = {
                         autoApplyFilter: false
                     };
-                    this.idListMappings = [];
+                    this.idListMappings = [{ dataArrayName: "Status", idArrayName: "Statuses" }];
                     var trace = this.classTrace("constructor");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var setupObject = {
@@ -57,17 +57,25 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                 }
                 UserFilterService.prototype.emptyFilterDefinition = function () {
                     return {
-                        toClientFilter: { Rows: [], RowCount: 0 },
-                        toServerFilter: { UserName: null }
+                        toClientFilter: { Rows: [], RowCount: 0, Statuses: this.userProfileService.defaultStatuses },
+                        toServerFilter: { UserName: null, Email: null, FullName: null, Status: "All" }
                     };
                 };
                 UserFilterService.prototype.filterSummaryFunction = function (filter) {
                     var trace = this.classTrace("filterSummaryFunction");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var toServerFilter = filter.toServerFilter;
+                    var toClientFilter = filter.toClientFilter;
                     var filterSummary = "";
                     if (toServerFilter.UserName)
                         filterSummary += "User Name contains '" + (toServerFilter.UserName || "") + "'";
+                    if (toServerFilter.FullName)
+                        filterSummary += this.addAnd(filterSummary) + "Full Name contains '" + (toServerFilter.FullName || "") + "'";
+                    if (toServerFilter.Email)
+                        filterSummary += this.addAnd(filterSummary) + "Email contains '" + (toServerFilter.Email || "") + "'";
+                    if (toServerFilter.Status && toServerFilter.Status !== "All")
+                        filterSummary += this.addAnd(filterSummary) + "Status = " + (toServerFilter.Status || "") + "";
+                    //filterSummary += this.aggregateDescription(this.selectedItems(toClientFilter.Status, toServerFilter.Statuses, "Value"), "Value", "Statuses are ", this.addAnd(filterSummary));
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return filterSummary;
                 };
@@ -105,12 +113,6 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                 return UserFilterService;
             }(filter_service_1.FilterService));
             exports_1("UserFilterService", UserFilterService);
-            IUsersToServerFilter = (function () {
-                function IUsersToServerFilter() {
-                }
-                return IUsersToServerFilter;
-            }());
-            exports_1("IUsersToServerFilter", IUsersToServerFilter);
         }
     }
 });

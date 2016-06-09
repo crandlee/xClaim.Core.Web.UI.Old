@@ -1,4 +1,4 @@
-System.register(['@angular/core', './shared/security/security.component', '@angular/router', './shared/ng2-toasty/ng2-toasty', './domain.service', './shared/service/core-services.service', './shared/hub/hub.service', '@angular/core/src/facade/async', './shared/scroll/scroll.service'], function(exports_1, context_1) {
+System.register(['@angular/core', './shared/security/security.component', '@angular/router', './shared/ng2-toasty/ng2-toasty', './domain.service', './shared/service/core-services.service', './shared/hub/hub.service', '@angular/core/src/facade/async', './shared/scroll/scroll.service', "./shared/off-click/off-click.directive"], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, security_component_1, router_1, ng2_toasty_1, domain_service_1, core_services_service_1, hub_service_1, async_1, scroll_service_1;
+    var core_1, security_component_1, router_1, ng2_toasty_1, domain_service_1, core_services_service_1, hub_service_1, async_1, scroll_service_1, off_click_directive_1;
     var AppComponent;
     return {
         setters:[
@@ -40,6 +40,9 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
             },
             function (scroll_service_1_1) {
                 scroll_service_1 = scroll_service_1_1;
+            },
+            function (off_click_directive_1_1) {
+                off_click_directive_1 = off_click_directive_1_1;
             }],
         execute: function() {
             AppComponent = (function () {
@@ -63,7 +66,7 @@ System.register(['@angular/core', './shared/security/security.component', '@angu
                         selector: 'xcore-app',
                         templateUrl: 'app/app.component.html',
                         styles: ['app/app.component.css'],
-                        directives: [security_component_1.SecurityComponent, ng2_toasty_1.Toasty, router_1.ROUTER_DIRECTIVES],
+                        directives: [security_component_1.SecurityComponent, ng2_toasty_1.Toasty, router_1.ROUTER_DIRECTIVES, off_click_directive_1.OffClickDirective],
                         providers: [core_services_service_1.XCoreServices, hub_service_1.HubService, scroll_service_1.ScrollService]
                     }),
                     router_1.Routes([].concat(domain_service_1.DomainService.getRoutes())), 

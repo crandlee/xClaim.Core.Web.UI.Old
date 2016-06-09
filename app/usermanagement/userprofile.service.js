@@ -41,6 +41,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     _super.call(this, xCoreServices);
                     this.hubService = hubService;
                     this.apiController = 'UserProfile';
+                    this.defaultStatuses = [{ Name: "All", Value: "All" }, { Name: "Enabled", Value: "Enabled" }, { Name: "Disabled", Value: "Disabled" }];
                     this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserProfileService");
                 }
                 UserProfileService.prototype.getOptions = function (serviceError) {
@@ -51,6 +52,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     return obs;
                 };
                 UserProfileService.prototype.getUsers = function (skip, take, toServerFilter) {
+                    var _this = this;
                     var trace = this.classTrace("getUsers");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     if (!skip)
@@ -60,7 +62,13 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     var url = "users?skip=" + skip + "&take=" + take;
                     if (toServerFilter && toServerFilter.UserName)
                         url += "&userName=" + toServerFilter.UserName;
-                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), url);
+                    if (toServerFilter && toServerFilter.FullName)
+                        url += "&fullName=" + toServerFilter.FullName;
+                    if (toServerFilter && toServerFilter.Email)
+                        url += "&email=" + toServerFilter.Email;
+                    if (toServerFilter && toServerFilter.Status && toServerFilter.Status !== "All")
+                        url += "&enabled=" + (toServerFilter.Status === "Enabled" ? true : false);
+                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), url).map(function (cf) { cf.Statuses = _this.defaultStatuses; return cf; });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };

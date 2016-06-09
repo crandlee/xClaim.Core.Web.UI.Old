@@ -34,12 +34,12 @@ export class UserFilterService extends FilterService<IUsersToServerFilter, IUser
         autoApplyFilter: false
     }
 
-    public idListMappings: IFilterIdListMapping[] = [];
+    public idListMappings: IFilterIdListMapping[] = [{ dataArrayName: "Status", idArrayName: "Statuses" }];
 
     protected emptyFilterDefinition(): IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>  {
         return {
-            toClientFilter: { Rows: [], RowCount: 0 },
-            toServerFilter: { UserName: null }
+            toClientFilter: { Rows: [], RowCount: 0, Statuses: this.userProfileService.defaultStatuses },
+            toServerFilter: { UserName: null, Email: null, FullName: null, Status: "All"  }            
         };
     }
 
@@ -49,8 +49,14 @@ export class UserFilterService extends FilterService<IUsersToServerFilter, IUser
         trace(TraceMethodPosition.Entry);
 
         var toServerFilter = filter.toServerFilter;
+        var toClientFilter = filter.toClientFilter;
+
         var filterSummary = "";
         if (toServerFilter.UserName) filterSummary += "User Name contains '" + (toServerFilter.UserName || "") + "'";
+        if (toServerFilter.FullName) filterSummary += this.addAnd(filterSummary) + "Full Name contains '" + (toServerFilter.FullName || "") + "'";
+        if (toServerFilter.Email) filterSummary += this.addAnd(filterSummary) + "Email contains '" + (toServerFilter.Email || "") + "'";
+        if (toServerFilter.Status && toServerFilter.Status !== "All") filterSummary += this.addAnd(filterSummary) + "Status = " + (toServerFilter.Status || "") + "";
+        //filterSummary += this.aggregateDescription(this.selectedItems(toClientFilter.Status, toServerFilter.Statuses, "Value"), "Value", "Statuses are ", this.addAnd(filterSummary));
 
         trace(TraceMethodPosition.Exit);
 
@@ -92,7 +98,10 @@ export class UserFilterService extends FilterService<IUsersToServerFilter, IUser
 }
 
 
-export class IUsersToServerFilter {
-    UserName: string
+export interface IUsersToServerFilter {
+    UserName: string;
+    FullName: string;
+    Email: string;
+    Status: string;
 }
 

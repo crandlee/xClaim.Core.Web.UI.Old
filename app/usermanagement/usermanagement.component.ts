@@ -93,7 +93,6 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
     private loadFirstData(filter: IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>, userProfileService: UserProfileService, userFilterService: UserFilterService): void {
         var trace = this.classTrace("loadData");
         trace(TraceMethodPosition.Entry);
-        
         this.users = _.map(filter.toClientFilter.Rows, u => userProfileService.userProfileToViewModel(u));
         this.totalRows = filter.toClientFilter.RowCount;
         this.active = true;

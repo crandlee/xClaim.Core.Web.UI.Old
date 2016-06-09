@@ -36,7 +36,6 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     this.rowTemplate = "";
                     // Outputs (Events)
                     this.tableChanged = new core_1.EventEmitter();
-                    this.rowClicked = new core_1.EventEmitter();
                     this.deleteClicked = new core_1.EventEmitter();
                     this.editClicked = new core_1.EventEmitter();
                     this._columns = [];
@@ -74,9 +73,6 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                 };
                 NgTableComponent.prototype.getColumnClass = function (column) {
                     return "col-xs-" + column.colWidth;
-                };
-                NgTableComponent.prototype.onRowClick = function (row) {
-                    this.rowClicked.emit(row);
                 };
                 NgTableComponent.prototype.onEditClick = function (event, row, column) {
                     event.preventDefault();
@@ -142,10 +138,6 @@ System.register(['@angular/core', '@angular/common', './ng-table-sorting.directi
                     core_1.Output(), 
                     __metadata('design:type', core_1.EventEmitter)
                 ], NgTableComponent.prototype, "tableChanged", void 0);
-                __decorate([
-                    core_1.Output(), 
-                    __metadata('design:type', core_1.EventEmitter)
-                ], NgTableComponent.prototype, "rowClicked", void 0);
                 __decorate([
                     core_1.Output(), 
                     __metadata('design:type', core_1.EventEmitter)

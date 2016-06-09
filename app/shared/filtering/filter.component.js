@@ -45,16 +45,21 @@ System.register(['@angular/core', '../service/core-services.service', 'lodash', 
                     this.xCoreServices = xCoreServices;
                     this.filterService = filterService;
                     this.mergedServiceOptions = false;
-                    this.filterVisible = false;
                     this.summaryText = "No filter set";
                     this.initializeTrace("FilterComponent");
                     var trace = this.classTrace("constructor");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     this.watchForServiceSetupCalled();
                     trace(core_services_service_1.TraceMethodPosition.Exit);
+                    this.filterOptions = { filterVisible: false };
                 }
                 Object.defineProperty(FilterComponent.prototype, "toServerFilter", {
-                    get: function () { return this.filterService.currentFilter.toServerFilter; },
+                    get: function () { return this.filterService && this.filterService.currentFilter && this.filterService.currentFilter.toServerFilter; },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(FilterComponent.prototype, "toClientFilter", {
+                    get: function () { return this.filterService && this.filterService.currentFilter && this.filterService.currentFilter.toClientFilter; },
                     enumerable: true,
                     configurable: true
                 });
@@ -128,7 +133,7 @@ System.register(['@angular/core', '../service/core-services.service', 'lodash', 
                         timeout = (this.filterService.componentOptions && this.filterService.componentOptions.applyDelayOnAutoFilter) || 2000;
                     }
                     else {
-                        this.filterVisible = false;
+                        this.filterOptions.filterVisible = false;
                     }
                     var obs = this.updateFilter(this.filterService.applyFilter, timeout);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -141,13 +146,28 @@ System.register(['@angular/core', '../service/core-services.service', 'lodash', 
                         event.preventDefault();
                         event.stopPropagation();
                     }
-                    this.filterVisible = false;
+                    this.filterOptions.filterVisible = false;
                     var obs = this.updateFilter(this.filterService.resetFilter, 0);
                     obs.subscribe(function () {
                         _this.summaryText = _this.filterService.getFilterSummary();
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
+                };
+                FilterComponent.prototype.onOutsideClick = function (comp) {
+                    return function () {
+                        this.filterOptions.filterVisible = false;
+                    }.bind(comp);
+                };
+                FilterComponent.prototype.onFilterClick = function (comp) {
+                    console.log('yeah');
+                    return function () {
+                        console.log('what?');
+                        //Sets up toggling filter display/setting default focus element
+                        this.filterOptions.filterVisible = !this.filterOptions.filterVisible;
+                        if (this.filterOptions.filterVisible && this.focusRef)
+                            this.renderer.invokeElementMethod(this.focusRef.nativeElement, 'focus', []);
+                    }.bind(comp);
                 };
                 FilterComponent.prototype.setIdList = function (idType, id) {
                     var trace = this.classTrace("setIdList");
@@ -165,22 +185,6 @@ System.register(['@angular/core', '../service/core-services.service', 'lodash', 
                     }
                     this.toServerFilterChanged();
                     trace(core_services_service_1.TraceMethodPosition.Exit);
-                };
-                //*****Some helper functions for building filter summary descriptions******
-                FilterComponent.aggregateDescription = function (items, nameProperty, header, anded) {
-                    var aggregate = "";
-                    if (items.length > 0) {
-                        items.forEach(function (item) { aggregate += (aggregate === "" ? "" : " OR ") + item[nameProperty]; });
-                        return anded + header + "(" + aggregate + ")";
-                    }
-                    return "";
-                };
-                FilterComponent.selectedItems = function (arrList, idList, idProperty) {
-                    idProperty = idProperty || "Id";
-                    return (arrList && arrList.filter(function (item) { return item && idList && (idList.indexOf(item[idProperty]) > -1); })) || [];
-                };
-                FilterComponent.addAnd = function (summary) {
-                    return (summary === "") ? "" : " AND ";
                 };
                 FilterComponent = __decorate([
                     core_1.Component({
