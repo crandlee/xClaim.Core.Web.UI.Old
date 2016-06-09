@@ -30,9 +30,8 @@ export class LoggingService {
             var toastOptions = this.setToastOptions(toastMessage, options);
             if (toastFunc) toastFunc(toastOptions);            
         }
-        if (!options || !options.noConsole) {
-            var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
-            console.log(`%c${consolePrefix}: ${msg}`, `${style}`);
+        if (!options || !options.noConsole) {            
+            console.log(`%c${consolePrefix}: ${message}`, `${style}`);
         }        
     }
     
@@ -68,7 +67,7 @@ export class LoggingService {
     }
     
     private setToastOptions(message: any, options?: IxLoggingOptions): IXCoreToastOptions {
-        var msg:string = _.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
+        var msg:string = message;
         var toastOptions: IXCoreToastOptions = { message: msg };        
         if (options) {
             toastOptions.showClose = options.showClose || true;

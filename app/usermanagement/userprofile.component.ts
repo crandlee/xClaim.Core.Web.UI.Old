@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
+import { XCoreBaseComponent } from '../shared/component/base.component';
+import { HubService } from '../shared/hub/hub.service';
+import _ from 'lodash';
+import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { IFormValidationResult } from '../shared/validation/validation.service';
 import { ValidationComponent } from '../shared/validation/validation.component';
 import { AsyncValidator } from '../shared/validation/async-validator.service';
 import { UserProfileValidationService } from './userprofile.validation';
-import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
-import { UserProfileService, IUserProfile, IUserProfileViewModel } from '../usermanagement/userprofile.service';
-import { XCoreBaseComponent } from '../shared/component/base.component';
-import { HubService } from '../shared/hub/hub.service';
-import _ from 'lodash';
+import { UserProfileService, IUserProfile, IUserProfileViewModel } from './userprofile.service';
 
 @Component({
     templateUrl: 'app/usermanagement/userprofile.component.html',
@@ -77,7 +77,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
             this.initializeForm(this.builder);
             trace(TraceMethodPosition.CallbackEnd);            
         }); 
-
+        
         trace(TraceMethodPosition.Exit);
     }
     

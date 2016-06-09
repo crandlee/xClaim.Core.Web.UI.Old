@@ -11,7 +11,7 @@ import 'rxjs/add/operator/share';
 export class BaseService {
         
     constructor(
-        public xCoreServices: XCoreServices
+        protected xCoreServices: XCoreServices
         ) {
             this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UnspecifiedService");
         }
@@ -137,7 +137,7 @@ export class BaseService {
                 if (swallowException) return Observable.empty<TData>();
                 throw newError;
             }).share();
-        var ret = currentObservable.finally(() => {
+        var ret = currentObservable.finally<TData>(() => {
             this.xCoreServices.BusyService.notifyBusy(false);
         });
         

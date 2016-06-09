@@ -59,11 +59,25 @@ div.panel-heading {
   border-left: 5px solid #a94442; /* red */
 }
 
+/* List styles */
+.list-header {
+    float: left;
+    padding: 19.5px 15px;
+    font-size: 19px;
+    height: 60px;
+    line-height: 1;
+    color: #FFFFFF;
+}
+
+.list-header-button-bar {
+    margin-right:10px;
+}
+
 .row-count-tag {
     position:fixed; 
     min-width:80px; 
     top:95%; 
-    left:88%; 
+    left:87%; 
     z-index: 1000;  
     background: #000000;
     color: #FFFFFF;
@@ -71,4 +85,5 @@ div.panel-heading {
     padding-left: 5px;
     padding-right: 5px;
     font-size: 1.0em;
+    text-align: center;
 }

@@ -1,0 +1,88 @@
+<div class="filter-container" id="filterContainer">
+    <div class="filter-header" id="filterHeader" (click)="filterVisible = !filterVisible"><i id="filterLink" class="glyphicon glyphicon-filter"></i>{{summaryText}}</div>
+    <div class="filter-body animate-show" ng-show="filterVisible">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                <div class="panel-group" id="filterPanel">
+                    <div class="panel-heading">
+                        Filters:
+                        <a class="btn btn-primary reset-link" href="" (click)="resetFilter()">Reset Filter</a>
+                        <a class="btn btn-primary reset-link" href="" (click)="applyFilter()">Apply Filter</a>
+                    </div>
+                    <!--All Filters-->
+                    <accordion [closeOthers]="false" class="col-sm-6 col-md-6">
+                        <accordion-group heading="Main Panel" [isOpen]="false" [isDisabled]="false">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-sm-4 form-label filter-label">User Name:</div>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" placeholder="User Name" [(ngModel)]="toServerFilter.ProjectNumber" />
+                                    </div>
+                                </div>
+                            </div>
+                        </accordion-group>
+                    </accordion>
+                    <div class="col-sm-12 col-md-12 filter-divider"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                        <!-- Sample Checkbox Panel -->
+                        <!--<div class="panel panel-default">
+                            <div class="panel-heading filter-accordion-toggle collapsed" data-toggle="collapse" data-parent="#filterPanel" data-target="#projectStatusPanel">
+                                <h4 class="panel-title">
+                                    Checkbox Panel
+                                </h4>
+                            </div>
+                            <div id="projectStatusPanel" class="panel-collapse collapse">
+                                <ul class="list-group">
+                                    <li class="list-group-item" ng-repeat="status in ctrl.toClientFilter.Status">
+                                        <span class="badge">{{status.Count}}</span>
+                                        <span><input type="checkbox" ng-model="ctrl.workingArea['Status' + status.Value]" ng-change="ctrl.setIdList('Status', status.Value)" />{{status.Value}}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>-->
+                        <!-- Sample Date Panel -->
+                        <!--<div class="panel panel-default">
+                            <div class="panel-heading filter-accordion-toggle collapsed" data-toggle="collapse" data-parent="#filterPanel" data-target="#projectDatePanel">
+                                <h4 class="panel-title">
+                                    Sample Date Panel
+                                </h4>
+                            </div>
+                            <div id="projectDatePanel" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-sm-6 form-label filter-label">Start Date (yyyy-MM-dd):</div>
+                                        <div class="col-sm-6">
+                                            <div class="input-group">
+                                                <input type="text" placeholder="[Start Date]" class="form-control" uib-datepicker-popup="yyyy-MM-dd" name="projectStart" id="projectStart"
+                                                       ng-model="ctrl.toServerFilter.ProjectStart" required is-open="ctrl.controllerOptions.projectStartDateOpen" close-text="Close"/>
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default" ng-click="ctrl.controllerOptions.projectStartDateOpen = true">
+                                                        <i class="glyphicon glyphicon-calendar"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 form-label filter-label">End Date (yyyy-MM-dd):</div>
+                                        <div class="col-sm-6">
+                                            <div class="input-group">
+                                                <input type="text" placeholder="[End Date]" class="form-control" uib-datepicker-popup name="projectEnd" id="projectEnd" is-open="ctrl.controllerOptions.projectEndDateOpen"
+                                                       ng-model="ctrl.toServerFilter.ProjectEnd" required close-text="Close"/>
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default" ng-click="ctrl.controllerOptions.projectEndDateOpen = true">
+                                                        <i class="glyphicon glyphicon-calendar"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>-->
+

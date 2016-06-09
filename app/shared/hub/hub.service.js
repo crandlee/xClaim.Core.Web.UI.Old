@@ -39,6 +39,7 @@ System.register(['rxjs/Subject', '@angular/core', 'rxjs/add/operator/map', 'rxjs
                 __extends(HubService, _super);
                 function HubService(xCoreServices) {
                     _super.call(this, xCoreServices);
+                    this.xCoreServices = xCoreServices;
                     this.HubDataRetrievedSource = new Subject_1.Subject();
                     this.HubDataCompletedSource = new Subject_1.Subject();
                     this.HubDataRetrievedEvent = this.HubDataRetrievedSource.asObservable().share();

@@ -50,10 +50,17 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.getUsers = function (skip, take) {
+                UserProfileService.prototype.getUsers = function (skip, take, toServerFilter) {
                     var trace = this.classTrace("getUsers");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), "users/" + skip + "/" + take);
+                    if (!skip)
+                        skip = 0;
+                    if (!take)
+                        take = this.xCoreServices.AppSettings.DefaultPageSize;
+                    var url = "users?skip=" + skip + "&take=" + take;
+                    if (toServerFilter && toServerFilter.UserName)
+                        url += "&userName=" + toServerFilter.UserName;
+                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), url);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };

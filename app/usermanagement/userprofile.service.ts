@@ -8,6 +8,7 @@ import { XCoreServiceBase, XCoreServices, TraceMethodPosition } from '../shared/
 import { HubService } from '../shared/hub/hub.service';
 import { IServiceOptions } from '../shared/service/base.service';
 import _ from 'lodash';
+import { IUsersToServerFilter } from './user.filter.service';
 
 declare var sha512;
 
@@ -32,10 +33,15 @@ export class UserProfileService extends XCoreServiceBase {
         return obs;
     }
 
-    public getUsers(skip: number, take: number): Observable<IUserProfileReturn> {  
+    public getUsers(skip?: number, take?: number, toServerFilter?: IUsersToServerFilter): Observable<IUserProfileReturn> {
+
         var trace = this.classTrace("getUsers");
         trace(TraceMethodPosition.Entry);
-        var obs = this.getObjectData<IUserProfileReturn>(this.getOptions("There was an error retrieving the users"), `users/${skip}/${take}`);
+        if (!skip) skip = 0;
+        if (!take) take = this.xCoreServices.AppSettings.DefaultPageSize;
+        var url = `users?skip=${skip}&take=${take}`;
+        if (toServerFilter && toServerFilter.UserName) url +=`&userName=${toServerFilter.UserName}`;
+        var obs = this.getObjectData<IUserProfileReturn>(this.getOptions("There was an error retrieving the users"), url);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -135,7 +141,7 @@ export class UserProfileService extends XCoreServiceBase {
     public saveUserProfile(vm: IUserProfileViewModel): Observable<IUserProfile> {
         var trace = this.classTrace("saveUserProfile");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.postData(this.userProfileToModel(vm), this.getOptions("There was an error saving the user profile"), 'user')        
+        var obs = this.postData<IUserProfile, IUserProfile>(this.userProfileToModel(vm), this.getOptions("There was an error saving the user profile"), 'user')        
         trace(TraceMethodPosition.Exit)
         return obs;
     }

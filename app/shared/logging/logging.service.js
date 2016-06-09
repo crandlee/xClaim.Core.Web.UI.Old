@@ -1,4 +1,4 @@
-System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../../appsettings', 'lodash'], function(exports_1, context_1) {
+System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../../appsettings'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -10,7 +10,7 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../..
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var xcore_toasty_service_1, core_1, appsettings_1, lodash_1;
+    var xcore_toasty_service_1, core_1, appsettings_1;
     var LoggingService, TraceMethodPosition;
     return {
         setters:[
@@ -22,9 +22,6 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../..
             },
             function (appsettings_1_1) {
                 appsettings_1 = appsettings_1_1;
-            },
-            function (lodash_1_1) {
-                lodash_1 = lodash_1_1;
             }],
         execute: function() {
             LoggingService = (function () {
@@ -52,8 +49,7 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../..
                             toastFunc(toastOptions);
                     }
                     if (!options || !options.noConsole) {
-                        var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 2000) : message;
-                        console.log("%c" + consolePrefix + ": " + msg, "" + style);
+                        console.log("%c" + consolePrefix + ": " + message, "" + style);
                     }
                 };
                 LoggingService.prototype.error = function (errorMessage, userMessage, options) {
@@ -88,7 +84,7 @@ System.register(['../xcore-toasty/xcore-toasty.service', '@angular/core', '../..
                     this.performLogging("Trace", null, 'background: orange; color: black', message, null, options);
                 };
                 LoggingService.prototype.setToastOptions = function (message, options) {
-                    var msg = lodash_1.default.isObject(message) ? window.CircularJSON.stringify(message).substring(0, 200) : message;
+                    var msg = message;
                     var toastOptions = { message: msg };
                     if (options) {
                         toastOptions.showClose = options.showClose || true;

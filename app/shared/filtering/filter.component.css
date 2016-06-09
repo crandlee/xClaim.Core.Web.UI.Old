@@ -1,0 +1,109 @@
+.filter-container {
+    margin-bottom: 5px;
+}
+
+.filter-header {
+    cursor: pointer;
+}
+
+    .filter-header i {
+        padding-right: 5px;
+        font-size: 1.2em;
+    }
+
+.filter-body {
+    position: absolute;
+    width: 1000px;
+    z-index: 10;
+}
+
+.filter-show-image {
+    padding-right: 5px;
+}
+
+.filter-main-panel {
+    border: 1px solid #EEE;
+    background-color: #FAFAFA;
+    padding: 7px;
+    border-radius: 10px;
+}
+
+.filter-body .panel-heading {
+    cursor: pointer;
+}
+
+.filter-label {
+    font-size: 0.9em;
+    transform: translate(0, 50%);
+}
+
+.list-group-item input[type="checkbox"] {
+    margin-right: 5px;
+    transform: translate(0, 5%);
+}
+
+.panel-heading.filter-accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';
+    /* essential for enabling glyphicon */
+    content: "\e114";
+    /* adjust as needed, taken from bootstrap.css */
+    float: right;
+    position: relative;
+    bottom: 23px;
+    font-size: 15pt;
+    /* adjust as needed */
+    color: grey;
+    transform: translate(10%, 0);
+    /* adjust as needed */
+}
+
+.panel-heading.filter-accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";
+    /* adjust as needed, taken from bootstrap.css */
+}
+
+.reset-link {
+    float: right;
+    margin-left: 10px;
+    margin-top: -10px;
+}
+
+.animate-show {
+    line-height: 20px;
+    opacity: 1;
+    padding: 10px;
+    background-color: #F9F9F9;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.59);
+    -moz-box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.59);
+    box-shadow: 4px 4px 5px 0px rgba(50, 50, 50, 0.59);
+}
+
+    .animate-show.ng-hide-add, .animate-show.ng-hide-remove {
+        transition: all linear 0.3s;
+    }
+
+    .animate-show.ng-hide {
+        line-height: 0;
+        opacity: 0;
+        padding: 0 10px;
+    }
+
+.filter-divider {
+    border: 1px solid #DADADA;
+    margin-bottom: 12px;
+    margin-top: 4px;
+}
+
+.panel-title .badge {
+    margin-top: -3px;
+}
+
+.filter-container .list-group {
+        overflow-y: scroll; 
+        overflow-x: hidden; 
+        height: 150px; 
+        width:100%;
+}

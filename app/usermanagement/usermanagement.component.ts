@@ -1,17 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
-import { UserProfileService, IUserProfile, IUserProfileViewModel } from '../usermanagement/userprofile.service';
 import { XCoreBaseComponent } from '../shared/component/base.component';
 import { HubService } from '../shared/hub/hub.service';
 import { NG_TABLE_DIRECTIVES }  from 'ng2-table/ng2-table';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 
+import { UserProfileService, IUserProfile, IUserProfileViewModel, IUserProfileReturn } from './userprofile.service';
+import { UserFilterComponent } from './user.filter.component';
+import { UserFilterService, IUsersToServerFilter } from './user.filter.service';
+import { IFilterDefinition } from '../shared/filtering/filter.service';
+import { Observable } from 'rxjs';
+
+
 @Component({
     styleUrls: ['app/usermanagement/usermanagement.component.css'],
     templateUrl: 'app/usermanagement/usermanagement.component.html',
-    providers: [UserProfileService],
-    directives: [NG_TABLE_DIRECTIVES]
+    providers: [UserProfileService, UserFilterService],
+    directives: [NG_TABLE_DIRECTIVES, UserFilterComponent]
 })
 export class UserManagementComponent extends XCoreBaseComponent implements OnInit {
 
@@ -32,11 +38,10 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
     
     public config: any = {
         paging: false,
-        sorting: { columns: this.columns },
-        filtering: { filterString: '', columnName: 'Name' }
+        sorting: { columns: this.columns }
     }
 
-    constructor(protected xCoreServices: XCoreServices, private userProfileService: UserProfileService, private hubService: HubService) {
+    constructor(protected xCoreServices: XCoreServices, private userProfileService: UserProfileService, private userFilterService: UserFilterService, private hubService: HubService) {
         super(xCoreServices);
 
         this.initializeTrace("UserManagementComponent");
@@ -62,52 +67,60 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
     private onRouteChange():void {
     }
 
-    private getInitialData(userProfileService: UserProfileService): void {
+    private performStartup(userFilterService: UserFilterService, userProfileService: UserProfileService): void {
 
-        var trace = this.classTrace("getInitialData");
+        var trace = this.classTrace("performStartup");
         trace(TraceMethodPosition.Entry);
-
-        userProfileService.getUsers(0, this.xCoreServices.AppSettings.DefaultPageSize).subscribe(up => {
-            trace(TraceMethodPosition.CallbackStart);
-            this.users = _.map(up.Rows, u => this.userProfileService.userProfileToViewModel(u));
-            this.totalRows = up.RowCount;
-            this.active = true;
-            this.onChangeTable(this.users, this.config);
-            this.userServiceSubscription = this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(si => {
-                if (this.users.length >= this.totalRows) return;
-                userProfileService.getUsers(this.users.length, this.xCoreServices.AppSettings.DefaultPageSize).subscribe(up => {
-                    this.users = this.users.concat(_.map(up.Rows, u => this.userProfileService.userProfileToViewModel(u)));
-                    this.totalRows = up.RowCount;
-                    this.onChangeTable(this.users, this.config);
-                    this.xCoreServices.ScrollService.checkNearBottom();
-                });
-            });
-            this.xCoreServices.ScrollService.checkNearBottom();
-            trace(TraceMethodPosition.CallbackEnd);
+        userFilterService.initializeFilter().subscribe(filter => {
+            trace(TraceMethodPosition.Callback);
+            this.loadFirstData(filter, userProfileService, userFilterService);
+            this.subscribeToFilterChanged(userFilterService, userProfileService);
         });
 
         trace(TraceMethodPosition.Exit);
+    }
+
+    private subscribeToFilterChanged(userFilterService: UserFilterService, userProfileService: UserProfileService) {
+        var trace = this.classTrace("subscribeToFilterChanged");
+        trace(TraceMethodPosition.Entry);
+        userFilterService.FilterUpdatedEvent.subscribe(filter => {
+            trace(TraceMethodPosition.Callback);
+            this.loadFirstData(filter, userProfileService, userFilterService);
+        });
+        trace(TraceMethodPosition.Exit);
+    }    
+
+    private loadFirstData(filter: IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>, userProfileService: UserProfileService, userFilterService: UserFilterService): void {
+        var trace = this.classTrace("loadData");
+        trace(TraceMethodPosition.Entry);
+        
+        this.users = _.map(filter.toClientFilter.Rows, u => userProfileService.userProfileToViewModel(u));
+        this.totalRows = filter.toClientFilter.RowCount;
+        this.active = true;
+        this.onChangeTable(this.users, this.config);  
+        if (this.userServiceSubscription) this.userServiceSubscription.unsubscribe();      
+        this.userServiceSubscription = this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(si => {
+            if (this.users.length >= this.totalRows) return;
+            userProfileService.getUsers(this.users.length, this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(up => {
+                this.users = this.users.concat(_.map(up.Rows, u => userProfileService.userProfileToViewModel(u)));
+                this.totalRows = up.RowCount;
+                this.onChangeTable(this.users, this.config);
+                this.xCoreServices.ScrollService.checkNearBottom();
+            });                                     
+        });
+        this.xCoreServices.ScrollService.checkNearBottom();
+        trace(TraceMethodPosition.CallbackEnd);
+
     }
 
     ngOnInit() {
         super.NotifyLoaded("UserManagement");
         var trace = this.classTrace("ngOnInit");
         trace(TraceMethodPosition.Entry);
-        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService));
+        this.hubService.callbackWhenLoaded(this.performStartup.bind(this, this.userFilterService, this.userProfileService));
         trace(TraceMethodPosition.Entry);
     }
 
-    public changeFilter(data: any, config: any): any {
-        if (!config.filtering) {
-            return data;
-        }
-        let filteredData: Array<any> = data.filter((item: any) => {
-            if (!this.config.filtering.filterString) return true;
-            var testItem = item[config.filtering.columnName];
-            return item[config.filtering.columnName].indexOf(this.config.filtering.filterString) > -1;            
-        });
-        return filteredData;
-    }
 
     public changeSort(data: any, config: any): any {
 
@@ -180,14 +193,10 @@ export class UserManagementComponent extends XCoreBaseComponent implements OnIni
         var trace = this.classTrace("onChangeTable");
         trace(TraceMethodPosition.Entry);
 
-        if (config && config.filtering) {
-            Object.assign(this.config.filtering, config.filtering);
-        }
         if (config && config.sorting) {
             Object.assign(this.config.sorting, config.sorting);
         }
-        let filteredData = this.changeFilter(data, this.config);
-        let sortedData = this.changeSort(filteredData, this.config);
+        let sortedData = this.changeSort(data, this.config);
         this.rows = sortedData;
         
         trace(TraceMethodPosition.Exit);

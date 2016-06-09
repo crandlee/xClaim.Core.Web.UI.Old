@@ -29,7 +29,7 @@ export class HubService extends XCoreServiceBase {
     
     public HubDataLoaded: boolean = false;
     
-    constructor(xCoreServices: XCoreServices) {
+    constructor(protected xCoreServices: XCoreServices) {
         super(xCoreServices);
                 
         this.initializeTrace("HubService");               

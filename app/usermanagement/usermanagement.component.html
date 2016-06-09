@@ -10,10 +10,7 @@
                 </li>
             </ul>            
         </div>
-        <!--<input *ngIf="config.filtering" placeholder="Filter"
-            [ngTableFiltering]="config.filtering"
-            (tableChanged)="onChangeTable(users, config)"/>-->
-
+        <userfilter></userfilter>
         <ng-table [config]="config.sorting"
                 (tableChanged)="onChangeTable(users, config)"
                 [rows]="rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">

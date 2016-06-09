@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service', 'ng2-table/ng2-table', 'lodash'], function(exports_1, context_1) {
+System.register(['@angular/core', '../shared/service/core-services.service', '../shared/component/base.component', '../shared/hub/hub.service', 'ng2-table/ng2-table', 'lodash', './userprofile.service', './user.filter.component', './user.filter.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1, ng2_table_1, lodash_1;
+    var core_1, core_services_service_1, base_component_1, hub_service_1, ng2_table_1, lodash_1, userprofile_service_1, user_filter_component_1, user_filter_service_1;
     var UserManagementComponent;
     return {
         setters:[
@@ -24,9 +24,6 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
             },
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
-            },
-            function (userprofile_service_1_1) {
-                userprofile_service_1 = userprofile_service_1_1;
             },
             function (base_component_1_1) {
                 base_component_1 = base_component_1_1;
@@ -39,15 +36,25 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
             },
             function (lodash_1_1) {
                 lodash_1 = lodash_1_1;
+            },
+            function (userprofile_service_1_1) {
+                userprofile_service_1 = userprofile_service_1_1;
+            },
+            function (user_filter_component_1_1) {
+                user_filter_component_1 = user_filter_component_1_1;
+            },
+            function (user_filter_service_1_1) {
+                user_filter_service_1 = user_filter_service_1_1;
             }],
         execute: function() {
             UserManagementComponent = (function (_super) {
                 __extends(UserManagementComponent, _super);
-                function UserManagementComponent(xCoreServices, userProfileService, hubService) {
+                function UserManagementComponent(xCoreServices, userProfileService, userFilterService, hubService) {
                     var _this = this;
                     _super.call(this, xCoreServices);
                     this.xCoreServices = xCoreServices;
                     this.userProfileService = userProfileService;
+                    this.userFilterService = userFilterService;
                     this.hubService = hubService;
                     this.active = false;
                     this.totalRows = 0;
@@ -62,8 +69,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     ];
                     this.config = {
                         paging: false,
-                        sorting: { columns: this.columns },
-                        filtering: { filterString: '', columnName: 'Name' }
+                        sorting: { columns: this.columns }
                     };
                     this.initializeTrace("UserManagementComponent");
                     //Unsubscribe from the infinite stream when when change routes
@@ -83,50 +89,56 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                 };
                 UserManagementComponent.prototype.onRouteChange = function () {
                 };
-                UserManagementComponent.prototype.getInitialData = function (userProfileService) {
+                UserManagementComponent.prototype.performStartup = function (userFilterService, userProfileService) {
                     var _this = this;
-                    var trace = this.classTrace("getInitialData");
+                    var trace = this.classTrace("performStartup");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    userProfileService.getUsers(0, this.xCoreServices.AppSettings.DefaultPageSize).subscribe(function (up) {
-                        trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        _this.users = lodash_1.default.map(up.Rows, function (u) { return _this.userProfileService.userProfileToViewModel(u); });
-                        _this.totalRows = up.RowCount;
-                        _this.active = true;
-                        _this.onChangeTable(_this.users, _this.config);
-                        _this.userServiceSubscription = _this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(function (si) {
-                            if (_this.users.length >= _this.totalRows)
-                                return;
-                            userProfileService.getUsers(_this.users.length, _this.xCoreServices.AppSettings.DefaultPageSize).subscribe(function (up) {
-                                _this.users = _this.users.concat(lodash_1.default.map(up.Rows, function (u) { return _this.userProfileService.userProfileToViewModel(u); }));
-                                _this.totalRows = up.RowCount;
-                                _this.onChangeTable(_this.users, _this.config);
-                                _this.xCoreServices.ScrollService.checkNearBottom();
-                            });
-                        });
-                        _this.xCoreServices.ScrollService.checkNearBottom();
-                        trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
+                    userFilterService.initializeFilter().subscribe(function (filter) {
+                        trace(core_services_service_1.TraceMethodPosition.Callback);
+                        _this.loadFirstData(filter, userProfileService, userFilterService);
+                        _this.subscribeToFilterChanged(userFilterService, userProfileService);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
+                };
+                UserManagementComponent.prototype.subscribeToFilterChanged = function (userFilterService, userProfileService) {
+                    var _this = this;
+                    var trace = this.classTrace("subscribeToFilterChanged");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    userFilterService.FilterUpdatedEvent.subscribe(function (filter) {
+                        trace(core_services_service_1.TraceMethodPosition.Callback);
+                        _this.loadFirstData(filter, userProfileService, userFilterService);
+                    });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                };
+                UserManagementComponent.prototype.loadFirstData = function (filter, userProfileService, userFilterService) {
+                    var _this = this;
+                    var trace = this.classTrace("loadData");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    this.users = lodash_1.default.map(filter.toClientFilter.Rows, function (u) { return userProfileService.userProfileToViewModel(u); });
+                    this.totalRows = filter.toClientFilter.RowCount;
+                    this.active = true;
+                    this.onChangeTable(this.users, this.config);
+                    if (this.userServiceSubscription)
+                        this.userServiceSubscription.unsubscribe();
+                    this.userServiceSubscription = this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(function (si) {
+                        if (_this.users.length >= _this.totalRows)
+                            return;
+                        userProfileService.getUsers(_this.users.length, _this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(function (up) {
+                            _this.users = _this.users.concat(lodash_1.default.map(up.Rows, function (u) { return userProfileService.userProfileToViewModel(u); }));
+                            _this.totalRows = up.RowCount;
+                            _this.onChangeTable(_this.users, _this.config);
+                            _this.xCoreServices.ScrollService.checkNearBottom();
+                        });
+                    });
+                    this.xCoreServices.ScrollService.checkNearBottom();
+                    trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
                 };
                 UserManagementComponent.prototype.ngOnInit = function () {
                     _super.prototype.NotifyLoaded.call(this, "UserManagement");
                     var trace = this.classTrace("ngOnInit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService));
+                    this.hubService.callbackWhenLoaded(this.performStartup.bind(this, this.userFilterService, this.userProfileService));
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                };
-                UserManagementComponent.prototype.changeFilter = function (data, config) {
-                    var _this = this;
-                    if (!config.filtering) {
-                        return data;
-                    }
-                    var filteredData = data.filter(function (item) {
-                        if (!_this.config.filtering.filterString)
-                            return true;
-                        var testItem = item[config.filtering.columnName];
-                        return item[config.filtering.columnName].indexOf(_this.config.filtering.filterString) > -1;
-                    });
-                    return filteredData;
                 };
                 UserManagementComponent.prototype.changeSort = function (data, config) {
                     var trace = this.classTrace("changeSort");
@@ -194,14 +206,10 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                 UserManagementComponent.prototype.onChangeTable = function (data, config) {
                     var trace = this.classTrace("onChangeTable");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    if (config && config.filtering) {
-                        Object.assign(this.config.filtering, config.filtering);
-                    }
                     if (config && config.sorting) {
                         Object.assign(this.config.sorting, config.sorting);
                     }
-                    var filteredData = this.changeFilter(data, this.config);
-                    var sortedData = this.changeSort(filteredData, this.config);
+                    var sortedData = this.changeSort(data, this.config);
                     this.rows = sortedData;
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
@@ -209,10 +217,10 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     core_1.Component({
                         styleUrls: ['app/usermanagement/usermanagement.component.css'],
                         templateUrl: 'app/usermanagement/usermanagement.component.html',
-                        providers: [userprofile_service_1.UserProfileService],
-                        directives: [ng2_table_1.NG_TABLE_DIRECTIVES]
+                        providers: [userprofile_service_1.UserProfileService, user_filter_service_1.UserFilterService],
+                        directives: [ng2_table_1.NG_TABLE_DIRECTIVES, user_filter_component_1.UserFilterComponent]
                     }), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, userprofile_service_1.UserProfileService, hub_service_1.HubService])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, userprofile_service_1.UserProfileService, user_filter_service_1.UserFilterService, hub_service_1.HubService])
                 ], UserManagementComponent);
                 return UserManagementComponent;
             }(base_component_1.XCoreBaseComponent));

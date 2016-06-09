@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/component/base.component', '../shared/hub/hub.service', '../shared/service/core-services.service', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', './userprofile.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, validation_component_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1;
+    var core_1, common_1, base_component_1, hub_service_1, core_services_service_1, validation_component_1, async_validator_service_1, userprofile_validation_1, userprofile_service_1;
     var UserProfileComponent;
     return {
         setters:[
@@ -24,6 +24,15 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
             },
             function (common_1_1) {
                 common_1 = common_1_1;
+            },
+            function (base_component_1_1) {
+                base_component_1 = base_component_1_1;
+            },
+            function (hub_service_1_1) {
+                hub_service_1 = hub_service_1_1;
+            },
+            function (core_services_service_1_1) {
+                core_services_service_1 = core_services_service_1_1;
             },
             function (validation_component_1_1) {
                 validation_component_1 = validation_component_1_1;
@@ -34,17 +43,8 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
             function (userprofile_validation_1_1) {
                 userprofile_validation_1 = userprofile_validation_1_1;
             },
-            function (core_services_service_1_1) {
-                core_services_service_1 = core_services_service_1_1;
-            },
             function (userprofile_service_1_1) {
                 userprofile_service_1 = userprofile_service_1_1;
-            },
-            function (base_component_1_1) {
-                base_component_1 = base_component_1_1;
-            },
-            function (hub_service_1_1) {
-                hub_service_1 = hub_service_1_1;
             }],
         execute: function() {
             UserProfileComponent = (function (_super) {
