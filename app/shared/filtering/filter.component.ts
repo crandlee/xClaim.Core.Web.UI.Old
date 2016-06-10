@@ -135,9 +135,7 @@ export abstract class FilterComponent<TFilterToServer, TFilterToClient> extends 
 
 
     public onFilterClick(comp: FilterComponent<TFilterToServer, TFilterToClient>): () => void {
-        console.log('yeah');
         return function() {
-            console.log('what?');
             //Sets up toggling filter display/setting default focus element
             this.filterOptions.filterVisible = !this.filterOptions.filterVisible;
             if (this.filterOptions.filterVisible && this.focusRef) this.renderer.invokeElementMethod(this.focusRef.nativeElement, 'focus', []);

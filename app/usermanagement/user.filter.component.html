@@ -1,5 +1,5 @@
 <div class="filter-container" [offClick]="onOutsideClick(self)" id="filterContainer" >
-    <div class="filter-header" id="filterHeader" (click)="onFilterClick(self)"><i id="filterLink" class="glyphicon glyphicon-filter"></i>{{summaryText}}</div>
+    <div class="filter-header" id="filterHeader" (click)="onFilterClick(self)()"><i id="filterLink" class="glyphicon glyphicon-filter"></i>{{summaryText}}</div>
     <div class="filter-body animate-show" [ngClass]="{'hide-class':!filterOptions.filterVisible}">
         <div class="row">
             <div class="col-xs-12">
