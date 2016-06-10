@@ -11,8 +11,7 @@
             </ul>            
         </div>
         <userfilter></userfilter>
-        <ng-table [config]="config.sorting"
-                (tableChanged)="onChangeTable(users, config)"
+        <ng-table [tableChangedEvent]="changeTable" [config]="config"
                 [rows]="rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
         </ng-table>
     </div>
