@@ -1,4 +1,4 @@
-System.register(['../shared/filtering/filter.service', '../shared/service/core-services.service', './userprofile.service', '@angular/core'], function(exports_1, context_1) {
+System.register(['../shared/filtering/filter.service', '../shared/service/core-services.service', './user.service', '@angular/core'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var filter_service_1, core_services_service_1, userprofile_service_1, core_1;
+    var filter_service_1, core_services_service_1, user_service_1, core_1;
     var UserFilterService;
     return {
         setters:[
@@ -25,8 +25,8 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
             },
-            function (userprofile_service_1_1) {
-                userprofile_service_1 = userprofile_service_1_1;
+            function (user_service_1_1) {
+                user_service_1 = user_service_1_1;
             },
             function (core_1_1) {
                 core_1 = core_1_1;
@@ -34,33 +34,22 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
         execute: function() {
             UserFilterService = (function (_super) {
                 __extends(UserFilterService, _super);
-                function UserFilterService(xCoreServices, userProfileService) {
+                function UserFilterService(xCoreServices, userService) {
+                    var _this = this;
                     _super.call(this, xCoreServices);
                     this.xCoreServices = xCoreServices;
-                    this.userProfileService = userProfileService;
-                    this.initialComponentOptions = {
-                        autoApplyFilter: false
-                    };
-                    this.idListMappings = [{ dataArrayName: "Status", idArrayName: "Statuses" }];
+                    this.userService = userService;
                     var trace = this.classTrace("constructor");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var setupObject = {
-                        componentOptions: this.initialComponentOptions,
-                        idListMappings: this.idListMappings,
-                        filterSummaryFunction: this.filterSummaryFunction.bind(this),
-                        initializeFilterFunction: this.initializeFilterFunction.bind(this),
-                        filterResetFunction: this.filterResetFunction.bind(this),
-                        applyFilterFunction: this.applyFilterFunction.bind(this)
+                    var emptyFilterDefinition = function () {
+                        return {
+                            toClientFilter: { Rows: [], RowCount: 0, Statuses: _this.userService.defaultStatuses },
+                            toServerFilter: { UserName: null, Email: null, FullName: null, Status: "All" }
+                        };
                     };
-                    this.setup(this.emptyFilterDefinition(), setupObject);
+                    this.initialize(this, emptyFilterDefinition, { autoApplyFilter: false }, [], this.initializeFilterFunction, this.filterSummaryFunction, this.filterResetFunction, this.applyFilterFunction);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 }
-                UserFilterService.prototype.emptyFilterDefinition = function () {
-                    return {
-                        toClientFilter: { Rows: [], RowCount: 0, Statuses: this.userProfileService.defaultStatuses },
-                        toServerFilter: { UserName: null, Email: null, FullName: null, Status: "All" }
-                    };
-                };
                 UserFilterService.prototype.filterSummaryFunction = function (filter) {
                     var trace = this.classTrace("filterSummaryFunction");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
@@ -82,7 +71,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                 UserFilterService.prototype.initializeFilterFunction = function () {
                     var trace = this.classTrace("initializeFilterFunction");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.userProfileService.getUsers(null, null, this.emptyFilterDefinition().toServerFilter);
+                    var obs = this.userService.get(null, null, this.emptyFilterDefinition().toServerFilter);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
@@ -90,7 +79,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                     var _this = this;
                     var trace = this.classTrace("filterResetFunction");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.userProfileService.getUsers(null, null, this.emptyFilterDefinition().toServerFilter).map(function (cf) {
+                    var obs = this.userService.get(null, null, this.emptyFilterDefinition().toServerFilter).map(function (cf) {
                         return { toClientFilter: cf, toServerFilter: _this.emptyFilterDefinition().toServerFilter };
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -100,7 +89,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                     var _this = this;
                     var trace = this.classTrace("applyFilterfunction");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.userProfileService.getUsers(null, null, filter).map(function (cf) {
+                    var obs = this.userService.get(null, null, filter).map(function (cf) {
                         return { toClientFilter: cf, toServerFilter: _this.currentFilter.toServerFilter };
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -108,7 +97,7 @@ System.register(['../shared/filtering/filter.service', '../shared/service/core-s
                 };
                 UserFilterService = __decorate([
                     core_1.Injectable(), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, userprofile_service_1.UserProfileService])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, user_service_1.UserService])
                 ], UserFilterService);
                 return UserFilterService;
             }(filter_service_1.FilterService));

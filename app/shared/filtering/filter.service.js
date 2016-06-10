@@ -47,6 +47,21 @@ System.register(['@angular/core', '../service/core-services.service', 'rxjs/Subj
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 }
+                FilterService.prototype.initialize = function (context, emptyFilterDefinition, initialComponentOptions, idListMappings, initializeFilter, filterSummaryFunction, filterResetFunction, applyFilterFunction) {
+                    var trace = this.classTrace("initializeSetup");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var setupObject = {
+                        componentOptions: initialComponentOptions,
+                        idListMappings: idListMappings,
+                        filterSummaryFunction: filterSummaryFunction.bind(context),
+                        initializeFilterFunction: initializeFilter.bind(context),
+                        filterResetFunction: filterResetFunction.bind(context),
+                        applyFilterFunction: applyFilterFunction.bind(context)
+                    };
+                    this.emptyFilterDefinition = emptyFilterDefinition;
+                    this.setup(emptyFilterDefinition(), setupObject);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                };
                 //This gets called by the domain component with all the functions and config data necessary to do its job
                 //filterDefinition => the current toServerFilter definition
                 FilterService.prototype.setup = function (filterDefinition, setupObject) {

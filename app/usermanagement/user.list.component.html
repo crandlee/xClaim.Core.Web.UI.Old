@@ -11,12 +11,12 @@
             </ul>            
         </div>
         <userfilter></userfilter>
-        <ng-table [tableChangedEvent]="changeTable" [config]="config"
-                [rows]="rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
+        <ng-table [tableChangedEvent]="tableChangeEmitter" [config]="tableConfig"
+                [rows]="dataViewModel.Rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
         </ng-table>
     </div>
-    <div class="row-count-tag">{{(users && users.length) || 0}} of {{totalRows}}</div>
-    <div *ngIf="!active" class="loading-message">
+    <div class="row-count-tag">{{(dataViewModel.Rows && dataViewModel.Rows.length) || 0}} of {{dataViewModel.RowCount}}</div>
+    <div *ngIf="!dataViewModel.active" class="loading-message">
         Loading Users
     </div>
 </div>

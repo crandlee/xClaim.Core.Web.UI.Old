@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/userprofile.service', '../shared/component/base.component', '../shared/hub/hub.service', '@angular/router', 'angular2-ui-switch'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', '../shared/service/core-services.service', '../usermanagement/user.service', '../shared/component/base.component', '../shared/hub/hub.service', '@angular/router', 'angular2-ui-switch'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, validation_component_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, userprofile_service_1, base_component_1, hub_service_1, router_1, angular2_ui_switch_1;
+    var core_1, common_1, validation_component_1, async_validator_service_1, userprofile_validation_1, core_services_service_1, user_service_1, base_component_1, hub_service_1, router_1, angular2_ui_switch_1;
     var UserComponent;
     return {
         setters:[
@@ -37,8 +37,8 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
             },
-            function (userprofile_service_1_1) {
-                userprofile_service_1 = userprofile_service_1_1;
+            function (user_service_1_1) {
+                user_service_1 = user_service_1_1;
             },
             function (base_component_1_1) {
                 base_component_1 = base_component_1_1;
@@ -55,10 +55,10 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
         execute: function() {
             UserComponent = (function (_super) {
                 __extends(UserComponent, _super);
-                function UserComponent(xCoreServices, userProfileService, builder, validationService, hubService, routeSegment, elementRef) {
+                function UserComponent(xCoreServices, userService, builder, validationService, hubService, routeSegment, elementRef) {
                     _super.call(this, xCoreServices);
                     this.xCoreServices = xCoreServices;
-                    this.userProfileService = userProfileService;
+                    this.userService = userService;
                     this.builder = builder;
                     this.validationService = validationService;
                     this.hubService = hubService;
@@ -76,9 +76,9 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     //Set up any async validators
                     var emailControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required, this.validationService.emailValidator]));
-                    var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userProfileService, _this.userProfile.Id); });
+                    var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userService, _this.userProfile.Id); });
                     var userNameControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required]));
-                    var userNameValidator = async_validator_service_1.AsyncValidator.debounceControl(userNameControl, function (control) { return _this.validationService.isUserNameDuplicate(control, _this.userProfileService, _this.userProfile.Id); });
+                    var userNameValidator = async_validator_service_1.AsyncValidator.debounceControl(userNameControl, function (control) { return _this.validationService.isUserNameDuplicate(control, _this.userService, _this.userProfile.Id); });
                     //Set up controls            
                     var buildReturn = this.validationService.buildControlGroup(builder, [
                         { controlName: "UserNameControl", description: "User Name", control: userNameControl },
@@ -102,16 +102,16 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                UserComponent.prototype.getInitialData = function (userProfileService, userId) {
+                UserComponent.prototype.getInitialData = function (userService, userId) {
                     var _this = this;
                     var trace = this.classTrace("getInitialData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var fn = (!this.userId)
-                        ? userProfileService.getNewUser.bind(userProfileService)
-                        : userProfileService.getUserProfile.bind(userProfileService, this.userId);
+                        ? userService.getNewUser.bind(userService)
+                        : userService.getUserProfile.bind(userService, this.userId);
                     fn().subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        _this.userProfile = _this.userProfileService.userProfileToViewModel(up);
+                        _this.userProfile = _this.userService.toViewModel(up);
                         if (_this.userId == null) {
                             _this.userProfile.Password = "";
                             _this.userProfile.ConfirmPassword = "";
@@ -127,16 +127,16 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     _super.prototype.NotifyLoaded.call(this, "User");
                     var trace = this.classTrace("ngOnInit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService, this.userId));
+                    this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userService, this.userId));
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                 };
                 UserComponent.prototype.onSubmit = function () {
                     var _this = this;
                     var trace = this.classTrace("onSubmit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.userProfileService.saveUserProfile(this.userProfile).subscribe(function (up) {
+                    this.userService.saveUserProfile(this.userProfile).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
-                        _this.userProfile = _this.userProfileService.userProfileToViewModel(up);
+                        _this.userProfile = _this.userService.toViewModel(up);
                         _this.xCoreServices.LoggingService.success("User successfully saved");
                         _this.xCoreServices.Router.navigate(["/UserManagement"]);
                     });
@@ -148,10 +148,10 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                 UserComponent = __decorate([
                     core_1.Component({
                         templateUrl: 'app/usermanagement/user.component.html',
-                        providers: [userprofile_service_1.UserProfileService, userprofile_validation_1.UserProfileValidationService],
+                        providers: [user_service_1.UserService, userprofile_validation_1.UserProfileValidationService],
                         directives: [validation_component_1.ValidationComponent, angular2_ui_switch_1.UiSwitchComponent]
                     }), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, userprofile_service_1.UserProfileService, common_1.FormBuilder, userprofile_validation_1.UserProfileValidationService, hub_service_1.HubService, router_1.RouteSegment, core_1.ElementRef])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, user_service_1.UserService, common_1.FormBuilder, userprofile_validation_1.UserProfileValidationService, hub_service_1.HubService, router_1.RouteSegment, core_1.ElementRef])
                 ], UserComponent);
                 return UserComponent;
             }(base_component_1.XCoreBaseComponent));

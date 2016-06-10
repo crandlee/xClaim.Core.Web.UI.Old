@@ -24,11 +24,11 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                     _super.call(this, loggingService);
                     this.classTrace = this.loggingService.getTraceFunction("UserProfileValidationService");
                 }
-                UserProfileValidationService.prototype.isEmailDuplicate = function (emailControl, userProfileService, id) {
+                UserProfileValidationService.prototype.isEmailDuplicate = function (emailControl, userService, id) {
                     var trace = this.classTrace("isEmailDuplicate");
                     if (!id || !emailControl.value)
                         return Promise.resolve(null);
-                    var svc = userProfileService.isEmailDuplicate(emailControl.value, id);
+                    var svc = userService.isEmailDuplicate(emailControl.value, id);
                     var p = new Promise(function (resolve) {
                         svc.subscribe(function (isDuplicate) {
                             trace(logging_service_1.TraceMethodPosition.Callback, "isEmailDuplicate");
@@ -39,11 +39,11 @@ System.register(['../shared/validation/validation.service', '../shared/logging/l
                     trace(logging_service_1.TraceMethodPosition.Exit);
                     return p;
                 };
-                UserProfileValidationService.prototype.isUserNameDuplicate = function (userNameControl, userProfileService, id) {
+                UserProfileValidationService.prototype.isUserNameDuplicate = function (userNameControl, userService, id) {
                     var trace = this.classTrace("isUserNameDuplicate");
                     if (!id || !userNameControl.value)
                         return Promise.resolve(null);
-                    var svc = userProfileService.isUserNameDuplicate(userNameControl.value, id);
+                    var svc = userService.isUserNameDuplicate(userNameControl.value, id);
                     var p = new Promise(function (resolve) {
                         svc.subscribe(function (isDuplicate) {
                             trace(logging_service_1.TraceMethodPosition.Callback, "isUserNameDuplicate");

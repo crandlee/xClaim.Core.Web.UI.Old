@@ -5,7 +5,7 @@ import { ValidationComponent } from '../shared/validation/validation.component';
 import { AsyncValidator } from '../shared/validation/async-validator.service';
 import { UserProfileValidationService } from './userprofile.validation';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
-import { UserProfileService, IUserProfile, IUserProfileViewModel } from '../usermanagement/userprofile.service';
+import { UserService, IUserProfile, IUserProfileViewModel } from '../usermanagement/user.service';
 import { XCoreBaseComponent } from '../shared/component/base.component';
 import { HubService } from '../shared/hub/hub.service';
 import _ from 'lodash';
@@ -15,7 +15,7 @@ import { UiSwitchComponent } from 'angular2-ui-switch';
 
 @Component({
     templateUrl: 'app/usermanagement/user.component.html',
-    providers: [UserProfileService, UserProfileValidationService],
+    providers: [UserService, UserProfileValidationService],
     directives: [ValidationComponent, UiSwitchComponent]
 })
 export class UserComponent extends XCoreBaseComponent implements OnInit  {
@@ -28,7 +28,7 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
     public userId: string;
 
                 
-    constructor(protected xCoreServices: XCoreServices, private userProfileService: UserProfileService, 
+    constructor(protected xCoreServices: XCoreServices, private userService: UserService, 
         private builder: FormBuilder, private validationService: UserProfileValidationService, private hubService: HubService, private routeSegment: RouteSegment, private elementRef: ElementRef)     
     {  
         super(xCoreServices);
@@ -45,9 +45,9 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         
         //Set up any async validators
         var emailControl = new Control("", Validators.compose([Validators.required, this.validationService.emailValidator]));
-        var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userProfileService, this.userProfile.Id));
+        var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userService, this.userProfile.Id));
         var userNameControl = new Control("", Validators.compose([Validators.required]));
-        var userNameValidator = AsyncValidator.debounceControl(userNameControl, control => this.validationService.isUserNameDuplicate(control, this.userProfileService, this.userProfile.Id));
+        var userNameValidator = AsyncValidator.debounceControl(userNameControl, control => this.validationService.isUserNameDuplicate(control, this.userService, this.userProfile.Id));
             
         //Set up controls            
         var buildReturn = this.validationService.buildControlGroup(builder, [
@@ -77,19 +77,16 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
     }
     
     
-    private getInitialData(userProfileService: UserProfileService, userId: string): void {
-        
+    private getInitialData(userService: UserService, userId: string): void {        
         var trace = this.classTrace("getInitialData");
-        trace(TraceMethodPosition.Entry);
-        
+        trace(TraceMethodPosition.Entry);        
         var fn: () => Observable<IUserProfile> = (!this.userId) 
-            ? userProfileService.getNewUser.bind(userProfileService) 
-            : userProfileService.getUserProfile.bind(userProfileService, this.userId);
-            
-                
+            ? userService.getNewUser.bind(userService) 
+            : userService.getUserProfile.bind(userService, this.userId);
+                            
         fn().subscribe(up => {
             trace(TraceMethodPosition.CallbackStart);
-            this.userProfile = this.userProfileService.userProfileToViewModel(up);
+            this.userProfile = this.userService.toViewModel(up);
             
             if (this.userId == null) {
                 this.userProfile.Password = "";
@@ -112,7 +109,7 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         trace(TraceMethodPosition.Entry);
         
         
-        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService, this.userId));        
+        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userService, this.userId));        
         trace(TraceMethodPosition.Entry);
     }
                  
@@ -120,9 +117,9 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         var trace = this.classTrace("onSubmit");
         trace(TraceMethodPosition.Entry);
         
-        this.userProfileService.saveUserProfile(this.userProfile).subscribe(up => {
+        this.userService.saveUserProfile(this.userProfile).subscribe(up => {
             trace(TraceMethodPosition.Callback);
-            this.userProfile = this.userProfileService.userProfileToViewModel(up);
+            this.userProfile = this.userService.toViewModel(up);
             this.xCoreServices.LoggingService.success("User successfully saved");
             this.xCoreServices.Router.navigate(["/UserManagement"]);
         });

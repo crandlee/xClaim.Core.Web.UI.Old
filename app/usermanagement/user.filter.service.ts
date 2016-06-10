@@ -2,48 +2,36 @@ import { FilterService } from '../shared/filtering/filter.service';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { IFilterDefinition, IComponentOptions, IFilterIdListMapping, IFilterSetupObject } from '../shared/filtering/filter.service';
 import { Observable } from 'rxjs';
-import { UserProfileService, IUserProfileReturn } from './userprofile.service';
+import { UserService, IUsersToClientFilter } from './user.service';
 import { Injectable } from '@angular/core';
 import _ from 'lodash';
 
 @Injectable()
-export class UserFilterService extends FilterService<IUsersToServerFilter, IUserProfileReturn> {
+export class UserFilterService extends FilterService<IUsersToServerFilter, IUsersToClientFilter> {
 
-    constructor(public xCoreServices: XCoreServices, private userProfileService: UserProfileService) {
+
+    constructor(public xCoreServices: XCoreServices, private userService: UserService) {
         super(xCoreServices)
         
-
         var trace = this.classTrace("constructor");
         trace(TraceMethodPosition.Entry);
         
-        var setupObject: IFilterSetupObject<IUsersToServerFilter, IUserProfileReturn> = {
-            componentOptions: this.initialComponentOptions,
-            idListMappings: this.idListMappings,
-            filterSummaryFunction: this.filterSummaryFunction.bind(this),
-            initializeFilterFunction:this.initializeFilterFunction.bind(this),
-            filterResetFunction: this.filterResetFunction.bind(this),
-            applyFilterFunction: this.applyFilterFunction.bind(this)
-        };
-        this.setup(this.emptyFilterDefinition(), setupObject);
+        var emptyFilterDefinition = () => {
+            return {
+                toClientFilter: { Rows: [], RowCount: 0, Statuses: this.userService.defaultStatuses },
+                toServerFilter: { UserName: null, Email: null, FullName: null, Status: "All"  }            
+            };
+        }
+
+        this.initialize(this, emptyFilterDefinition,
+                { autoApplyFilter: false }, [], this.initializeFilterFunction, this.filterSummaryFunction, this.filterResetFunction, this.applyFilterFunction);
 
         trace(TraceMethodPosition.Exit);
 
     }
+    
 
-    private initialComponentOptions: IComponentOptions = {
-        autoApplyFilter: false
-    }
-
-    public idListMappings: IFilterIdListMapping[] = [{ dataArrayName: "Status", idArrayName: "Statuses" }];
-
-    protected emptyFilterDefinition(): IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>  {
-        return {
-            toClientFilter: { Rows: [], RowCount: 0, Statuses: this.userProfileService.defaultStatuses },
-            toServerFilter: { UserName: null, Email: null, FullName: null, Status: "All"  }            
-        };
-    }
-
-    protected filterSummaryFunction(filter: IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>): string  {
+    protected filterSummaryFunction(filter: IFilterDefinition<IUsersToServerFilter, IUsersToClientFilter>): string  {
 
         var trace = this.classTrace("filterSummaryFunction");
         trace(TraceMethodPosition.Entry);
@@ -63,31 +51,31 @@ export class UserFilterService extends FilterService<IUsersToServerFilter, IUser
         return filterSummary;
     } 
 
-    protected initializeFilterFunction() : Observable<IUserProfileReturn> {
+    protected initializeFilterFunction() : Observable<IUsersToClientFilter> {
         
         var trace = this.classTrace("initializeFilterFunction");
         trace(TraceMethodPosition.Entry);
-        var obs = this.userProfileService.getUsers(null, null, this.emptyFilterDefinition().toServerFilter);
+        var obs = this.userService.get(null, null, this.emptyFilterDefinition().toServerFilter);
         trace(TraceMethodPosition.Exit);
         return obs;
 
     }
 
-    protected filterResetFunction (filter: IUsersToServerFilter) : Observable<IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>> {
+    protected filterResetFunction (filter: IUsersToServerFilter) : Observable<IFilterDefinition<IUsersToServerFilter, IUsersToClientFilter>> {
 
         var trace = this.classTrace("filterResetFunction");
         trace(TraceMethodPosition.Entry);
-        var obs = this.userProfileService.getUsers(null, null, this.emptyFilterDefinition().toServerFilter).map<IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>>(cf => {
+        var obs = this.userService.get(null, null, this.emptyFilterDefinition().toServerFilter).map<IFilterDefinition<IUsersToServerFilter, IUsersToClientFilter>>(cf => {
             return { toClientFilter: cf, toServerFilter: this.emptyFilterDefinition().toServerFilter }
         });
         trace(TraceMethodPosition.Exit);
         return obs;
     }
 
-    protected applyFilterFunction (filter: IUsersToServerFilter) : Observable<IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>> {
+    protected applyFilterFunction (filter: IUsersToServerFilter) : Observable<IFilterDefinition<IUsersToServerFilter, IUsersToClientFilter>> {
         var trace = this.classTrace("applyFilterfunction");
         trace(TraceMethodPosition.Entry);
-        var obs = this.userProfileService.getUsers(null, null, filter).map<IFilterDefinition<IUsersToServerFilter, IUserProfileReturn>>(cf => {
+        var obs = this.userService.get(null, null, filter).map<IFilterDefinition<IUsersToServerFilter, IUsersToClientFilter>>(cf => {
             return { toClientFilter: cf, toServerFilter: this.currentFilter.toServerFilter }
         });
         trace(TraceMethodPosition.Exit);

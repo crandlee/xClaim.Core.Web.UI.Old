@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '../shared/component/base.component', '../shared/hub/hub.service', '../shared/service/core-services.service', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', './userprofile.service'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/component/base.component', '../shared/hub/hub.service', '../shared/service/core-services.service', '../shared/validation/validation.component', '../shared/validation/async-validator.service', './userprofile.validation', './user.service'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, base_component_1, hub_service_1, core_services_service_1, validation_component_1, async_validator_service_1, userprofile_validation_1, userprofile_service_1;
+    var core_1, common_1, base_component_1, hub_service_1, core_services_service_1, validation_component_1, async_validator_service_1, userprofile_validation_1, user_service_1;
     var UserProfileComponent;
     return {
         setters:[
@@ -43,16 +43,16 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
             function (userprofile_validation_1_1) {
                 userprofile_validation_1 = userprofile_validation_1_1;
             },
-            function (userprofile_service_1_1) {
-                userprofile_service_1 = userprofile_service_1_1;
+            function (user_service_1_1) {
+                user_service_1 = user_service_1_1;
             }],
         execute: function() {
             UserProfileComponent = (function (_super) {
                 __extends(UserProfileComponent, _super);
-                function UserProfileComponent(xCoreServices, userProfileService, builder, validationService, hubService) {
+                function UserProfileComponent(xCoreServices, userService, builder, validationService, hubService) {
                     _super.call(this, xCoreServices);
                     this.xCoreServices = xCoreServices;
-                    this.userProfileService = userProfileService;
+                    this.userService = userService;
                     this.builder = builder;
                     this.validationService = validationService;
                     this.hubService = hubService;
@@ -66,7 +66,7 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     //Set up any async validators
                     var emailControl = new common_1.Control("", common_1.Validators.compose([common_1.Validators.required, this.validationService.emailValidator]));
-                    var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userProfileService, _this.userProfile.Id); });
+                    var emailAsyncValidator = async_validator_service_1.AsyncValidator.debounceControl(emailControl, function (control) { return _this.validationService.isEmailDuplicate(control, _this.userService, _this.userProfile.Id); });
                     //Set up controls            
                     var buildReturn = this.validationService.buildControlGroup(builder, [
                         { controlName: "EMailControl", description: "EMail", control: emailControl },
@@ -87,13 +87,13 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                UserProfileComponent.prototype.getInitialData = function (userProfileService, hubService) {
+                UserProfileComponent.prototype.getInitialData = function (userService, hubService) {
                     var _this = this;
                     var trace = this.classTrace("getInitialData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    userProfileService.getUserProfile(this.hubService.HubData.UserId).subscribe(function (up) {
+                    userService.getUserProfile(this.hubService.HubData.UserId).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.CallbackStart);
-                        _this.userProfile = _this.userProfileService.userProfileToViewModel(up);
+                        _this.userProfile = _this.userService.toViewModel(up);
                         _this.active = true;
                         _this.initializeForm(_this.builder);
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
@@ -104,16 +104,16 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
                     _super.prototype.NotifyLoaded.call(this, "UserProfile");
                     var trace = this.classTrace("ngOnInit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService, this.hubService));
+                    this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userService, this.hubService));
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                 };
                 UserProfileComponent.prototype.onSubmit = function () {
                     var _this = this;
                     var trace = this.classTrace("onSubmit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.userProfileService.saveUserProfile(this.userProfile).subscribe(function (up) {
+                    this.userService.saveUserProfile(this.userProfile).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
-                        _this.userProfile = _this.userProfileService.userProfileToViewModel(up);
+                        _this.userProfile = _this.userService.toViewModel(up);
                         _this.xCoreServices.LoggingService.success("User profile successfully updated");
                         _this.xCoreServices.Router.navigate(["/"]);
                     });
@@ -125,10 +125,10 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
                 UserProfileComponent = __decorate([
                     core_1.Component({
                         templateUrl: 'app/usermanagement/userprofile.component.html',
-                        providers: [userprofile_service_1.UserProfileService, userprofile_validation_1.UserProfileValidationService],
+                        providers: [user_service_1.UserService, userprofile_validation_1.UserProfileValidationService],
                         directives: [validation_component_1.ValidationComponent]
                     }), 
-                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, userprofile_service_1.UserProfileService, common_1.FormBuilder, userprofile_validation_1.UserProfileValidationService, hub_service_1.HubService])
+                    __metadata('design:paramtypes', [core_services_service_1.XCoreServices, user_service_1.UserService, common_1.FormBuilder, userprofile_validation_1.UserProfileValidationService, hub_service_1.HubService])
                 ], UserProfileComponent);
                 return UserProfileComponent;
             }(base_component_1.XCoreBaseComponent));

@@ -8,11 +8,11 @@ import { IFormValidationResult } from '../shared/validation/validation.service';
 import { ValidationComponent } from '../shared/validation/validation.component';
 import { AsyncValidator } from '../shared/validation/async-validator.service';
 import { UserProfileValidationService } from './userprofile.validation';
-import { UserProfileService, IUserProfile, IUserProfileViewModel } from './userprofile.service';
+import { UserService, IUserProfile, IUserProfileViewModel } from './user.service';
 
 @Component({
     templateUrl: 'app/usermanagement/userprofile.component.html',
-    providers: [UserProfileService, UserProfileValidationService],
+    providers: [UserService, UserProfileValidationService],
     directives: [ValidationComponent]
 })
 export class UserProfileComponent extends XCoreBaseComponent implements OnInit  {
@@ -23,7 +23,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
     public validationMessages: IFormValidationResult[] = [];
     public controlDataDescriptions: string[];
             
-    constructor(protected xCoreServices: XCoreServices, private userProfileService: UserProfileService, 
+    constructor(protected xCoreServices: XCoreServices, private userService: UserService, 
         private builder: FormBuilder, private validationService: UserProfileValidationService, private hubService: HubService)     
     {  
         super(xCoreServices);
@@ -38,7 +38,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         
         //Set up any async validators
         var emailControl = new Control("", Validators.compose([Validators.required, this.validationService.emailValidator]));
-        var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userProfileService, this.userProfile.Id));
+        var emailAsyncValidator = AsyncValidator.debounceControl(emailControl, control => this.validationService.isEmailDuplicate(control, this.userService, this.userProfile.Id));
 
         //Set up controls            
         var buildReturn = this.validationService.buildControlGroup(builder, [
@@ -65,14 +65,14 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
     }
     
     
-    private getInitialData(userProfileService: UserProfileService, hubService: HubService): void {
+    private getInitialData(userService: UserService, hubService: HubService): void {
         
         var trace = this.classTrace("getInitialData");
         trace(TraceMethodPosition.Entry);
         
-        userProfileService.getUserProfile(this.hubService.HubData.UserId).subscribe(up => {
+        userService.getUserProfile(this.hubService.HubData.UserId).subscribe(up => {
             trace(TraceMethodPosition.CallbackStart);
-            this.userProfile = this.userProfileService.userProfileToViewModel(up);
+            this.userProfile = this.userService.toViewModel(up);
             this.active = true;
             this.initializeForm(this.builder);
             trace(TraceMethodPosition.CallbackEnd);            
@@ -85,7 +85,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         super.NotifyLoaded("UserProfile");        
         var trace = this.classTrace("ngOnInit");
         trace(TraceMethodPosition.Entry);
-        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userProfileService, this.hubService));        
+        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userService, this.hubService));        
         trace(TraceMethodPosition.Entry);
     }
                  
@@ -93,9 +93,9 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         var trace = this.classTrace("onSubmit");
         trace(TraceMethodPosition.Entry);
         
-        this.userProfileService.saveUserProfile(this.userProfile).subscribe(up => {
+        this.userService.saveUserProfile(this.userProfile).subscribe(up => {
             trace(TraceMethodPosition.Callback);
-            this.userProfile = this.userProfileService.userProfileToViewModel(up);
+            this.userProfile = this.userService.toViewModel(up);
             this.xCoreServices.LoggingService.success("User profile successfully updated");
             this.xCoreServices.Router.navigate(["/"]);
         });

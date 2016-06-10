@@ -2,7 +2,7 @@ import { ValidationService, IValidationOptions, IFormValidationResult, IValidati
 import { LoggingService, TraceMethodPosition } from '../shared/logging/logging.service';
 import { Control, ControlGroup, AbstractControl } from '@angular/common';
 import { ValidatorFn, AsyncValidatorFn } from '@angular/common/src/forms/directives/validators';
-import { UserProfileService } from './userprofile.service';
+import { UserService } from './user.service';
 import 'rxjs/add/operator/toPromise';
 
 export class UserProfileValidationService extends ValidationService {
@@ -17,12 +17,12 @@ export class UserProfileValidationService extends ValidationService {
     }
     
     
-    public isEmailDuplicate(emailControl: AbstractControl, userProfileService: UserProfileService, id: string): Promise<IValidationResult> {
+    public isEmailDuplicate(emailControl: AbstractControl, userService: UserService, id: string): Promise<IValidationResult> {
         var trace = this.classTrace("isEmailDuplicate");
         
         if (!id || !emailControl.value) return Promise.resolve(null);
         
-        var svc = userProfileService.isEmailDuplicate(emailControl.value, id);                            
+        var svc = userService.isEmailDuplicate(emailControl.value, id);                            
         var p = new Promise<IValidationResult>(resolve => {
             svc.subscribe(isDuplicate => {
                 trace(TraceMethodPosition.Callback, "isEmailDuplicate");
@@ -34,12 +34,12 @@ export class UserProfileValidationService extends ValidationService {
         return p;
     }
 
-    public isUserNameDuplicate(userNameControl: AbstractControl, userProfileService: UserProfileService, id: string): Promise<IValidationResult> {
+    public isUserNameDuplicate(userNameControl: AbstractControl, userService: UserService, id: string): Promise<IValidationResult> {
         var trace = this.classTrace("isUserNameDuplicate");
         
         if (!id || !userNameControl.value) return Promise.resolve(null);
         
-        var svc = userProfileService.isUserNameDuplicate(userNameControl.value, id);                            
+        var svc = userService.isUserNameDuplicate(userNameControl.value, id);                            
         var p = new Promise<IValidationResult>(resolve => {
             svc.subscribe(isDuplicate => {
                 trace(TraceMethodPosition.Callback, "isUserNameDuplicate");

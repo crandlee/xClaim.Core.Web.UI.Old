@@ -1,4 +1,4 @@
-System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/catch', 'rxjs/add/observable/throw', '../shared/service/core-services.service', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
+System.register(['@angular/core', '../shared/service/core-services.service', '../shared/hub/hub.service', 'lodash'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -16,15 +16,12 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
     var core_1, core_services_service_1, hub_service_1, lodash_1;
-    var UserProfileService;
+    var UserService;
     return {
         setters:[
             function (core_1_1) {
                 core_1 = core_1_1;
             },
-            function (_1) {},
-            function (_2) {},
-            function (_3) {},
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
             },
@@ -35,23 +32,22 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                 lodash_1 = lodash_1_1;
             }],
         execute: function() {
-            UserProfileService = (function (_super) {
-                __extends(UserProfileService, _super);
-                function UserProfileService(xCoreServices, hubService) {
+            UserService = (function (_super) {
+                __extends(UserService, _super);
+                function UserService(xCoreServices, hubService) {
                     _super.call(this, xCoreServices);
                     this.hubService = hubService;
-                    this.apiController = 'UserProfile';
                     this.defaultStatuses = [{ Name: "All", Value: "All" }, { Name: "Enabled", Value: "Enabled" }, { Name: "Disabled", Value: "Disabled" }];
-                    this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserProfileService");
+                    this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserService");
                 }
-                UserProfileService.prototype.getOptions = function (serviceError) {
+                UserService.prototype.getOptions = function (serviceError) {
                     var trace = this.classTrace("getEndpoint");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot, ServiceError: serviceError };
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.getUsers = function (skip, take, toServerFilter) {
+                UserService.prototype.get = function (skip, take, toServerFilter) {
                     var _this = this;
                     var trace = this.classTrace("getUsers");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
@@ -68,39 +64,44 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                         url += "&email=" + toServerFilter.Email;
                     if (toServerFilter && toServerFilter.Status && toServerFilter.Status !== "All")
                         url += "&enabled=" + (toServerFilter.Status === "Enabled" ? true : false);
-                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), url).map(function (cf) { cf.Statuses = _this.defaultStatuses; return cf; });
+                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), url)
+                        .map(function (data) {
+                        return { RowCount: data.RowCount,
+                            Rows: data.Rows.map(function (r) { return _this.toViewModel(r); }),
+                            Statuses: _this.defaultStatuses };
+                    });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.getNewUser = function () {
+                UserService.prototype.getNewUser = function () {
                     var trace = this.classTrace("getNewUser");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = this.getObjectData(this.getOptions("There was an error starting a new user"), "user/new");
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.getUserProfile = function (userId) {
+                UserService.prototype.getUserProfile = function (userId) {
                     var trace = this.classTrace("getUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = this.getObjectData(this.getOptions("There was an error retrieving the user profile"), "userfromid/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.isEmailDuplicate = function (email, userId) {
+                UserService.prototype.isEmailDuplicate = function (email, userId) {
                     var trace = this.classTrace("isEmailDuplicate");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = this.getObjectData(this.getOptions("There was an error valdiating the email address"), "userfromemail/" + email + "/isduplicated/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.isUserNameDuplicate = function (userName, userId) {
+                UserService.prototype.isUserNameDuplicate = function (userName, userId) {
                     var trace = this.classTrace("isUserNameDuplicate");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = this.getObjectData(this.getOptions("There was an error valdiating the user name"), "userfromusername/" + userName + "/isduplicated/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.userProfileToModel = function (vm) {
+                UserService.prototype.toModel = function (vm) {
                     var trace = this.classTrace("userProfileToModel");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var up = {
@@ -116,7 +117,7 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return up;
                 };
-                UserProfileService.prototype.userProfileToViewModel = function (model) {
+                UserService.prototype.toViewModel = function (model) {
                     var trace = this.classTrace("userProfileToModel");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var emailClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "email"; });
@@ -134,28 +135,28 @@ System.register(['@angular/core', 'rxjs/add/operator/map', 'rxjs/add/operator/ca
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return vm;
                 };
-                UserProfileService.prototype.deleteUser = function (id) {
+                UserService.prototype.deleteUser = function (id) {
                     var trace = this.classTrace("deleteUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var obs = this.deleteData(this.getOptions("There was an error deleting the user"), "user/" + id);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService.prototype.saveUserProfile = function (vm) {
+                UserService.prototype.saveUserProfile = function (vm) {
                     var trace = this.classTrace("saveUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.postData(this.userProfileToModel(vm), this.getOptions("There was an error saving the user profile"), 'user');
+                    var obs = this.postData(this.toModel(vm), this.getOptions("There was an error saving the user profile"), 'user');
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
-                UserProfileService = __decorate([
+                UserService = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices, hub_service_1.HubService])
-                ], UserProfileService);
-                return UserProfileService;
+                ], UserService);
+                return UserService;
             }(core_services_service_1.XCoreServiceBase));
-            exports_1("UserProfileService", UserProfileService);
+            exports_1("UserService", UserService);
         }
     }
 });
-//# sourceMappingURL=userprofile.service.js.map
+//# sourceMappingURL=user.service.js.map

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 
 @Injectable()
-export abstract class FilterService<TFilterToServer, TFilterToClient> extends XCoreServiceBase {
+export abstract class FilterService<TFilterToServer, TFilterToClient> extends XCoreServiceBase implements IFilterService<TFilterToServer, TFilterToClient> {
 
     public setupObject: IFilterSetupObject<TFilterToServer, TFilterToClient>;
 
@@ -12,6 +12,7 @@ export abstract class FilterService<TFilterToServer, TFilterToClient> extends XC
     public componentOptions: IComponentOptions = { autoApplyFilter: false, applyDelayOnAutoFilter: 2000, otherComponentOptions: {} };
     public setupCalled: boolean = false;
     public idListMappings: IFilterIdListMapping[];
+    protected emptyFilterDefinition: () => IFilterDefinition<TFilterToServer, TFilterToClient>;
 
     private SetupCalledSource = new Subject<boolean>();    
     public SetupCalledEvent = this.SetupCalledSource.asObservable().share();
@@ -32,6 +33,31 @@ export abstract class FilterService<TFilterToServer, TFilterToClient> extends XC
         
     }
 
+    protected initialize(context: FilterService<TFilterToServer, TFilterToClient>,
+                              emptyFilterDefinition: () => IFilterDefinition<TFilterToServer, TFilterToClient>,
+                              initialComponentOptions: IComponentOptions,
+                              idListMappings: IFilterIdListMapping[],
+                              initializeFilter: () => Observable<TFilterToClient>,
+                              filterSummaryFunction: (filter: IFilterDefinition<TFilterToServer, TFilterToClient>) => string,
+                              filterResetFunction: (serverFilter: TFilterToServer) => Observable<IFilterDefinition<TFilterToServer, TFilterToClient>>,
+                              applyFilterFunction: (serverFilter: TFilterToServer) => Observable<IFilterDefinition<TFilterToServer, TFilterToClient>>
+                              ) {
+        var trace = this.classTrace("initializeSetup");        
+        trace(TraceMethodPosition.Entry);
+
+        var setupObject: IFilterSetupObject<TFilterToServer, TFilterToClient> = {
+            componentOptions: initialComponentOptions,
+            idListMappings: idListMappings,
+            filterSummaryFunction: filterSummaryFunction.bind(context),
+            initializeFilterFunction: initializeFilter.bind(context),
+            filterResetFunction: filterResetFunction.bind(context),
+            applyFilterFunction: applyFilterFunction.bind(context)
+        };
+        this.emptyFilterDefinition = emptyFilterDefinition;        
+        this.setup(emptyFilterDefinition(), setupObject);        
+        trace(TraceMethodPosition.Exit);
+
+    }
     //This gets called by the domain component with all the functions and config data necessary to do its job
     //filterDefinition => the current toServerFilter definition
 
@@ -137,7 +163,6 @@ export abstract class FilterService<TFilterToServer, TFilterToClient> extends XC
     }
     //*********************************************************************
 
-    protected abstract emptyFilterDefinition(): IFilterDefinition<TFilterToServer, TFilterToClient>;
     protected abstract filterSummaryFunction(filter: IFilterDefinition<TFilterToServer, TFilterToClient>): string;
     protected abstract initializeFilterFunction() : Observable<TFilterToClient>;
     protected abstract filterResetFunction (filter: TFilterToServer) : Observable<IFilterDefinition<TFilterToServer, TFilterToClient>>;
@@ -169,4 +194,10 @@ export interface IComponentOptions {
     autoApplyFilter?: boolean;
     applyDelayOnAutoFilter?: number;
     otherComponentOptions?: Object;
+}
+
+
+export interface IFilterService<TFilterToServer, TFilterToClient> {
+    initializeFilter(): Observable<IFilterDefinition<TFilterToServer, TFilterToClient>>;
+    FilterUpdatedEvent: Observable<IFilterDefinition<TFilterToServer, TFilterToClient>>;
 }

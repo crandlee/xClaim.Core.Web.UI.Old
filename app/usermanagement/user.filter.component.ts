@@ -3,7 +3,7 @@ import { FilterComponent } from '../shared/filtering/filter.component';
 import { UserFilterService, IUsersToServerFilter } from './user.filter.service';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { ACCORDION_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
-import { IUserProfileReturn } from './userprofile.service';
+import { IUsersToClientFilter } from './user.service';
 import { OffClickDirective } from '../shared/off-click/off-click.directive';
 
 @Component({
@@ -13,10 +13,10 @@ import { OffClickDirective } from '../shared/off-click/off-click.directive';
     providers: [],
     directives: [ACCORDION_DIRECTIVES, OffClickDirective]
 })
-export class UserFilterComponent extends FilterComponent<IUsersToServerFilter, IUserProfileReturn> {
+export class UserFilterComponent extends FilterComponent<IUsersToServerFilter, IUsersToClientFilter> {
     
     @ViewChild('userName') focusRef;
-    public self:FilterComponent<IUsersToServerFilter, IUserProfileReturn> = this;
+    public self:FilterComponent<IUsersToServerFilter, IUsersToClientFilter> = this;
 
     constructor(protected xCoreServices: XCoreServices, private userFilterService: UserFilterService, private renderer: Renderer) {
 

@@ -6,6 +6,7 @@ import { BusyService } from './busy.service';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/operator/share';
+import { IFilterDefinition } from '../filtering/filter.service';
 
  @Injectable()
 export class BaseService {
@@ -223,6 +224,18 @@ export class BaseService {
         
 }
 
+
+export interface IDataService<TModel, TViewModel, TFilterToServer, TFilterToClient> {
+    toViewModel(model: TModel): TViewModel;
+    toModel(vm: TViewModel): TModel;
+    get(skip?: number, take?: number, filter?: TFilterToServer): Observable<TFilterToClient>
+}
+
+export interface ICollectionViewModel<T> {
+    Active?: boolean;
+    RowCount: number;
+    Rows: T[];
+}
 
 export interface IServiceOptions {
     SuppressDefaultException?: boolean;
