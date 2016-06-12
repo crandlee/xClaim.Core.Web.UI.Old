@@ -167,14 +167,6 @@ System.register(['@angular/core', '@angular/common', './table.sorting.directive'
                 NgTableComponent.prototype.load = function (message) {
                     this.changeTableEvent(message);
                 };
-                NgTableComponent.prototype.ngOnInit = function () {
-                    var _this = this;
-                    if (this.tableChangedEvent) {
-                        this.tableChangedEvent.asObservable().subscribe(function (msg) {
-                            _this.changeTableEvent(msg);
-                        });
-                    }
-                };
                 __decorate([
                     core_1.Input(), 
                     __metadata('design:type', Object)
@@ -187,10 +179,6 @@ System.register(['@angular/core', '@angular/common', './table.sorting.directive'
                     core_1.Input(), 
                     __metadata('design:type', String)
                 ], NgTableComponent.prototype, "tooltipTemplate", void 0);
-                __decorate([
-                    core_1.Input(), 
-                    __metadata('design:type', core_1.EventEmitter)
-                ], NgTableComponent.prototype, "tableChangedEvent", void 0);
                 __decorate([
                     core_1.Output(), 
                     __metadata('design:type', core_1.EventEmitter)

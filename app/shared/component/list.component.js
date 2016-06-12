@@ -1,4 +1,4 @@
-System.register(['@angular/core', '../service/core-services.service', './base.component'], function(exports_1, context_1) {
+System.register(['../service/core-services.service', './base.component'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -6,13 +6,10 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var core_1, core_services_service_1, base_component_1;
+    var core_services_service_1, base_component_1;
     var XCoreListComponent;
     return {
         setters:[
-            function (core_1_1) {
-                core_1 = core_1_1;
-            },
             function (core_services_service_1_1) {
                 core_services_service_1 = core_services_service_1_1;
             },
@@ -30,7 +27,6 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     this.serviceSubscription = null;
                     this.dataViewModel = { RowCount: 0, Rows: [], Active: false };
                     this.columns = [];
-                    this.tableChangeEmitter = new core_1.EventEmitter();
                     this.tableConfig = {
                         sorting: { columns: [] }
                     };
@@ -49,38 +45,38 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     this.filterService = filterService;
                     this.dataService = dataService;
                 };
-                XCoreListComponent.prototype.performStartup = function (currentViewModel, tableChangeEmitter, tableConfig, filterService, service) {
+                XCoreListComponent.prototype.performStartup = function (currentViewModel, tableComponent, tableConfig, filterService, service) {
                     var _this = this;
                     var trace = this.classTrace("performStartup");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    currentViewModel.Active = true;
+                    //currentViewModel.Active = true;
                     filterService.initializeFilter().subscribe(function (filter) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
                         currentViewModel.Rows = [];
-                        _this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
-                        _this.subscribeToFilterChanged(currentViewModel, tableChangeEmitter, tableConfig, filterService, service);
+                        _this.loadFirstData(currentViewModel, tableComponent, tableConfig, filter, service);
+                        _this.subscribeToFilterChanged(currentViewModel, tableComponent, tableConfig, filterService, service);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                XCoreListComponent.prototype.subscribeToFilterChanged = function (currentViewModel, tableChangeEmitter, tableConfig, filterService, service) {
+                XCoreListComponent.prototype.subscribeToFilterChanged = function (currentViewModel, tableComponent, tableConfig, filterService, service) {
                     var _this = this;
                     var trace = this.classTrace("subscribeToFilterChanged");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     filterService.FilterUpdatedEvent.subscribe(function (filter) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
                         currentViewModel.Rows = [];
-                        _this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
+                        _this.loadFirstData(currentViewModel, tableComponent, tableConfig, filter, service);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                XCoreListComponent.prototype.loadFirstData = function (currentViewModel, tableChangeEmitter, tableConfig, filter, service) {
+                XCoreListComponent.prototype.loadFirstData = function (currentViewModel, tableComponent, tableConfig, filter, service) {
                     var _this = this;
                     var trace = this.classTrace("loadFirstData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     currentViewModel.Rows = currentViewModel.Rows.concat(filter.toClientFilter.Rows);
                     currentViewModel.RowCount = filter.toClientFilter.RowCount;
                     var msg = { rows: currentViewModel.Rows, config: tableConfig };
-                    tableChangeEmitter.emit(msg);
+                    tableComponent.load(msg);
                     //Subscribe to infinite scroll
                     if (this.serviceSubscription)
                         this.serviceSubscription.unsubscribe();
@@ -90,17 +86,18 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                         service.get(currentViewModel.Rows.length, _this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(function (data) {
                             currentViewModel.Rows = currentViewModel.Rows.concat(data.Rows);
                             currentViewModel.RowCount = data.RowCount;
-                            tableChangeEmitter.emit({ rows: currentViewModel.Rows, config: tableConfig });
+                            tableComponent.load({ rows: currentViewModel.Rows, config: tableConfig });
                             _this.xCoreServices.ScrollService.checkNearBottom();
                         });
                     });
                     this.xCoreServices.ScrollService.checkNearBottom();
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                XCoreListComponent.prototype.ngOnInit = function () {
-                    var trace = this.classTrace("ngOnInit");
+                XCoreListComponent.prototype.initialize = function (tableComponent) {
+                    var trace = this.classTrace("initializing");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.hubService.callbackWhenLoaded(this.performStartup.bind(this, this.dataViewModel, this.tableChangeEmitter, this.tableConfig, this.filterService, this.dataService));
+                    this.tableComponent = tableComponent;
+                    this.hubService.callbackWhenLoaded(this.performStartup.bind(this, this.dataViewModel, this.tableComponent, this.tableConfig, this.filterService, this.dataService));
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 return XCoreListComponent;

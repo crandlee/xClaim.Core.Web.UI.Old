@@ -30,7 +30,6 @@ export class NgTableComponent {
                   <div class="tooltip-arrow tooltip-arrow-custom"></div>
                   <div class="tooltip-inner tooltip-inner-custom"></div>
                 </div>`;
-  @Input() public tableChangedEvent: EventEmitter<INgTableChangeMessage>;
 
   // Outputs (Events)
   @Output() public tableChanged: EventEmitter<INgTableConfig> = new EventEmitter<INgTableConfig>();
@@ -169,15 +168,6 @@ export class NgTableComponent {
       this.changeTableEvent(message);
   }  
 
-  ngOnInit() {
-    
-    if (this.tableChangedEvent) {
-      this.tableChangedEvent.asObservable().subscribe(msg => {
-          this.changeTableEvent(msg);
-      });
-    }
-
-  }
 }
 
 

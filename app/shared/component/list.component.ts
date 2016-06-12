@@ -1,7 +1,7 @@
-import { Component, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, ViewChild } from '@angular/core';
 import { XCoreServices, TraceMethodPosition } from '../service/core-services.service';
 import { XCoreBaseComponent } from './base.component';
-import { INgTableColumn, INgTableConfig, INgTableRow, INgTableChangeMessage } from '../table/table.component';
+import { INgTableColumn, INgTableConfig, INgTableRow, INgTableChangeMessage, NgTableComponent } from '../table/table.component';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { IDataService, ICollectionViewModel } from '../service/base.service';
@@ -16,12 +16,12 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
 
     public columns: INgTableColumn[] = [];
 
-    public tableChangeEmitter: EventEmitter<INgTableChangeMessage> = new EventEmitter<INgTableChangeMessage>();
     public tableConfig: INgTableConfig = {
         sorting: { columns: [] }
     }
     private filterService: IFilterService<TFilterToServer, TFilterToClient>;
     private dataService: IDataService<TModel, TViewModel, TFilterToServer, TFilterToClient>;
+    tableComponent: NgTableComponent;
 
     constructor(protected xCoreServices: XCoreServices, protected hubService: HubService) {
         super(xCoreServices);
@@ -40,7 +40,6 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
     protected initializeWith(columns: INgTableColumn[], 
         filterService: IFilterService<TFilterToServer, TFilterToClient>, 
         dataService: IDataService<TModel, TViewModel, TFilterToServer, TFilterToClient>) {
-        
         this.columns = columns;
         this.tableConfig = { sorting: {columns: columns }};
         this.filterService = filterService;
@@ -48,26 +47,26 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
     }
 
     protected performStartup(currentViewModel: ICollectionViewModel<TViewModel>,
-        tableChangeEmitter: EventEmitter<INgTableChangeMessage>, 
+        tableComponent: NgTableComponent,
         tableConfig: INgTableConfig,
         filterService: IFilterService<TFilterToServer, TFilterToClient>, 
         service: IDataService<TModel, TViewModel, TFilterToServer, TFilterToClient>): void {
 
         var trace = this.classTrace("performStartup");
         trace(TraceMethodPosition.Entry);
-        currentViewModel.Active = true;
+        //currentViewModel.Active = true;
         filterService.initializeFilter().subscribe(filter => {
             trace(TraceMethodPosition.Callback);
             currentViewModel.Rows = [];
-            this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
-            this.subscribeToFilterChanged(currentViewModel, tableChangeEmitter, tableConfig, filterService, service);
+            this.loadFirstData(currentViewModel, tableComponent, tableConfig, filter, service);
+            this.subscribeToFilterChanged(currentViewModel, tableComponent, tableConfig, filterService, service);
         });
 
         trace(TraceMethodPosition.Exit);
     }
 
     private subscribeToFilterChanged(currentViewModel: ICollectionViewModel<TViewModel>,
-        tableChangeEmitter: EventEmitter<INgTableChangeMessage>, 
+        tableComponent: NgTableComponent, 
         tableConfig: INgTableConfig,
         filterService: IFilterService<TFilterToServer, TFilterToClient>,         
         service: IDataService<TModel, TViewModel, TFilterToServer, TFilterToClient>) {
@@ -77,13 +76,13 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         filterService.FilterUpdatedEvent.subscribe(filter => {
             trace(TraceMethodPosition.Callback);
             currentViewModel.Rows = [];
-            this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
+            this.loadFirstData(currentViewModel, tableComponent, tableConfig, filter, service);
         });
         trace(TraceMethodPosition.Exit);
     }    
 
     private loadFirstData(currentViewModel: ICollectionViewModel<TViewModel>,
-        tableChangeEmitter: EventEmitter<INgTableChangeMessage>,      
+        tableComponent: NgTableComponent,      
         tableConfig: INgTableConfig,
         filter: IFilterDefinition<TFilterToServer, TFilterToClient>, 
         service: IDataService<TModel, TViewModel, TFilterToServer, TFilterToClient>): void {
@@ -94,7 +93,7 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         currentViewModel.Rows = currentViewModel.Rows.concat(filter.toClientFilter.Rows);
         currentViewModel.RowCount = filter.toClientFilter.RowCount;
         var msg: INgTableChangeMessage = { rows: currentViewModel.Rows, config: tableConfig };
-        tableChangeEmitter.emit(msg);
+        tableComponent.load(msg);
 
         //Subscribe to infinite scroll
         if (this.serviceSubscription) this.serviceSubscription.unsubscribe();      
@@ -103,7 +102,7 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
             service.get(currentViewModel.Rows.length, this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(data => {
                 currentViewModel.Rows = currentViewModel.Rows.concat(data.Rows);
                 currentViewModel.RowCount = data.RowCount;                
-                tableChangeEmitter.emit({ rows: currentViewModel.Rows, config: tableConfig });
+                tableComponent.load({ rows: currentViewModel.Rows, config: tableConfig });
                 this.xCoreServices.ScrollService.checkNearBottom();
             });                                     
         });
@@ -112,14 +111,13 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
     }
 
 
-    ngOnInit() {
-
-        var trace = this.classTrace("ngOnInit");
+    protected initialize(tableComponent: NgTableComponent) {
+        var trace = this.classTrace("initializing");        
         trace(TraceMethodPosition.Entry);
-
+        this.tableComponent = tableComponent;
         this.hubService.callbackWhenLoaded(this.performStartup.bind(this,
             this.dataViewModel,
-            this.tableChangeEmitter,
+            this.tableComponent,
             this.tableConfig,  
             this.filterService, 
             this.dataService));

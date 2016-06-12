@@ -58,7 +58,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.initializeTrace("UserListComponent");
                 }
                 UserListComponent.prototype.ngOnInit = function () {
-                    this.NotifyLoaded("UserList");
+                    this.dataViewModel.Active = true;
                     this.initializeWith([
                         { title: "User Name", name: "Name", colWidth: 3, sort: "asc" },
                         { title: "Full Name", name: "GivenName", colWidth: 6 },
@@ -66,7 +66,10 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         { title: "Edit", name: "Edit", colWidth: 1, editRow: true },
                         { title: "Delete", name: "Delete", colWidth: 1, deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
                     ], this.userFilterService, this.userService);
-                    _super.prototype.ngOnInit.call(this);
+                };
+                UserListComponent.prototype.ngAfterViewInit = function () {
+                    this.NotifyLoaded("UserList");
+                    _super.prototype.initialize.call(this, this.TableComponent);
                 };
                 UserListComponent.prototype.addNew = function (event) {
                     event.preventDefault();
@@ -94,11 +97,15 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         if (d) {
                             _this.xCoreServices.LoggingService.success("Used deleted successfully");
                             lodash_1.default.remove(_this.dataViewModel.Rows, function (u) { return u.Id === row.Id; });
-                            _this.tableChangeEmitter.emit({ rows: _this.dataViewModel.Rows, config: _this.tableConfig });
+                            _this.TableComponent.load({ rows: _this.dataViewModel.Rows, config: _this.tableConfig });
                         }
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
+                __decorate([
+                    core_1.ViewChild(table_component_1.NgTableComponent), 
+                    __metadata('design:type', table_component_1.NgTableComponent)
+                ], UserListComponent.prototype, "TableComponent", void 0);
                 UserListComponent = __decorate([
                     core_1.Component({
                         styleUrls: ['app/usermanagement/user.list.component.css'],

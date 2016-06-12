@@ -11,8 +11,7 @@
             </ul>            
         </div>
         <userfilter></userfilter>
-        <ng-table [tableChangedEvent]="tableChangeEmitter" [config]="tableConfig"
-                [rows]="dataViewModel.Rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
+        <ng-table [config]="tableConfig" [rows]="dataViewModel.Rows" [columns]="columns" (editClicked)="editUser($event)" (deleteClicked)="deleteUser($event)">
         </ng-table>
     </div>
     <div class="row-count-tag">{{(dataViewModel.Rows && dataViewModel.Rows.length) || 0}} of {{dataViewModel.RowCount}}</div>

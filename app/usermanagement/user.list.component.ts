@@ -1,4 +1,4 @@
-import { Component, EventEmitter } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { XCoreListComponent } from '../shared/component/list.component';
 import { HubService } from '../shared/hub/hub.service';
@@ -23,13 +23,15 @@ import { IFilterDefinition, IFilterService } from '../shared/filtering/filter.se
 })
 export class UserListComponent extends XCoreListComponent<IUserProfile, IUserProfileViewModel, IUsersToServerFilter, IUsersToClientFilter> {
     
+    @ViewChild(NgTableComponent) TableComponent: NgTableComponent;
+
     constructor(protected xCoreServices: XCoreServices, private userService: UserService, private userFilterService: UserFilterService, protected hubService: HubService) {
         super(xCoreServices, hubService);
         this.initializeTrace("UserListComponent");
     }
 
-    ngOnInit() {
-        this.NotifyLoaded("UserList");
+    public ngOnInit() {
+        this.dataViewModel.Active = true;
         this.initializeWith([
             { title: "User Name", name: "Name", colWidth: 3, sort: "asc" },
             { title: "Full Name", name: "GivenName", colWidth: 6 },
@@ -37,7 +39,11 @@ export class UserListComponent extends XCoreListComponent<IUserProfile, IUserPro
             { title: "Edit", name: "Edit", colWidth: 1, editRow: true },        
             { title: "Delete", name: "Delete", colWidth: 1, deleteRow: true, deleteMessage: 'Do you want to delete this user?' }
         ], this.userFilterService, this.userService);  
-        super.ngOnInit();
+    }
+
+    public ngAfterViewInit() {
+        this.NotifyLoaded("UserList");
+        super.initialize(this.TableComponent);
     }
 
     public addNew(event): void {
@@ -65,7 +71,7 @@ export class UserListComponent extends XCoreListComponent<IUserProfile, IUserPro
            if (d) {
              this.xCoreServices.LoggingService.success("Used deleted successfully");
              _.remove(this.dataViewModel.Rows, u => u.Id === row.Id);  
-             this.tableChangeEmitter.emit({ rows: this.dataViewModel.Rows, config: this.tableConfig });
+             this.TableComponent.load({ rows: this.dataViewModel.Rows, config: this.tableConfig });
            } 
         });
         trace(TraceMethodPosition.Exit);                        
