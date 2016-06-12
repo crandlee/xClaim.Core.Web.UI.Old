@@ -113,6 +113,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
                  Password: "Dummy@000",
                  ConfirmPassword: "Dummy@000",
                  Enabled: model.Enabled,
+                 Claims: [].concat(_.map(model.Claims, c => { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value } } )),
                  TooltipMessage: `<table>
                                     <tr>
                                         <td>User Name:</td><td style="padding-left: 5px">${model.Name}</td>
@@ -161,13 +162,15 @@ export interface IUserProfileViewModel {
      Password?: string;
      ConfirmPassword?: string;
      Enabled: boolean;
-     TooltipMessage: string;  
+     TooltipMessage: string;
+     Claims: IUserClaimViewModel[];
 }
 
 export interface IUserClaimViewModel {
-     Name: string;
-     Description: string;
-     Value: string;
+    Id: string;
+    Name: string;
+    Description: string;
+    Value: string;
 }
 
 export interface IUserProfile {
@@ -178,7 +181,7 @@ export interface IUserProfile {
      SaveGivenName: string;
      SaveEmailAddress: string;  
      Enabled: boolean;  
-     Claims: IUserClaim[]
+     Claims: IUserClaim[];
 }
 
 export interface IUserClaim {

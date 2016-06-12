@@ -37,9 +37,12 @@
                     <button type="submit" class="btn btn-primary pull-right" [disabled]="validationMessages.length > 0">Save</button>
                 </div>
             </div>    
-        </form>            
+        </form>    
     </div>
     <div *ngIf="!active" class="loading-message">
         Loading User
-    </div>
+    </div>        
 </div>
+<br/>
+<user-claims></user-claims>
+

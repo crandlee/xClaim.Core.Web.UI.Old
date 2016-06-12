@@ -1,0 +1,17 @@
+<div class="container">
+    <div *ngIf="active" class="edit-panel" >
+        <div class="navbar navbar-inverse center">
+            <h4>User Claims</h4>
+        </div>
+        <ng-table [config]="tableConfig" [columns]="columns" (deleteClicked)="deleteClaim($event)">
+        </ng-table>        
+        <div class="form-group clearfix">
+            <div class="btn-toolbar">
+                <button type="button" class="btn btn-primary pull-right" (click)="addClaim($event)">Add Claim</button>
+            </div>
+        </div>    
+    </div>
+    <div *ngIf="!active" class="loading-message">
+        Loading User Claims
+    </div>
+</div>

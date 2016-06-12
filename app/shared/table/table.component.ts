@@ -22,7 +22,7 @@ export class NgTableComponent {
   }
 
   // Table values
-  @Input() public rows: INgTableRow[] = [];
+  public rows: INgTableRow[] = [];
   @Input() public config: INgTableConfig = { sorting: { columns: []} }
 
   @Input() public rowTemplate: string = "";
@@ -163,11 +163,19 @@ export class NgTableComponent {
 
     return sorted;
   }
-  
-  ngAfterContentInit() {
-    this.tableChangedEvent.asObservable().subscribe(msg => {
-         this.changeTableEvent(msg);
-    });
+
+  public load(message: INgTableChangeMessage): void {
+
+      this.changeTableEvent(message);
+  }  
+
+  ngOnInit() {
+    
+    if (this.tableChangedEvent) {
+      this.tableChangedEvent.asObservable().subscribe(msg => {
+          this.changeTableEvent(msg);
+      });
+    }
 
   }
 }

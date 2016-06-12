@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, EventEmitter, ViewChild } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
 import { IFormValidationResult } from '../shared/validation/validation.service';
 import { ValidationComponent } from '../shared/validation/validation.component';
@@ -12,11 +12,12 @@ import _ from 'lodash';
 import { RouteSegment } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { UiSwitchComponent } from 'angular2-ui-switch';
+import { UserClaimsComponent } from './user.claims.component';
 
 @Component({
     templateUrl: 'app/usermanagement/user.component.html',
     providers: [UserService, UserProfileValidationService],
-    directives: [ValidationComponent, UiSwitchComponent]
+    directives: [ValidationComponent, UiSwitchComponent, UserClaimsComponent]
 })
 export class UserComponent extends XCoreBaseComponent implements OnInit  {
 
@@ -26,10 +27,10 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
     public validationMessages: IFormValidationResult[] = [];
     public controlDataDescriptions: string[];
     public userId: string;
+    @ViewChild(UserClaimsComponent) ClaimsView: UserClaimsComponent;
 
-                
     constructor(protected xCoreServices: XCoreServices, private userService: UserService, 
-        private builder: FormBuilder, private validationService: UserProfileValidationService, private hubService: HubService, private routeSegment: RouteSegment, private elementRef: ElementRef)     
+        private builder: FormBuilder, private validationService: UserProfileValidationService, private hubService: HubService, private routeSegment: RouteSegment)     
     {  
         super(xCoreServices);
         
@@ -93,27 +94,24 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
                 this.userProfile.ConfirmPassword = "";
                 this.userProfile.Enabled = true;
             }
-            
             this.active = true;
             this.initializeForm(this.builder);
-            
+            this.ClaimsView.load(this.userProfile);
             trace(TraceMethodPosition.CallbackEnd);            
         }); 
         
         trace(TraceMethodPosition.Exit);
     }
     
+    ngAfterViewInit() {
+        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userService, this.userId));        
+    }
+
     ngOnInit() {        
         super.NotifyLoaded("User");        
-        var trace = this.classTrace("ngOnInit");
-        trace(TraceMethodPosition.Entry);
-        
-        
-        this.hubService.callbackWhenLoaded(this.getInitialData.bind(this, this.userService, this.userId));        
-        trace(TraceMethodPosition.Entry);
     }
-                 
-    onSubmit() {
+
+    public onSubmit() {
         var trace = this.classTrace("onSubmit");
         trace(TraceMethodPosition.Entry);
         
@@ -127,8 +125,8 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         trace(TraceMethodPosition.Exit);
     }
     
-    cancel(): void {
-        this.xCoreServices.Router.navigate(["/UserManagement"]);
+    public cancel(): void {
+        this.xCoreServices.Router.navigate(["/UserList"]);
     }
 }
 

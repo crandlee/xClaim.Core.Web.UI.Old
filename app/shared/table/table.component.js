@@ -164,16 +164,17 @@ System.register(['@angular/core', '@angular/common', './table.sorting.directive'
                     });
                     return sorted;
                 };
-                NgTableComponent.prototype.ngAfterContentInit = function () {
-                    var _this = this;
-                    this.tableChangedEvent.asObservable().subscribe(function (msg) {
-                        _this.changeTableEvent(msg);
-                    });
+                NgTableComponent.prototype.load = function (message) {
+                    this.changeTableEvent(message);
                 };
-                __decorate([
-                    core_1.Input(), 
-                    __metadata('design:type', Array)
-                ], NgTableComponent.prototype, "rows", void 0);
+                NgTableComponent.prototype.ngOnInit = function () {
+                    var _this = this;
+                    if (this.tableChangedEvent) {
+                        this.tableChangedEvent.asObservable().subscribe(function (msg) {
+                            _this.changeTableEvent(msg);
+                        });
+                    }
+                };
                 __decorate([
                     core_1.Input(), 
                     __metadata('design:type', Object)

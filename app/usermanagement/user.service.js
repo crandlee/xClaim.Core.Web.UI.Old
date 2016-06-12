@@ -130,6 +130,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         Password: "Dummy@000",
                         ConfirmPassword: "Dummy@000",
                         Enabled: model.Enabled,
+                        Claims: [].concat(lodash_1.default.map(model.Claims, function (c) { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value }; })),
                         TooltipMessage: "<table>\n                                    <tr>\n                                        <td>User Name:</td><td style=\"padding-left: 5px\">" + model.Name + "</td>\n                                    </tr>\n                                    <tr>\n                                        <td>Full Name:</td><td style=\"padding-left: 5px\">" + ((givenNameClaim && givenNameClaim.Value) || "") + "</td>\n                                    </tr>\n                                    <tr>\n                                        <td>Email:</td><td style=\"padding-left: 5px\">" + ((emailClaim && emailClaim.Value) || "") + "</td>\n                                    </tr>\n                                    <tr>                                        \n                                        <td>Id:</td><td style=\"padding-left: 5px\">" + model.Id + "</td>\n                                    </tr>\n                                  </table>\n                 "
                     };
                     trace(core_services_service_1.TraceMethodPosition.Exit);
