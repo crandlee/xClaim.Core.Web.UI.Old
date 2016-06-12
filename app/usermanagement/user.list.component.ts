@@ -31,7 +31,6 @@ export class UserListComponent extends XCoreListComponent<IUserProfile, IUserPro
     }
 
     public ngOnInit() {
-        this.dataViewModel.Active = true;
         this.initializeWith([
             { title: "User Name", name: "Name", colWidth: 3, sort: "asc" },
             { title: "Full Name", name: "GivenName", colWidth: 6 },
@@ -69,7 +68,7 @@ export class UserListComponent extends XCoreListComponent<IUserProfile, IUserPro
         if (!row || !row.Id) throw Error("Invalid row");
         this.userService.deleteUser(row.Id).subscribe(d => {
            if (d) {
-             this.xCoreServices.LoggingService.success("Used deleted successfully");
+             this.xCoreServices.LoggingService.success("User deleted successfully");
              _.remove(this.dataViewModel.Rows, u => u.Id === row.Id);  
              this.TableComponent.load({ rows: this.dataViewModel.Rows, config: this.tableConfig });
            } 

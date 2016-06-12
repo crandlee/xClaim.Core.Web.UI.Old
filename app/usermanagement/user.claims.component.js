@@ -53,11 +53,9 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
                         { name: "Description", title: "Claim Name", colWidth: 6 },
                         { name: "Value", title: "Claim Value", colWidth: 6 }
                     ];
-                    this.tableChangeEmitter = new core_1.EventEmitter();
                     this.tableConfig = {
                         sorting: { columns: [] }
                     };
-                    this.active = false;
                     this.initializeTrace("UserClaimsComponent");
                 }
                 UserClaimsComponent.prototype.load = function (user) {
@@ -80,17 +78,10 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
                     // });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
-                UserClaimsComponent.prototype.ngOnInit = function () {
-                    this.active = true;
-                };
                 __decorate([
                     core_1.Input(), 
                     __metadata('design:type', Object)
                 ], UserClaimsComponent.prototype, "User", void 0);
-                __decorate([
-                    core_1.Input(), 
-                    __metadata('design:type', core_1.EventEmitter)
-                ], UserClaimsComponent.prototype, "UserLoadedEvent", void 0);
                 __decorate([
                     core_1.ViewChild(table_component_1.NgTableComponent), 
                     __metadata('design:type', table_component_1.NgTableComponent)

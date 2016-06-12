@@ -66,11 +66,11 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     this.validationService = validationService;
                     this.hubService = hubService;
                     this.routeSegment = routeSegment;
-                    this.active = false;
                     this.validationMessages = [];
                     this.initializeTrace("UserComponent");
                     this.userId = routeSegment.getParam("id");
                     //console.log(this.userId);
+                    this.userProfile = this.userService.getEmptyUserProfileViewModel();
                 }
                 UserComponent.prototype.initializeForm = function (builder) {
                     var _this = this;
@@ -119,8 +119,6 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                             _this.userProfile.ConfirmPassword = "";
                             _this.userProfile.Enabled = true;
                         }
-                        _this.active = true;
-                        _this.initializeForm(_this.builder);
                         _this.ClaimsView.load(_this.userProfile);
                         trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
                     });
@@ -131,6 +129,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                 };
                 UserComponent.prototype.ngOnInit = function () {
                     _super.prototype.NotifyLoaded.call(this, "User");
+                    this.initializeForm(this.builder);
                 };
                 UserComponent.prototype.onSubmit = function () {
                     var _this = this;
@@ -140,7 +139,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                         trace(core_services_service_1.TraceMethodPosition.Callback);
                         _this.userProfile = _this.userService.toViewModel(up);
                         _this.xCoreServices.LoggingService.success("User successfully saved");
-                        _this.xCoreServices.Router.navigate(["/UserList"]);
+                        _this.xCoreServices.Router.navigate([("/User/" + _this.userProfile.Id)]);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };

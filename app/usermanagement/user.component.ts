@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
 import { IFormValidationResult } from '../shared/validation/validation.service';
 import { ValidationComponent } from '../shared/validation/validation.component';
@@ -22,7 +22,6 @@ import { UserClaimsComponent } from './user.claims.component';
 export class UserComponent extends XCoreBaseComponent implements OnInit  {
 
     public userProfile: IUserProfileViewModel;
-    public active: boolean = false;    
     public form: ControlGroup;
     public validationMessages: IFormValidationResult[] = [];
     public controlDataDescriptions: string[];
@@ -37,6 +36,7 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         this.initializeTrace("UserComponent");
         this.userId = routeSegment.getParam("id");
         //console.log(this.userId);
+        this.userProfile = this.userService.getEmptyUserProfileViewModel();
     }
     
     private initializeForm(builder: FormBuilder): void {
@@ -94,8 +94,6 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
                 this.userProfile.ConfirmPassword = "";
                 this.userProfile.Enabled = true;
             }
-            this.active = true;
-            this.initializeForm(this.builder);
             this.ClaimsView.load(this.userProfile);
             trace(TraceMethodPosition.CallbackEnd);            
         }); 
@@ -108,7 +106,8 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
     }
 
     ngOnInit() {        
-        super.NotifyLoaded("User");        
+        super.NotifyLoaded("User");   
+        this.initializeForm(this.builder);     
     }
 
     public onSubmit() {
@@ -119,7 +118,7 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
             trace(TraceMethodPosition.Callback);
             this.userProfile = this.userService.toViewModel(up);
             this.xCoreServices.LoggingService.success("User successfully saved");
-            this.xCoreServices.Router.navigate(["/UserList"]);
+            this.xCoreServices.Router.navigate([`/User/${this.userProfile.Id}`]);
         });
         
         trace(TraceMethodPosition.Exit);

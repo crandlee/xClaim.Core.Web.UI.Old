@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
 import { UserService, IUserProfile, IUserProfileViewModel } from '../usermanagement/user.service';
@@ -23,13 +23,10 @@ export class UserClaimsComponent extends XCoreBaseComponent {
         { name: "Value", title: "Claim Value", colWidth: 6 }
     ];
 
-    public tableChangeEmitter: EventEmitter<INgTableChangeMessage> = new EventEmitter<INgTableChangeMessage>();
     public tableConfig: INgTableConfig = {
         sorting: { columns: [] }
     }
     @Input() public User: IUserProfileViewModel;
-    public active: boolean = false;
-    @Input() public UserLoadedEvent: EventEmitter<IUserProfileViewModel>;
     @ViewChild(NgTableComponent) TableComponent: NgTableComponent;
 
     constructor(protected xCoreServices: XCoreServices, private userService: UserService, 
@@ -67,9 +64,6 @@ export class UserClaimsComponent extends XCoreBaseComponent {
         trace(TraceMethodPosition.Exit);
     }
 
-    public ngOnInit(): void {
-        this.active = true;
-    }
 
 }
 

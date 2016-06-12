@@ -232,7 +232,6 @@ export interface IDataService<TModel, TViewModel, TFilterToServer, TFilterToClie
 }
 
 export interface ICollectionViewModel<T> {
-    Active?: boolean;
     RowCount: number;
     Rows: T[];
 }

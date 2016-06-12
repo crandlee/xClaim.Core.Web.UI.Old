@@ -58,7 +58,6 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     this.initializeTrace("UserListComponent");
                 }
                 UserListComponent.prototype.ngOnInit = function () {
-                    this.dataViewModel.Active = true;
                     this.initializeWith([
                         { title: "User Name", name: "Name", colWidth: 3, sort: "asc" },
                         { title: "Full Name", name: "GivenName", colWidth: 6 },
@@ -95,7 +94,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         throw Error("Invalid row");
                     this.userService.deleteUser(row.Id).subscribe(function (d) {
                         if (d) {
-                            _this.xCoreServices.LoggingService.success("Used deleted successfully");
+                            _this.xCoreServices.LoggingService.success("User deleted successfully");
                             lodash_1.default.remove(_this.dataViewModel.Rows, function (u) { return u.Id === row.Id; });
                             _this.TableComponent.load({ rows: _this.dataViewModel.Rows, config: _this.tableConfig });
                         }

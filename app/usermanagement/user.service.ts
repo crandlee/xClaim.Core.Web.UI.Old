@@ -151,7 +151,10 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
         trace(TraceMethodPosition.Exit)
         return obs;
     }
-           
+
+    public getEmptyUserProfileViewModel(): IUserProfileViewModel {
+        return { Id: "", Name: "", EmailAddress: "", GivenName: "", Password: "", ConfirmPassword: "", Enabled: false, TooltipMessage: "", Claims: []};
+    }
 }
 
 export interface IUserProfileViewModel {

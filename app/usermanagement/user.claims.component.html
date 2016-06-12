@@ -1,7 +1,7 @@
 <div class="container">
-    <div *ngIf="active" class="edit-panel" >
+    <div [hidden]="!User || !User.Id || User.Id === '00000000-0000-0000-0000-000000000000'" class="edit-panel" >
         <div class="navbar navbar-inverse center">
-            <h4>User Claims</h4>
+            <h4>User Claims for {{User?.Name}}</h4>
         </div>
         <ng-table [config]="tableConfig" [columns]="columns" (deleteClicked)="deleteClaim($event)">
         </ng-table>        
@@ -10,8 +10,5 @@
                 <button type="button" class="btn btn-primary pull-right" (click)="addClaim($event)">Add Claim</button>
             </div>
         </div>    
-    </div>
-    <div *ngIf="!active" class="loading-message">
-        Loading User Claims
     </div>
 </div>

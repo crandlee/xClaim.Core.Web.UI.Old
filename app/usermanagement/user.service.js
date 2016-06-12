@@ -150,6 +150,9 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
+                UserService.prototype.getEmptyUserProfileViewModel = function () {
+                    return { Id: "", Name: "", EmailAddress: "", GivenName: "", Password: "", ConfirmPassword: "", Enabled: false, TooltipMessage: "", Claims: [] };
+                };
                 UserService = __decorate([
                     core_1.Injectable(), 
                     __metadata('design:paramtypes', [core_services_service_1.XCoreServices, hub_service_1.HubService])

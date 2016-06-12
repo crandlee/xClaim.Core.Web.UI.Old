@@ -12,7 +12,7 @@ import { HubService } from '../hub/hub.service';
 export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow, TFilterToServer, TFilterToClient extends ICollectionViewModel<TViewModel>> extends XCoreBaseComponent  {
     
     protected serviceSubscription: Subscription = null;
-    public dataViewModel: ICollectionViewModel<TViewModel> = { RowCount:0, Rows:[], Active: false };
+    public dataViewModel: ICollectionViewModel<TViewModel> = { RowCount:0, Rows:[] };
 
     public columns: INgTableColumn[] = [];
 
@@ -54,7 +54,6 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
 
         var trace = this.classTrace("performStartup");
         trace(TraceMethodPosition.Entry);
-        //currentViewModel.Active = true;
         filterService.initializeFilter().subscribe(filter => {
             trace(TraceMethodPosition.Callback);
             currentViewModel.Rows = [];

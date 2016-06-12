@@ -1,5 +1,5 @@
 <div class="container">
-    <div *ngIf="active" class="edit-panel" >
+    <div [hidden]="!userProfile || !userProfile.Id" class="edit-panel" >
         <div class="navbar navbar-inverse center">
             <h4>User Information for: {{userProfile.Name || "New User"}}</h4>
         </div>
@@ -32,14 +32,14 @@
             </div>    
             <validation [validationMessages]='validationMessages'></validation>
             <div class="form-group clearfix">
-                <div class="btn-toolbar">
-                    <button type="button" class="btn btn-default pull-right" (click)="cancel()">Cancel</button>
-                    <button type="submit" class="btn btn-primary pull-right" [disabled]="validationMessages.length > 0">Save</button>
+                <div class="btn-toolbar pull-right">
+                    <button type="submit" class="btn btn-default" [disabled]="validationMessages.length > 0">Save</button>
+                    <button type="button" class="btn btn-primary" (click)="cancel()">User List</button>
                 </div>
             </div>    
         </form>    
     </div>
-    <div *ngIf="!active" class="loading-message">
+    <div [hidden]="userProfile && userProfile.Id" class="loading-message">
         Loading User
     </div>        
 </div>

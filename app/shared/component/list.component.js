@@ -25,7 +25,7 @@ System.register(['../service/core-services.service', './base.component'], functi
                     this.xCoreServices = xCoreServices;
                     this.hubService = hubService;
                     this.serviceSubscription = null;
-                    this.dataViewModel = { RowCount: 0, Rows: [], Active: false };
+                    this.dataViewModel = { RowCount: 0, Rows: [] };
                     this.columns = [];
                     this.tableConfig = {
                         sorting: { columns: [] }
@@ -49,7 +49,6 @@ System.register(['../service/core-services.service', './base.component'], functi
                     var _this = this;
                     var trace = this.classTrace("performStartup");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    //currentViewModel.Active = true;
                     filterService.initializeFilter().subscribe(function (filter) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
                         currentViewModel.Rows = [];
