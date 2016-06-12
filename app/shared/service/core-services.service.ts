@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import {CookieService} from 'angular2-cookie/core';
 import { BusyService } from './busy.service';
 import { ScrollService } from '../scroll/scroll.service';
+import { HubService } from '../hub/hub.service';
 
 @Injectable()
 export class XCoreServices {

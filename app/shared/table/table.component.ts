@@ -85,7 +85,7 @@ export class NgTableComponent {
     box.then(resultPromise => {
       return resultPromise.result.then((result) => {
         this.deleteClicked.emit(row);
-      });
+      }, cancel => {});
     });
 
   }

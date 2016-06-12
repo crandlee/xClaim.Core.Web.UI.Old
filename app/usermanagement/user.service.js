@@ -37,16 +37,10 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                 function UserService(xCoreServices, hubService) {
                     _super.call(this, xCoreServices);
                     this.hubService = hubService;
+                    this.endpointKey = 'xClaim.Core.Web.Api.Security';
                     this.defaultStatuses = [{ Name: "All", Value: "All" }, { Name: "Enabled", Value: "Enabled" }, { Name: "Disabled", Value: "Disabled" }];
                     this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserService");
                 }
-                UserService.prototype.getOptions = function (serviceError) {
-                    var trace = this.classTrace("getEndpoint");
-                    trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot, ServiceError: serviceError };
-                    trace(core_services_service_1.TraceMethodPosition.Exit);
-                    return obs;
-                };
                 UserService.prototype.get = function (skip, take, toServerFilter) {
                     var _this = this;
                     var trace = this.classTrace("getUsers");
@@ -64,7 +58,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         url += "&email=" + toServerFilter.Email;
                     if (toServerFilter && toServerFilter.Status && toServerFilter.Status !== "All")
                         url += "&enabled=" + (toServerFilter.Status === "Enabled" ? true : false);
-                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the users"), url)
+                    var obs = this.getObjectData(this.getOptions(this.hubService, this.endpointKey, "There was an error retrieving the users"), url)
                         .map(function (data) {
                         return { RowCount: data.RowCount,
                             Rows: data.Rows.map(function (r) { return _this.toViewModel(r); }),
@@ -76,34 +70,32 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                 UserService.prototype.getNewUser = function () {
                     var trace = this.classTrace("getNewUser");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getOptions("There was an error starting a new user"), "user/new");
+                    var obs = this.getObjectData(this.getOptions(this.hubService, this.endpointKey, "There was an error starting a new user"), "user/new");
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserService.prototype.getUserProfile = function (userId) {
                     var trace = this.classTrace("getUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getOptions("There was an error retrieving the user profile"), "userfromid/" + userId);
+                    var obs = this.getObjectData(this.getOptions(this.hubService, this.endpointKey, "There was an error retrieving the user profile"), "userfromid/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserService.prototype.isEmailDuplicate = function (email, userId) {
                     var trace = this.classTrace("isEmailDuplicate");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getOptions("There was an error valdiating the email address"), "userfromemail/" + email + "/isduplicated/" + userId);
+                    var obs = this.getObjectData(this.getOptions(this.hubService, this.endpointKey, "There was an error valdiating the email address"), "userfromemail/" + email + "/isduplicated/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserService.prototype.isUserNameDuplicate = function (userName, userId) {
                     var trace = this.classTrace("isUserNameDuplicate");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.getObjectData(this.getOptions("There was an error valdiating the user name"), "userfromusername/" + userName + "/isduplicated/" + userId);
+                    var obs = this.getObjectData(this.getOptions(this.hubService, this.endpointKey, "There was an error valdiating the user name"), "userfromusername/" + userName + "/isduplicated/" + userId);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserService.prototype.toModel = function (vm) {
-                    var trace = this.classTrace("userProfileToModel");
-                    trace(core_services_service_1.TraceMethodPosition.Entry);
                     var up = {
                         Name: vm.Name,
                         Id: vm.Id,
@@ -114,12 +106,9 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         Enabled: vm.Enabled,
                         Claims: []
                     };
-                    trace(core_services_service_1.TraceMethodPosition.Exit);
                     return up;
                 };
                 UserService.prototype.toViewModel = function (model) {
-                    var trace = this.classTrace("userProfileToModel");
-                    trace(core_services_service_1.TraceMethodPosition.Entry);
                     var emailClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "email"; });
                     var givenNameClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "given_name"; });
                     var vm = {
@@ -131,22 +120,21 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         ConfirmPassword: "Dummy@000",
                         Enabled: model.Enabled,
                         Claims: [].concat(lodash_1.default.map(model.Claims, function (c) { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value }; })),
-                        TooltipMessage: "<table>\n                                    <tr>\n                                        <td>User Name:</td><td style=\"padding-left: 5px\">" + model.Name + "</td>\n                                    </tr>\n                                    <tr>\n                                        <td>Full Name:</td><td style=\"padding-left: 5px\">" + ((givenNameClaim && givenNameClaim.Value) || "") + "</td>\n                                    </tr>\n                                    <tr>\n                                        <td>Email:</td><td style=\"padding-left: 5px\">" + ((emailClaim && emailClaim.Value) || "") + "</td>\n                                    </tr>\n                                    <tr>                                        \n                                        <td>Id:</td><td style=\"padding-left: 5px\">" + model.Id + "</td>\n                                    </tr>\n                                  </table>\n                 "
+                        TooltipMessage: "<table>\n                                <tr>\n                                    <td>User Name:</td><td style=\"padding-left: 5px\">" + model.Name + "</td>\n                                </tr>\n                                <tr>\n                                    <td>Full Name:</td><td style=\"padding-left: 5px\">" + ((givenNameClaim && givenNameClaim.Value) || "") + "</td>\n                                </tr>\n                                <tr>\n                                    <td>Email:</td><td style=\"padding-left: 5px\">" + ((emailClaim && emailClaim.Value) || "") + "</td>\n                                </tr>\n                                <tr>                                        \n                                    <td>Id:</td><td style=\"padding-left: 5px\">" + model.Id + "</td>\n                                </tr>\n                                </table>\n                "
                     };
-                    trace(core_services_service_1.TraceMethodPosition.Exit);
                     return vm;
                 };
                 UserService.prototype.deleteUser = function (id) {
                     var trace = this.classTrace("deleteUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.deleteData(this.getOptions("There was an error deleting the user"), "user/" + id);
+                    var obs = this.deleteData(this.getOptions(this.hubService, this.endpointKey, "There was an error deleting the user"), "user/" + id);
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserService.prototype.saveUserProfile = function (vm) {
                     var trace = this.classTrace("saveUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.postData(this.toModel(vm), this.getOptions("There was an error saving the user profile"), 'user');
+                    var obs = this.postData(this.toModel(vm), this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user profile"), 'user');
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };

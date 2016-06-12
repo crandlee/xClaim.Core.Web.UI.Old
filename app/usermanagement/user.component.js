@@ -69,7 +69,6 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                     this.validationMessages = [];
                     this.initializeTrace("UserComponent");
                     this.userId = routeSegment.getParam("id");
-                    //console.log(this.userId);
                     this.userProfile = this.userService.getEmptyUserProfileViewModel();
                 }
                 UserComponent.prototype.initializeForm = function (builder) {

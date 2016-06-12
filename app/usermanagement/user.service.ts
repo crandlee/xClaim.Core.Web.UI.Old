@@ -11,19 +11,14 @@ import { IFilterDefinition } from '../shared/filtering/filter.service';
 @Injectable()
 export class UserService extends XCoreServiceBase implements IDataService<IUserProfile, IUserProfileViewModel, IUsersToServerFilter, IUsersToClientFilter> {
     
-    constructor(xCoreServices: XCoreServices, private hubService: HubService) {
+    constructor(xCoreServices: XCoreServices, protected hubService: HubService) {
         super(xCoreServices);
         
          this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UserService");
     }
-            
-    private getOptions(serviceError: string): IServiceOptions {
-        var trace = this.classTrace("getEndpoint");
-        trace(TraceMethodPosition.Entry);
-        var obs = { ApiRoot: this.hubService.findApiEndPoint('xClaim.Core.Web.Api.Security').ApiRoot, ServiceError: serviceError };
-        trace(TraceMethodPosition.Exit);
-        return obs;
-    }
+
+    private endpointKey: string = 'xClaim.Core.Web.Api.Security';
+
 
     public defaultStatuses: INameValue<string>[] = [{ Name: "All", Value:"All"}, {Name: "Enabled", Value: "Enabled"}, {Name: "Disabled", Value: "Disabled"}]
 
@@ -41,7 +36,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
         if (toServerFilter && toServerFilter.Email) url +=`&email=${toServerFilter.Email}`;
         if (toServerFilter && toServerFilter.Status && toServerFilter.Status !== "All") url +=`&enabled=${toServerFilter.Status === "Enabled"? true : false}`;
 
-        var obs = this.getObjectData<IUsersFromServer>(this.getOptions("There was an error retrieving the users"), url)
+        var obs = this.getObjectData<IUsersFromServer>(this.getOptions(this.hubService, this.endpointKey, "There was an error retrieving the users"), url)
             .map<IUsersToClientFilter>(data => { 
                             return { RowCount: data.RowCount, 
                                     Rows: data.Rows.map(r => this.toViewModel(r)), 
@@ -54,7 +49,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
     public getNewUser(): Observable<IUserProfile> {          
         var trace = this.classTrace("getNewUser");
         trace(TraceMethodPosition.Entry);
-        var obs = this.getObjectData<IUserProfile>(this.getOptions("There was an error starting a new user"), `user/new`);
+        var obs = this.getObjectData<IUserProfile>(this.getOptions(this.hubService, this.endpointKey, "There was an error starting a new user"), `user/new`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -62,7 +57,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
     public getUserProfile(userId: string): Observable<IUserProfile> {  
         var trace = this.classTrace("getUserProfile");
         trace(TraceMethodPosition.Entry);
-        var obs = this.getObjectData<IUserProfile>(this.getOptions("There was an error retrieving the user profile"), `userfromid/${userId}`);
+        var obs = this.getObjectData<IUserProfile>(this.getOptions(this.hubService, this.endpointKey, "There was an error retrieving the user profile"), `userfromid/${userId}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -70,7 +65,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
     public isEmailDuplicate(email: string, userId: string): Observable<boolean> {
         var trace = this.classTrace("isEmailDuplicate");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.getObjectData<boolean>(this.getOptions("There was an error valdiating the email address"), `userfromemail/${email}/isduplicated/${userId}`);
+        var obs = this.getObjectData<boolean>(this.getOptions(this.hubService, this.endpointKey, "There was an error valdiating the email address"), `userfromemail/${email}/isduplicated/${userId}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
@@ -78,14 +73,12 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
     public isUserNameDuplicate(userName: string, userId: string): Observable<boolean> {
         var trace = this.classTrace("isUserNameDuplicate");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.getObjectData<boolean>(this.getOptions("There was an error valdiating the user name"), `userfromusername/${userName}/isduplicated/${userId}`);
+        var obs = this.getObjectData<boolean>(this.getOptions(this.hubService, this.endpointKey, "There was an error valdiating the user name"), `userfromusername/${userName}/isduplicated/${userId}`);
         trace(TraceMethodPosition.Exit);
         return obs;
     }
     
     public toModel(vm: IUserProfileViewModel): IUserProfile {
-        var trace = this.classTrace("userProfileToModel");
-        trace(TraceMethodPosition.Entry);
         var up: IUserProfile = {
             Name: vm.Name,
             Id: vm.Id,
@@ -96,49 +89,45 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
             Enabled: vm.Enabled,
             Claims: []
         };        
-        trace(TraceMethodPosition.Exit);
         return up;
     }
 
     public toViewModel(model: IUserProfile): IUserProfileViewModel {
-        var trace = this.classTrace("userProfileToModel");
-        trace(TraceMethodPosition.Entry);
-            var emailClaim = _.find(model.Claims, c => c.Definition && c.Definition.Name == "email");
-            var givenNameClaim = _.find(model.Claims, c => c.Definition && c.Definition.Name == "given_name");
-            var vm: IUserProfileViewModel  = {
-                 Id: model.Id,
-                 Name: model.Name,
-                 GivenName: (givenNameClaim && givenNameClaim.Value) || "",
-                 EmailAddress: (emailClaim && emailClaim.Value) || "",
-                 Password: "Dummy@000",
-                 ConfirmPassword: "Dummy@000",
-                 Enabled: model.Enabled,
-                 Claims: [].concat(_.map(model.Claims, c => { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value } } )),
-                 TooltipMessage: `<table>
-                                    <tr>
-                                        <td>User Name:</td><td style="padding-left: 5px">${model.Name}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Full Name:</td><td style="padding-left: 5px">${(givenNameClaim && givenNameClaim.Value) || ""}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Email:</td><td style="padding-left: 5px">${(emailClaim && emailClaim.Value) || ""}</td>
-                                    </tr>
-                                    <tr>                                        
-                                        <td>Id:</td><td style="padding-left: 5px">${model.Id}</td>
-                                    </tr>
-                                  </table>
-                 `  
-            };            
-        
-        trace(TraceMethodPosition.Exit);
+        var emailClaim = _.find(model.Claims, c => c.Definition && c.Definition.Name == "email");
+        var givenNameClaim = _.find(model.Claims, c => c.Definition && c.Definition.Name == "given_name");
+        var vm: IUserProfileViewModel  = {
+                Id: model.Id,
+                Name: model.Name,
+                GivenName: (givenNameClaim && givenNameClaim.Value) || "",
+                EmailAddress: (emailClaim && emailClaim.Value) || "",
+                Password: "Dummy@000",
+                ConfirmPassword: "Dummy@000",
+                Enabled: model.Enabled,
+                Claims: [].concat(_.map(model.Claims, c => { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value } } )),
+                TooltipMessage: `<table>
+                                <tr>
+                                    <td>User Name:</td><td style="padding-left: 5px">${model.Name}</td>
+                                </tr>
+                                <tr>
+                                    <td>Full Name:</td><td style="padding-left: 5px">${(givenNameClaim && givenNameClaim.Value) || ""}</td>
+                                </tr>
+                                <tr>
+                                    <td>Email:</td><td style="padding-left: 5px">${(emailClaim && emailClaim.Value) || ""}</td>
+                                </tr>
+                                <tr>                                        
+                                    <td>Id:</td><td style="padding-left: 5px">${model.Id}</td>
+                                </tr>
+                                </table>
+                `  
+        };            
+    
         return vm;
     }
     
     public deleteUser(id: string): Observable<boolean> {
         var trace = this.classTrace("deleteUserProfile");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.deleteData(this.getOptions("There was an error deleting the user"), `user/${id}`);        
+        var obs = this.deleteData(this.getOptions(this.hubService, this.endpointKey, "There was an error deleting the user"), `user/${id}`);        
         trace(TraceMethodPosition.Exit)
         return obs;
         
@@ -147,7 +136,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
     public saveUserProfile(vm: IUserProfileViewModel): Observable<IUserProfile> {
         var trace = this.classTrace("saveUserProfile");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.postData<IUserProfile, IUserProfile>(this.toModel(vm), this.getOptions("There was an error saving the user profile"), 'user')        
+        var obs = this.postData<IUserProfile, IUserProfile>(this.toModel(vm), this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user profile"), 'user')        
         trace(TraceMethodPosition.Exit)
         return obs;
     }

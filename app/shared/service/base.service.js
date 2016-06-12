@@ -35,6 +35,13 @@ System.register(['@angular/http', 'rxjs/Observable', '@angular/core', './core-se
                     this.xCoreServices = xCoreServices;
                     this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UnspecifiedService");
                 }
+                BaseService.prototype.getOptions = function (hubService, endpointKey, serviceError) {
+                    var trace = this.classTrace("getOptions");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = { ApiRoot: hubService.findApiEndPoint(endpointKey).ApiRoot, ServiceError: serviceError };
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
                 BaseService.prototype.setHeaders = function (options) {
                     if (!options)
                         options = new http_1.RequestOptions();

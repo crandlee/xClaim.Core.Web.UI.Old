@@ -35,7 +35,6 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
         
         this.initializeTrace("UserComponent");
         this.userId = routeSegment.getParam("id");
-        //console.log(this.userId);
         this.userProfile = this.userService.getEmptyUserProfileViewModel();
     }
     

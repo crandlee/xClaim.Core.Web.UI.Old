@@ -93,7 +93,7 @@ System.register(['@angular/core', '@angular/common', './table.sorting.directive'
                     box.then(function (resultPromise) {
                         return resultPromise.result.then(function (result) {
                             _this.deleteClicked.emit(row);
-                        });
+                        }, function (cancel) { });
                     });
                 };
                 Object.defineProperty(NgTableComponent.prototype, "configColumns", {

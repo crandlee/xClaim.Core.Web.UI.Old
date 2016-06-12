@@ -7,6 +7,7 @@ import 'rxjs/add/operator/finally';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/operator/share';
 import { IFilterDefinition } from '../filtering/filter.service';
+import { HubService } from '../hub/hub.service';
 
  @Injectable()
 export class BaseService {
@@ -17,6 +18,15 @@ export class BaseService {
             this.classTrace = this.xCoreServices.LoggingService.getTraceFunction("UnspecifiedService");
         }
     
+
+    protected getOptions(hubService: HubService, endpointKey: string, serviceError: string): IServiceOptions {
+        var trace = this.classTrace("getOptions");
+        trace(TraceMethodPosition.Entry);
+        var obs = { ApiRoot: hubService.findApiEndPoint(endpointKey).ApiRoot, ServiceError: serviceError };
+        trace(TraceMethodPosition.Exit);
+        return obs;
+    }
+
     private setHeaders(options: RequestOptions): RequestOptions {
         
         if (!options) options = new RequestOptions();
@@ -234,6 +244,10 @@ export interface IDataService<TModel, TViewModel, TFilterToServer, TFilterToClie
 export interface ICollectionViewModel<T> {
     RowCount: number;
     Rows: T[];
+}
+
+export interface IEntity {
+    Id: string;
 }
 
 export interface IServiceOptions {
