@@ -44,7 +44,7 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         this.columns = columns;
         this.tableConfig = { sorting: {columns: columns }};
         this.filterService = filterService;
-
+        this.dataService = dataService;
     }
 
     protected performStartup(currentViewModel: ICollectionViewModel<TViewModel>,
@@ -58,6 +58,7 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         currentViewModel.Active = true;
         filterService.initializeFilter().subscribe(filter => {
             trace(TraceMethodPosition.Callback);
+            currentViewModel.Rows = [];
             this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
             this.subscribeToFilterChanged(currentViewModel, tableChangeEmitter, tableConfig, filterService, service);
         });
@@ -75,13 +76,13 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         trace(TraceMethodPosition.Entry);
         filterService.FilterUpdatedEvent.subscribe(filter => {
             trace(TraceMethodPosition.Callback);
+            currentViewModel.Rows = [];
             this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
         });
         trace(TraceMethodPosition.Exit);
     }    
 
     private loadFirstData(currentViewModel: ICollectionViewModel<TViewModel>,
-
         tableChangeEmitter: EventEmitter<INgTableChangeMessage>,      
         tableConfig: INgTableConfig,
         filter: IFilterDefinition<TFilterToServer, TFilterToClient>, 
@@ -90,7 +91,6 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         var trace = this.classTrace("loadFirstData");
         trace(TraceMethodPosition.Entry);
 
-        var returnData: TViewModel[] = [];
         currentViewModel.Rows = currentViewModel.Rows.concat(filter.toClientFilter.Rows);
         currentViewModel.RowCount = filter.toClientFilter.RowCount;
         var msg: INgTableChangeMessage = { rows: currentViewModel.Rows, config: tableConfig };
@@ -99,8 +99,8 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         //Subscribe to infinite scroll
         if (this.serviceSubscription) this.serviceSubscription.unsubscribe();      
         this.serviceSubscription = this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(si => {
-            if (returnData.length >= currentViewModel.RowCount) return;
-            service.get(returnData.length, this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(data => {
+            if (currentViewModel.Rows.length >= currentViewModel.RowCount) return;
+            service.get(currentViewModel.Rows.length, this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(data => {
                 currentViewModel.Rows = currentViewModel.Rows.concat(data.Rows);
                 currentViewModel.RowCount = data.RowCount;                
                 tableChangeEmitter.emit({ rows: currentViewModel.Rows, config: tableConfig });
@@ -108,7 +108,7 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
             });                                     
         });
         this.xCoreServices.ScrollService.checkNearBottom();
-        trace(TraceMethodPosition.CallbackEnd);
+        trace(TraceMethodPosition.Exit);
     }
 
 
@@ -118,9 +118,9 @@ export abstract class XCoreListComponent<TModel, TViewModel extends INgTableRow,
         trace(TraceMethodPosition.Entry);
 
         this.hubService.callbackWhenLoaded(this.performStartup.bind(this,
+            this.dataViewModel,
             this.tableChangeEmitter,
-            this.tableConfig, 
-            this.dataViewModel, 
+            this.tableConfig,  
             this.filterService, 
             this.dataService));
 

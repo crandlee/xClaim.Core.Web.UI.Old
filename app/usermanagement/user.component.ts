@@ -121,7 +121,7 @@ export class UserComponent extends XCoreBaseComponent implements OnInit  {
             trace(TraceMethodPosition.Callback);
             this.userProfile = this.userService.toViewModel(up);
             this.xCoreServices.LoggingService.success("User successfully saved");
-            this.xCoreServices.Router.navigate(["/UserManagement"]);
+            this.xCoreServices.Router.navigate(["/UserList"]);
         });
         
         trace(TraceMethodPosition.Exit);

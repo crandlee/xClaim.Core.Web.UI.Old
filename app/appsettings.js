@@ -103,7 +103,7 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                 });
                 ;
                 Object.defineProperty(AppSettings.prototype, "MinimumLogLevel", {
-                    get: function () { return LogLevel.Trace; },
+                    get: function () { return LogLevel.Debug; },
                     enumerable: true,
                     configurable: true
                 });

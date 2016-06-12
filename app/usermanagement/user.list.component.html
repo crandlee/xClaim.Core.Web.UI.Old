@@ -1,5 +1,5 @@
 <div class="container">
-    <div *ngIf="active" class="edit-panel" >
+    <div *ngIf="dataViewModel.Active" class="edit-panel" >
         <div class="navbar navbar-inverse center">
             <div class="list-header">Users</div>
             <ul class="nav navbar-nav pull-right list-header-button-bar">
@@ -16,7 +16,7 @@
         </ng-table>
     </div>
     <div class="row-count-tag">{{(dataViewModel.Rows && dataViewModel.Rows.length) || 0}} of {{dataViewModel.RowCount}}</div>
-    <div *ngIf="!dataViewModel.active" class="loading-message">
+    <div *ngIf="!dataViewModel.Active" class="loading-message">
         Loading Users
     </div>
 </div>

@@ -21,7 +21,7 @@ export class AppSettings {
     public get CookieKeys(): ICookieKeys { return { 
         RouteAfterLoginKey: 'xc.routeAfterLogin'
     }};
-    public get MinimumLogLevel(): LogLevel {return LogLevel.Trace }
+    public get MinimumLogLevel(): LogLevel {return LogLevel.Debug }
 }
 
 

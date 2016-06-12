@@ -138,7 +138,7 @@ System.register(['@angular/core', '@angular/common', '../shared/validation/valid
                         trace(core_services_service_1.TraceMethodPosition.Callback);
                         _this.userProfile = _this.userService.toViewModel(up);
                         _this.xCoreServices.LoggingService.success("User successfully saved");
-                        _this.xCoreServices.Router.navigate(["/UserManagement"]);
+                        _this.xCoreServices.Router.navigate(["/UserList"]);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };

@@ -47,6 +47,7 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     this.columns = columns;
                     this.tableConfig = { sorting: { columns: columns } };
                     this.filterService = filterService;
+                    this.dataService = dataService;
                 };
                 XCoreListComponent.prototype.performStartup = function (currentViewModel, tableChangeEmitter, tableConfig, filterService, service) {
                     var _this = this;
@@ -55,6 +56,7 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     currentViewModel.Active = true;
                     filterService.initializeFilter().subscribe(function (filter) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
+                        currentViewModel.Rows = [];
                         _this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
                         _this.subscribeToFilterChanged(currentViewModel, tableChangeEmitter, tableConfig, filterService, service);
                     });
@@ -66,6 +68,7 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     filterService.FilterUpdatedEvent.subscribe(function (filter) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
+                        currentViewModel.Rows = [];
                         _this.loadFirstData(currentViewModel, tableChangeEmitter, tableConfig, filter, service);
                     });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
@@ -74,7 +77,6 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     var _this = this;
                     var trace = this.classTrace("loadFirstData");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var returnData = [];
                     currentViewModel.Rows = currentViewModel.Rows.concat(filter.toClientFilter.Rows);
                     currentViewModel.RowCount = filter.toClientFilter.RowCount;
                     var msg = { rows: currentViewModel.Rows, config: tableConfig };
@@ -83,9 +85,9 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                     if (this.serviceSubscription)
                         this.serviceSubscription.unsubscribe();
                     this.serviceSubscription = this.xCoreServices.ScrollService.ScrollNearBottomEvent.subscribe(function (si) {
-                        if (returnData.length >= currentViewModel.RowCount)
+                        if (currentViewModel.Rows.length >= currentViewModel.RowCount)
                             return;
-                        service.get(returnData.length, _this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(function (data) {
+                        service.get(currentViewModel.Rows.length, _this.xCoreServices.AppSettings.DefaultPageSize, filter.toServerFilter).subscribe(function (data) {
                             currentViewModel.Rows = currentViewModel.Rows.concat(data.Rows);
                             currentViewModel.RowCount = data.RowCount;
                             tableChangeEmitter.emit({ rows: currentViewModel.Rows, config: tableConfig });
@@ -93,12 +95,12 @@ System.register(['@angular/core', '../service/core-services.service', './base.co
                         });
                     });
                     this.xCoreServices.ScrollService.checkNearBottom();
-                    trace(core_services_service_1.TraceMethodPosition.CallbackEnd);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 XCoreListComponent.prototype.ngOnInit = function () {
                     var trace = this.classTrace("ngOnInit");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    this.hubService.callbackWhenLoaded(this.performStartup.bind(this, this.tableChangeEmitter, this.tableConfig, this.dataViewModel, this.filterService, this.dataService));
+                    this.hubService.callbackWhenLoaded(this.performStartup.bind(this, this.dataViewModel, this.tableChangeEmitter, this.tableConfig, this.filterService, this.dataService));
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 return XCoreListComponent;
