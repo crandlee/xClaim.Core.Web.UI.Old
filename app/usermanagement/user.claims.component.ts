@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { Validators, ControlGroup, Control, FormBuilder } from '@angular/common';
 import { XCoreServices, TraceMethodPosition } from '../shared/service/core-services.service';
-import { UserService, IUserProfile, IUserProfileViewModel } from '../usermanagement/user.service';
+import { UserService, IUserProfile, IUserProfileViewModel, IUserClaimViewModel } from '../usermanagement/user.service';
 import { XCoreBaseComponent } from '../shared/component/base.component';
 import { HubService } from '../shared/hub/hub.service';
 import _ from 'lodash';
@@ -38,7 +38,11 @@ export class UserClaimsComponent extends XCoreBaseComponent {
     @Input() public User: IUserProfileViewModel;
     @ViewChild(NgTableComponent) TableComponent: NgTableComponent;
 
-
+    private get tableLoadFunction(): () => INgTableChangeMessage {
+        return () => {
+            return { rows: _.filter(this.User.Claims, r => ['given_name', 'email', 'sub', 'name'].indexOf(r.Name) === -1), config: this.tableConfig }            
+        };
+    }
     constructor(protected xCoreServices: XCoreServices, private userService: UserService, 
         private builder: FormBuilder, private hubService: HubService, private claimDefinitionsService: ClaimDefinitionsService)     
     {  
@@ -50,17 +54,19 @@ export class UserClaimsComponent extends XCoreBaseComponent {
     
     public load(user: IUserProfileViewModel) {
         this.User = user;
-        this.TableComponent.load({ rows: this.User.Claims, config: this.tableConfig });
+        this.TableComponent.load(this.tableLoadFunction());
         this.claimDefinitionsService.getNonCoreDefinitions().subscribe(cd => {
             this.claimDefinitions = cd.Rows;
         });
 
     }
     
-    public deleteClaim(event: any): void {
+    public deleteClaim(row: IUserClaimViewModel): void {
 
         var trace = this.classTrace("deleteClaim");
         trace(TraceMethodPosition.Entry);
+        _.remove(this.User.Claims, cd =>  cd.Id === row.Id && cd.Value.toLowerCase() === row.Value.toLowerCase());
+        this.TableComponent.load(this.tableLoadFunction());        
         trace(TraceMethodPosition.Entry);
 
     }
@@ -68,14 +74,24 @@ export class UserClaimsComponent extends XCoreBaseComponent {
     public addClaim(event: any): void {
         var trace = this.classTrace("addClaim");
         trace(TraceMethodPosition.Entry);
-        console.log(`${this.ClaimType}|${this.ClaimValue}`);
+
+        var claimLookup: IClaimDefinitionViewModel = _.find(this.claimDefinitions, cd => cd.Id === this.ClaimType);
+        var existingUserClaim: IUserClaimViewModel = _.find(this.User.Claims, cd => cd.Id === this.ClaimType && cd.Value === this.ClaimValue)
+        if (claimLookup && !existingUserClaim) {
+            var vm = { Value: this.ClaimValue, Id: claimLookup.Id, Description: claimLookup.Description, Name: claimLookup.Name };            
+            this.User.Claims.push(vm);
+            this.TableComponent.load(this.tableLoadFunction());
+        }
+        
+
         // this.userService.saveUserProfile(this.userProfile).subscribe(up => {
         //     trace(TraceMethodPosition.Callback);
         //     this.userProfile = this.userService.toViewModel(up);
         //     this.xCoreServices.LoggingService.success("User successfully saved");
         //     this.xCoreServices.Router.navigate(["/UserList"]);
         // });
-        
+        this.ClaimType = null;
+        this.ClaimValue = null;
         trace(TraceMethodPosition.Exit);
     }
 

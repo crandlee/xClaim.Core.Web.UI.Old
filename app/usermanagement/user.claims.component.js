@@ -1,4 +1,4 @@
-System.register(['@angular/core', '@angular/common', '../shared/service/core-services.service', '../usermanagement/user.service', '../shared/component/base.component', '../shared/hub/hub.service', './claimDefinitions.service', '../shared/table/table.component', '../shared/pipe/orderby.pipe'], function(exports_1, context_1) {
+System.register(['@angular/core', '@angular/common', '../shared/service/core-services.service', '../usermanagement/user.service', '../shared/component/base.component', '../shared/hub/hub.service', 'lodash', './claimDefinitions.service', '../shared/table/table.component', '../shared/pipe/orderby.pipe'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var __extends = (this && this.__extends) || function (d, b) {
@@ -15,7 +15,7 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
     var __metadata = (this && this.__metadata) || function (k, v) {
         if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
     };
-    var core_1, common_1, core_services_service_1, user_service_1, base_component_1, hub_service_1, claimDefinitions_service_1, table_component_1, orderby_pipe_1;
+    var core_1, common_1, core_services_service_1, user_service_1, base_component_1, hub_service_1, lodash_1, claimDefinitions_service_1, table_component_1, orderby_pipe_1;
     var UserClaimsComponent;
     return {
         setters:[
@@ -36,6 +36,9 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
             },
             function (hub_service_1_1) {
                 hub_service_1 = hub_service_1_1;
+            },
+            function (lodash_1_1) {
+                lodash_1 = lodash_1_1;
             },
             function (claimDefinitions_service_1_1) {
                 claimDefinitions_service_1 = claimDefinitions_service_1_1;
@@ -67,29 +70,50 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
                     this.claimDefinitions = [];
                     this.initializeTrace("UserClaimsComponent");
                 }
+                Object.defineProperty(UserClaimsComponent.prototype, "tableLoadFunction", {
+                    get: function () {
+                        var _this = this;
+                        return function () {
+                            return { rows: lodash_1.default.filter(_this.User.Claims, function (r) { return ['given_name', 'email', 'sub', 'name'].indexOf(r.Name) === -1; }), config: _this.tableConfig };
+                        };
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 UserClaimsComponent.prototype.load = function (user) {
                     var _this = this;
                     this.User = user;
-                    this.TableComponent.load({ rows: this.User.Claims, config: this.tableConfig });
+                    this.TableComponent.load(this.tableLoadFunction());
                     this.claimDefinitionsService.getNonCoreDefinitions().subscribe(function (cd) {
                         _this.claimDefinitions = cd.Rows;
                     });
                 };
-                UserClaimsComponent.prototype.deleteClaim = function (event) {
+                UserClaimsComponent.prototype.deleteClaim = function (row) {
                     var trace = this.classTrace("deleteClaim");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
+                    lodash_1.default.remove(this.User.Claims, function (cd) { return cd.Id === row.Id && cd.Value.toLowerCase() === row.Value.toLowerCase(); });
+                    this.TableComponent.load(this.tableLoadFunction());
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                 };
                 UserClaimsComponent.prototype.addClaim = function (event) {
+                    var _this = this;
                     var trace = this.classTrace("addClaim");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    console.log(this.ClaimType + "|" + this.ClaimValue);
+                    var claimLookup = lodash_1.default.find(this.claimDefinitions, function (cd) { return cd.Id === _this.ClaimType; });
+                    var existingUserClaim = lodash_1.default.find(this.User.Claims, function (cd) { return cd.Id === _this.ClaimType && cd.Value === _this.ClaimValue; });
+                    if (claimLookup && !existingUserClaim) {
+                        var vm = { Value: this.ClaimValue, Id: claimLookup.Id, Description: claimLookup.Description, Name: claimLookup.Name };
+                        this.User.Claims.push(vm);
+                        this.TableComponent.load(this.tableLoadFunction());
+                    }
                     // this.userService.saveUserProfile(this.userProfile).subscribe(up => {
                     //     trace(TraceMethodPosition.Callback);
                     //     this.userProfile = this.userService.toViewModel(up);
                     //     this.xCoreServices.LoggingService.success("User successfully saved");
                     //     this.xCoreServices.Router.navigate(["/UserList"]);
                     // });
+                    this.ClaimType = null;
+                    this.ClaimValue = null;
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 __decorate([
