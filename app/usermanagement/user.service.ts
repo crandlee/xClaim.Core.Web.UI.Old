@@ -103,7 +103,7 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
                 Password: "Dummy@000",
                 ConfirmPassword: "Dummy@000",
                 Enabled: model.Enabled,
-                Claims: [].concat(_.map(model.Claims, c => { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value } } )),
+                Claims: [].concat(_.map(model.Claims, c => this.userClaimToViewModel(c)  )),
                 TooltipMessage: `<table>
                                 <tr>
                                     <td>User Name:</td><td style="padding-left: 5px">${model.Name}</td>
@@ -132,18 +132,49 @@ export class UserService extends XCoreServiceBase implements IDataService<IUserP
         return obs;
         
     }
+
+    public deleteUserClaim(id: string): Observable<boolean> {
+        var trace = this.classTrace("deleteUserClaim");
+        trace(TraceMethodPosition.Entry);                
+        var obs = this.deleteData(this.getOptions(this.hubService, this.endpointKey, "There was an error deleting the user claim"), `userclaim/${id}`);        
+        trace(TraceMethodPosition.Exit)
+        return obs;
+        
+    }
     
-    public saveUserProfile(vm: IUserProfileViewModel): Observable<IUserProfile> {
+    public saveUserProfile(vm: IUserProfileViewModel): Observable<IUserProfileViewModel> {
         var trace = this.classTrace("saveUserProfile");
         trace(TraceMethodPosition.Entry);                
-        var obs = this.postData<IUserProfile, IUserProfile>(this.toModel(vm), this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user profile"), 'user')        
+        var obs = this.postData<IUserProfile, IUserProfile>(this.toModel(vm), 
+            this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user profile"), 'user').map(m => this.toViewModel(m));        
+        trace(TraceMethodPosition.Exit)
+        return obs;
+    }
+
+    public saveUserClaim(vm: IUserClaimViewModel): Observable<IUserClaimViewModel> {
+        var trace = this.classTrace("saveUserClaim");
+        trace(TraceMethodPosition.Entry);   
+        var obs = this.postData<IUserClaim, IUserClaim>(this.viewModelToUserClaim(vm), 
+            this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user claim"), 'userclaim').map(m => this.userClaimToViewModel(m));        
         trace(TraceMethodPosition.Exit)
         return obs;
     }
 
     public getEmptyUserProfileViewModel(): IUserProfileViewModel {
-        return { Id: "", Name: "", EmailAddress: "", GivenName: "", Password: "", ConfirmPassword: "", Enabled: false, TooltipMessage: "", Claims: []};
+        return <IUserProfileViewModel>{ Id: "", Name: "", EmailAddress: "", GivenName: "", Password: "", ConfirmPassword: "", Enabled: false, TooltipMessage: "", Claims: []};
     }
+
+
+    public userClaimToViewModel(model: IUserClaim) : IUserClaimViewModel {
+        return <IUserClaimViewModel>{ Id: model.Id || this.xCoreServices.AppSettings.EmptyGuid, DefinitionId: model.Definition.Id,  UserId: model.UserId,
+            Name: model.Definition && model.Definition.Name, Description: model.Definition && model.Definition.Description, Value: model.Value }
+    } 
+
+    public viewModelToUserClaim(vm: IUserClaimViewModel): IUserClaim {
+        return <IUserClaim>{ Id: vm.Id || this.xCoreServices.AppSettings.EmptyGuid, UserId: vm.UserId, DefinitionId: vm.DefinitionId, Definition: { Id: vm.DefinitionId, Name: vm.Name, Description: vm.Description}, Value: vm.Value };
+
+    }
+
 }
 
 export interface IUserProfileViewModel {
@@ -160,9 +191,11 @@ export interface IUserProfileViewModel {
 
 export interface IUserClaimViewModel {
     Id: string;
+    DefinitionId: string;
     Name: string;
     Description: string;
     Value: string;
+    UserId: string;
 }
 
 export interface IUserProfile {
@@ -177,7 +210,9 @@ export interface IUserProfile {
 }
 
 export interface IUserClaim {
+     UserId: string;
      Definition: IClaimDefinition;
+     DefinitionId: string;
      Id: string;         
      Value?: string;
 }

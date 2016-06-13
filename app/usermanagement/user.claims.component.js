@@ -60,12 +60,12 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
                     this.hubService = hubService;
                     this.claimDefinitionsService = claimDefinitionsService;
                     this.columns = [
-                        { name: "Description", title: "Claim Name", colWidth: 5 },
+                        { name: "Description", title: "Claim Name", colWidth: 5, sort: "asc" },
                         { name: "Value", title: "Claim Value", colWidth: 6 },
                         { name: "Delete", title: "", deleteRow: true, deleteMessage: "Delete this claim from the user?", colWidth: 1 }
                     ];
                     this.tableConfig = {
-                        sorting: { columns: [] }
+                        sorting: { columns: this.columns }
                     };
                     this.claimDefinitions = [];
                     this.initializeTrace("UserClaimsComponent");
@@ -89,31 +89,36 @@ System.register(['@angular/core', '@angular/common', '../shared/service/core-ser
                     });
                 };
                 UserClaimsComponent.prototype.deleteClaim = function (row) {
+                    var _this = this;
                     var trace = this.classTrace("deleteClaim");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    lodash_1.default.remove(this.User.Claims, function (cd) { return cd.Id === row.Id && cd.Value.toLowerCase() === row.Value.toLowerCase(); });
-                    this.TableComponent.load(this.tableLoadFunction());
-                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    this.userService.deleteUserClaim(row.Id).subscribe(function (d) {
+                        if (d) {
+                            _this.xCoreServices.LoggingService.success("User claim " + row.Description + " deleted successfully");
+                            lodash_1.default.remove(_this.User.Claims, function (cd) { return cd.Id === row.Id && cd.Value.toLowerCase() === row.Value.toLowerCase(); });
+                            _this.TableComponent.load(_this.tableLoadFunction());
+                        }
+                    });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 UserClaimsComponent.prototype.addClaim = function (event) {
                     var _this = this;
                     var trace = this.classTrace("addClaim");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     var claimLookup = lodash_1.default.find(this.claimDefinitions, function (cd) { return cd.Id === _this.ClaimType; });
-                    var existingUserClaim = lodash_1.default.find(this.User.Claims, function (cd) { return cd.Id === _this.ClaimType && cd.Value === _this.ClaimValue; });
+                    var existingUserClaim = lodash_1.default.find(this.User.Claims, function (cd) { return cd.DefinitionId === _this.ClaimType && cd.Value.toLowerCase() === _this.ClaimValue.toLowerCase(); });
+                    if (existingUserClaim)
+                        this.xCoreServices.LoggingService.warn("This claim/value already exist on the user");
                     if (claimLookup && !existingUserClaim) {
-                        var vm = { Value: this.ClaimValue, Id: claimLookup.Id, Description: claimLookup.Description, Name: claimLookup.Name };
-                        this.User.Claims.push(vm);
-                        this.TableComponent.load(this.tableLoadFunction());
+                        var vm = { Id: "", Value: this.ClaimValue, DefinitionId: claimLookup.Id, Description: claimLookup.Description, Name: claimLookup.Name, UserId: this.User.Id };
+                        this.userService.saveUserClaim(vm).subscribe(function (vm) {
+                            _this.xCoreServices.LoggingService.success("Successfully added new " + vm.Description + " claim ");
+                            _this.User.Claims.push(vm);
+                            _this.TableComponent.load(_this.tableLoadFunction());
+                            _this.ClaimType = null;
+                            _this.ClaimValue = null;
+                        });
                     }
-                    // this.userService.saveUserProfile(this.userProfile).subscribe(up => {
-                    //     trace(TraceMethodPosition.Callback);
-                    //     this.userProfile = this.userService.toViewModel(up);
-                    //     this.xCoreServices.LoggingService.success("User successfully saved");
-                    //     this.xCoreServices.Router.navigate(["/UserList"]);
-                    // });
-                    this.ClaimType = null;
-                    this.ClaimValue = null;
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                 };
                 __decorate([

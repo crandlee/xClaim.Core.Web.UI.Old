@@ -2,7 +2,7 @@
         role="grid" style="width: 100%;">
     <thead>
     <tr role="row">
-    <th *ngFor="let column of columns" data-html="true" [class]="getColumnClass(column)" [ngTableSorting]="config" [column]="column" (sortChanged)="changeSortEvent($event)">
+    <th *ngFor="let column of columns" data-html="true" style="cursor: pointer;" [class]="getColumnClass(column)" [ngTableSorting]="config" [column]="column" (sortChanged)="changeSortEvent($event)">
         {{column.title}}
         <i *ngIf="config && column.sort" class="pull-right fa"
         [ngClass]="{'fa-chevron-down': column.sort === 'desc', 'fa-chevron-up': column.sort === 'asc'}"></i>

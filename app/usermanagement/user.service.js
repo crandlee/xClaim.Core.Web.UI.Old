@@ -109,6 +109,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     return up;
                 };
                 UserService.prototype.toViewModel = function (model) {
+                    var _this = this;
                     var emailClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "email"; });
                     var givenNameClaim = lodash_1.default.find(model.Claims, function (c) { return c.Definition && c.Definition.Name == "given_name"; });
                     var vm = {
@@ -119,7 +120,7 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                         Password: "Dummy@000",
                         ConfirmPassword: "Dummy@000",
                         Enabled: model.Enabled,
-                        Claims: [].concat(lodash_1.default.map(model.Claims, function (c) { return { Id: c.Id, Name: c.Definition && c.Definition.Name, Description: c.Definition && c.Definition.Description, Value: c.Value }; })),
+                        Claims: [].concat(lodash_1.default.map(model.Claims, function (c) { return _this.userClaimToViewModel(c); })),
                         TooltipMessage: "<table>\n                                <tr>\n                                    <td>User Name:</td><td style=\"padding-left: 5px\">" + model.Name + "</td>\n                                </tr>\n                                <tr>\n                                    <td>Full Name:</td><td style=\"padding-left: 5px\">" + ((givenNameClaim && givenNameClaim.Value) || "") + "</td>\n                                </tr>\n                                <tr>\n                                    <td>Email:</td><td style=\"padding-left: 5px\">" + ((emailClaim && emailClaim.Value) || "") + "</td>\n                                </tr>\n                                <tr>                                        \n                                    <td>Id:</td><td style=\"padding-left: 5px\">" + model.Id + "</td>\n                                </tr>\n                                </table>\n                "
                     };
                     return vm;
@@ -131,15 +132,38 @@ System.register(['@angular/core', '../shared/service/core-services.service', '..
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
+                UserService.prototype.deleteUserClaim = function (id) {
+                    var trace = this.classTrace("deleteUserClaim");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.deleteData(this.getOptions(this.hubService, this.endpointKey, "There was an error deleting the user claim"), "userclaim/" + id);
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
                 UserService.prototype.saveUserProfile = function (vm) {
+                    var _this = this;
                     var trace = this.classTrace("saveUserProfile");
                     trace(core_services_service_1.TraceMethodPosition.Entry);
-                    var obs = this.postData(this.toModel(vm), this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user profile"), 'user');
+                    var obs = this.postData(this.toModel(vm), this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user profile"), 'user').map(function (m) { return _this.toViewModel(m); });
+                    trace(core_services_service_1.TraceMethodPosition.Exit);
+                    return obs;
+                };
+                UserService.prototype.saveUserClaim = function (vm) {
+                    var _this = this;
+                    var trace = this.classTrace("saveUserClaim");
+                    trace(core_services_service_1.TraceMethodPosition.Entry);
+                    var obs = this.postData(this.viewModelToUserClaim(vm), this.getOptions(this.hubService, this.endpointKey, "There was an error saving the user claim"), 'userclaim').map(function (m) { return _this.userClaimToViewModel(m); });
                     trace(core_services_service_1.TraceMethodPosition.Exit);
                     return obs;
                 };
                 UserService.prototype.getEmptyUserProfileViewModel = function () {
                     return { Id: "", Name: "", EmailAddress: "", GivenName: "", Password: "", ConfirmPassword: "", Enabled: false, TooltipMessage: "", Claims: [] };
+                };
+                UserService.prototype.userClaimToViewModel = function (model) {
+                    return { Id: model.Id || this.xCoreServices.AppSettings.EmptyGuid, DefinitionId: model.Definition.Id, UserId: model.UserId,
+                        Name: model.Definition && model.Definition.Name, Description: model.Definition && model.Definition.Description, Value: model.Value };
+                };
+                UserService.prototype.viewModelToUserClaim = function (vm) {
+                    return { Id: vm.Id || this.xCoreServices.AppSettings.EmptyGuid, UserId: vm.UserId, DefinitionId: vm.DefinitionId, Definition: { Id: vm.DefinitionId, Name: vm.Name, Description: vm.Description }, Value: vm.Value };
                 };
                 UserService = __decorate([
                     core_1.Injectable(), 

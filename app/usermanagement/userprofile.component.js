@@ -113,7 +113,7 @@ System.register(['@angular/core', '@angular/common', '../shared/component/base.c
                     trace(core_services_service_1.TraceMethodPosition.Entry);
                     this.userService.saveUserProfile(this.userProfile).subscribe(function (up) {
                         trace(core_services_service_1.TraceMethodPosition.Callback);
-                        _this.userProfile = _this.userService.toViewModel(up);
+                        _this.userProfile = up;
                         _this.xCoreServices.LoggingService.success("User profile successfully updated");
                         _this.xCoreServices.Router.navigate(["/"]);
                     });

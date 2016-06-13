@@ -102,6 +102,12 @@ System.register(['@angular/core'], function(exports_1, context_1) {
                     configurable: true
                 });
                 ;
+                Object.defineProperty(AppSettings.prototype, "EmptyGuid", {
+                    get: function () { return '00000000-0000-0000-0000-000000000000'; },
+                    enumerable: true,
+                    configurable: true
+                });
+                ;
                 Object.defineProperty(AppSettings.prototype, "MinimumLogLevel", {
                     get: function () { return LogLevel.Debug; },
                     enumerable: true,

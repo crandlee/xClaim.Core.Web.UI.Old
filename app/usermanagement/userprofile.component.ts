@@ -95,7 +95,7 @@ export class UserProfileComponent extends XCoreBaseComponent implements OnInit  
         
         this.userService.saveUserProfile(this.userProfile).subscribe(up => {
             trace(TraceMethodPosition.Callback);
-            this.userProfile = this.userService.toViewModel(up);
+            this.userProfile = up;
             this.xCoreServices.LoggingService.success("User profile successfully updated");
             this.xCoreServices.Router.navigate(["/"]);
         });
